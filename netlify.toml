@@ -1,0 +1,14 @@
+# Netlify configuration for SponsorAtlas (Next.js 14 App Router)
+# Netlify's official Next.js runtime handles SSG pages, API routes, and image
+# optimization automatically — no need to install the plugin manually.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
