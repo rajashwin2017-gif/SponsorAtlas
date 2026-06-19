@@ -1,0 +1,130 @@
+// SponsorAtlas — Prisma schema
+// PostgreSQL with pg_trgm for fuzzy full-text sponsor search.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm]
+}
+
+model Sponsor {
+  id                    String   @id @default(uuid())
+  organisationName      String
+  town                  String
+  county                String
+  route                 String // "Skilled Worker", "Health & Care", etc.
+  rating                String // "A-rated", "B-rated"
+  licenceStatus         String // "Active", "Revoked", "Suspended"
+  addedDate             DateTime
+  lastUpdated           DateTime @updatedAt
+
+  // Enriched fields
+  industryCategory      String?
+  companySize           String? // "Startup", "SME", "Enterprise"
+  sicCode               String?
+  companiesHouseNumber  String?
+
+  // Proprietary signals
+  hiringLikelihoodScore Int?      @default(0) // 0-100
+  cosActivity2024       Int?      @default(0)
+  cosActivity2025       Int?      @default(0)
+  cosActivity2026       Int?      @default(0)
+  liveJobsCount         Int?      @default(0)
+  lastJobPostedAt       DateTime?
+
+  // Relationships
+  savedBy SavedSponsor[]
+  alerts  OpportunityAlert[]
+
+  @@index([organisationName])
+  @@index([town])
+  @@index([industryCategory])
+  @@index([hiringLikelihoodScore])
+  @@index([route])
+  @@map("sponsors")
+}
+
+model SocCode {
+  id              String  @id @default(uuid())
+  socCode         String  @unique // e.g., "2135"
+  occupationTitle String
+  skillLevel      String // "RQF 3", "RQF 6", etc.
+  goingRate2026   Decimal @db.Decimal(10, 2)
+  lowerRate2026   Decimal @db.Decimal(10, 2)
+  isOnIsl         Boolean @default(false) // Immigration Salary List
+  isOnTsl         Boolean @default(false) // Temporary Salary List
+  description     String?
+
+  @@map("soc_codes")
+}
+
+model User {
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  name                 String?
+  image                String?
+  subscriptionTier     String   @default("free") // "free", "pro", "pro_plus"
+  subscriptionStatus   String   @default("inactive")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  monthlyChecksUsed    Int      @default(0)
+  monthlyChecksLimit   Int      @default(5)
+  alertFrequency       String   @default("weekly") // "daily", "weekly", "none"
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  savedSponsors SavedSponsor[]
+  alerts        OpportunityAlert[]
+  fitChecks     FitCheck[]
+
+  @@map("users")
+}
+
+model SavedSponsor {
+  id        String   @id @default(uuid())
+  userId    String
+  sponsorId String
+  notes     String?
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sponsor Sponsor @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sponsorId])
+  @@map("saved_sponsors")
+}
+
+model OpportunityAlert {
+  id        String    @id @default(uuid())
+  userId    String
+  sponsorId String?
+  industry  String?
+  city      String?
+  frequency String    @default("weekly")
+  lastSent  DateTime?
+  isActive  Boolean   @default(true)
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sponsor Sponsor? @relation(fields: [sponsorId], references: [id])
+
+  @@map("opportunity_alerts")
+}
+
+model FitCheck {
+  id             String   @id @default(uuid())
+  userId         String
+  sponsorId      String
+  score          Int // 0-100
+  suggestedRoles String[] // Array of SOC codes
+  salaryMatch    Boolean
+  gapAnalysis    String?
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fit_checks")
+}

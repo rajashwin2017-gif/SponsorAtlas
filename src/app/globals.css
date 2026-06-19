@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    /* SponsorAtlas — 60 / 30 / 10 palette: white (60%) · black (30%) · red (10%) */
+    --background: 0 0% 100%;          /* white — dominant 60% */
+    --foreground: 0 0% 9%;            /* near-black text — 30% */
+    --surface: 0 0% 98%;             /* #fafafa subtle sections */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --primary: 0 72% 51%;            /* red #dc2626 — accent 10% */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 9%;            /* black — secondary 30% */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --ring: 0 72% 51%;               /* red focus ring */
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Tabular figures for stats / data columns */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Premium display headings (Fraunces) — refined weight, optical sizing, tight tracking */
+  .font-display {
+    font-optical-sizing: auto;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent;
+  }
+
+  .surface-card {
+    @apply rounded-xl border border-border bg-card shadow-sm;
+  }
+
+  /* Glassmorphism premium surface (light) */
+  .glass {
+    @apply rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-xl;
+    box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.6) inset, 0 12px 40px -20px hsl(0 0% 0% / 0.18);
+  }
+
+  /* Mono data-label eyebrow — uppercase, tracked */
+  .eyebrow {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  /* Pulsing "live" status dot — red accent */
+  .live-dot {
+    @apply relative inline-flex size-2 rounded-full bg-red-600;
+  }
+  .live-dot::after {
+    content: "";
+    @apply absolute inset-0 rounded-full bg-red-600;
+    animation: ping-soft 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes ping-soft {
+    75%, 100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  /* Staggered entrance */
+  .stagger > * {
+    opacity: 0;
+    animation: fade-up 0.5s ease-out forwards;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0.04s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.10s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.16s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.22s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.28s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.34s; }
+  @keyframes fade-up {
+    0% { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Animated grid pattern background for the hero (subtle on white) */
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, hsl(0 0% 0% / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(0 0% 0% / 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 75%);
+  }
+
+  /* Shimmer skeleton (light) */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-muted;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      hsl(0 0% 0% / 0.05),
+      transparent
+    );
+  }
+
+  /* Accent glow for highlighted surfaces */
+  .glow-accent {
+    box-shadow: 0 0 0 1px hsl(0 72% 51% / 0.2), 0 12px 40px -16px hsl(0 72% 51% / 0.35);
+  }
+
+  /* ── Custom cursor: a small red plane that noses toward movement ── */
+  .cursor-3d {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: opacity 0.25s ease;
+  }
+  .cursor-plane {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  }
+  /* Hide the native cursor only on precise pointers while the plane is active */
+  @media (pointer: fine) {
+    body.cursor-3d-active,
+    body.cursor-3d-active * {
+      cursor: none !important;
+    }
+  }
+
+  /* ── Hero skyline + flight paths ── */
+  /* Planes follow a parabolic arc (take off → cruise → land). offset-rotate:auto
+     banks the jet along the curve. Coordinates are in the SVG viewBox user units. */
+  .plane {
+    offset-rotate: auto;
+    transform-box: view-box;
+    will-change: offset-distance, opacity;
+  }
+  /* Plane drawing size — CSS-driven so it can shrink on mobile */
+  .plane-body {
+    transform: scale(var(--ps, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @media (max-width: 640px) {
+    .plane-body {
+      transform: scale(calc(var(--ps, 1) * 0.5));
+    }
+  }
+  .arc-1 {
+    offset-path: path("M -140 550 Q 720 -380 1580 550");
+    animation: arc-fly 19s linear infinite;
+  }
+  .arc-2 {
+    offset-path: path("M 1580 510 Q 720 -250 -140 525");
+    animation: arc-fly 27s linear infinite 4s;
+  }
+  .arc-3 {
+    offset-path: path("M -140 565 Q 700 -120 1580 480");
+    animation: arc-fly 34s linear infinite 11s;
+  }
+  @keyframes arc-fly {
+    0%   { offset-distance: 0%;   opacity: 0; }
+    7%   { opacity: 1; }
+    93%  { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+
+  /* Blinking red beacon on the tallest towers */
+  .beacon { animation: beacon-blink 2.4s ease-in-out infinite; }
+  @keyframes beacon-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.15; }
+  }
+}
+
+/* Custom scrollbar (light) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 82%);
+  border-radius: 8px;
+  border: 2px solid hsl(var(--background));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 70%);
+}
