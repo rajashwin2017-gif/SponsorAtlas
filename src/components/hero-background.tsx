@@ -78,6 +78,51 @@ function SkylineCluster() {
   );
 }
 
+/**
+ * Minimal commuter silhouettes that walk inward from under each skyline.
+ * One flat grey to match the towers; a couple meet mid-frame and shake hands,
+ * the rest just walk. Pure CSS (see globals.css), aria-hidden.
+ */
+type Walker = { type: "walk-r" | "walk-l" | "meet-l" | "meet-r" | "jump-l" | "jump-r"; bag?: boolean; delay: number; duration: number };
+
+const WALKERS: Walker[] = [
+  { type: "meet-l", bag: true, delay: -3, duration: 28.5 },
+  { type: "meet-r", bag: true, delay: -3, duration: 28.5 },
+  { type: "walk-r", bag: true, delay: -9, duration: 36 },
+  { type: "walk-l", bag: true, delay: -21, duration: 40.5 },
+  // celebrate — hop happily in the middle "I got the job!"
+  { type: "jump-l", bag: true, delay: -16, duration: 30 },
+  { type: "jump-r", bag: true, delay: -7, duration: 30 },
+];
+
+function HeroWalkers() {
+  return (
+    <div className="hw-layer">
+      {WALKERS.map((w, i) => (
+        <div
+          key={i}
+          className={`hw-person hw-${w.type}`}
+          style={{ animationDelay: `${w.delay}s`, animationDuration: `${w.duration}s` }}
+        >
+          <div className="hw-face">
+            <div className="hw-figure">
+              <span className="hw-head" />
+              <span className="hw-torso">
+                <span className="hw-arm" />
+                {w.bag && <span className="hw-bag" />}
+              </span>
+              <span className="hw-legs">
+                <span className="hw-leg hw-leg--back" />
+                <span className="hw-leg hw-leg--front" />
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function HeroBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -116,6 +161,9 @@ export function HeroBackground() {
           <SkylineCluster />
         </g>
       </svg>
+
+      {/* Commuters walking out from under the skylines */}
+      <HeroWalkers />
     </div>
   );
 }
