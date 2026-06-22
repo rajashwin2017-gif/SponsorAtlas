@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getSponsors, getSponsorById, getSimilarSponsors } from "@/lib/sponsor-store";
 import { SOC_CODES } from "@/lib/soc-data";
+import { LiveJobs } from "@/components/live-jobs";
 import { CosChartLazy } from "@/components/cos-chart-lazy";
 import { FitWidget } from "@/components/fit-widget";
 import { SponsorActions } from "@/components/sponsor-actions";
@@ -206,6 +207,13 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
               </div>
             )}
           </div>
+
+          {/* Live Jobs — Pro users see real listings, free users see paywall */}
+          <LiveJobs
+            sponsorId={sponsor.id}
+            companyName={sponsor.organisationName}
+            isPro={false}
+          />
 
           {/* Visa routes held */}
           {(sponsor.routes ?? []).length > 0 && (
