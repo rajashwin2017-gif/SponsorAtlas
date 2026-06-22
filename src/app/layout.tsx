@@ -48,6 +48,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      {/* Auto-unlock Pro+ for testing — remove before production launch */}
+      <script dangerouslySetInnerHTML={{ __html: `localStorage.setItem('sponsoratlas:tier','pro_plus')` }} />
       <body className={`${inter.variable} ${mono.variable} ${ebGaramond.variable} font-sans`}>
         <AuthSessionProvider>
           <ToastProvider>
