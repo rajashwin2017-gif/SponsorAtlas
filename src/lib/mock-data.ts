@@ -1,4 +1,5 @@
-import type { CompanySize, Rating, Route, Sponsor, LicenceStatus } from "./types";
+import type { CompanySize, Rating, Sponsor, LicenceStatus } from "./types";
+type Route = string;
 import { SOC_CODES } from "./soc-data";
 
 // ── Deterministic PRNG (mulberry32) so server & client render identically ──
@@ -87,7 +88,7 @@ function generateSponsors(count: number): Sponsor[] {
     else if (rng() < 0.08) route = pick(rng, ["Scale-up", "Global Business Mobility"]);
     else route = "Skilled Worker";
 
-    const rating: Rating = rng() < 0.88 ? "A-rated" : "B-rated";
+    const rating: Rating = rng() < 0.88 ? "A" : "B";
     const licenceRoll = rng();
     const licenceStatus: LicenceStatus =
       licenceRoll < 0.94 ? "Active" : licenceRoll < 0.98 ? "Suspended" : "Revoked";
@@ -107,7 +108,7 @@ function generateSponsors(count: number): Sponsor[] {
     const momentum = cos2025 + cos2026 * 1.5;
     let score = Math.min(
       100,
-      Math.round(momentum * 0.7 + liveJobsCount * 1.8 + (rating === "A-rated" ? 12 : 0))
+      Math.round(momentum * 0.7 + liveJobsCount * 1.8 + (rating === "A" ? 12 : 0))
     );
     if (licenceStatus !== "Active") score = Math.floor(score * 0.2);
     score = Math.max(2, score);
@@ -133,12 +134,19 @@ function generateSponsors(count: number): Sponsor[] {
       companySize: size,
       sicCode: `${Math.floor(rng() * 90000) + 10000}`,
       companiesHouseNumber: `${Math.floor(rng() * 9000000) + 1000000}`,
+      routes: [route],
+      ratingType: "Worker",
+      sponsorTier: cos2025 >= 500 ? "Platinum" : cos2025 >= 200 ? "Gold" : cos2025 >= 50 ? "Silver" : cos2025 >= 10 ? "Bronze" : "Active",
+      hiringActivity: cos2025 >= 200 ? "Very High" : cos2025 >= 50 ? "High" : cos2025 >= 10 ? "Medium" : "Low",
+      sponsorStrengthScore: score,
+      opportunityScore: Math.min(100, Math.round(score * 0.9 + (town === "London" ? 8 : 3))),
+      cos2025Total: cos2025,
+      cos2025Sw: cos2025,
+      cos2025Gbm: null,
+      cos2025SwSuppressed: false,
+      cos2025GbmSuppressed: false,
       hiringLikelihoodScore: score,
-      cosActivity2022: cos2022,
-      cosActivity2023: cos2023,
-      cosActivity2024: cos2024,
       cosActivity2025: cos2025,
-      cosActivity2026: cos2026,
       liveJobsCount,
       lastJobPostedAt: lastJobDays === null ? null : isoDaysAgo(lastJobDays),
       suggestedSocCodes: suggested,
@@ -198,7 +206,7 @@ export function searchSponsors(params: SearchParams): Sponsor[] {
   } = params;
 
   let results = SPONSORS.filter((s) => {
-    if (aRatedOnly && s.rating !== "A-rated") return false;
+    if (aRatedOnly && s.rating !== "A") return false;
     if (industries.length && !industries.includes(s.industryCategory)) return false;
     if (cities.length && !cities.includes(s.town)) return false;
     if (routes.length && !routes.includes(s.route)) return false;

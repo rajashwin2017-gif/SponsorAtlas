@@ -1,25 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Lock, MapPin, Zap, Briefcase, ShieldCheck, ShieldAlert, ArrowUpRight } from "lucide-react";
+import {
+  Heart, Lock, MapPin, Zap, Briefcase, ShieldCheck, ShieldAlert,
+  ArrowUpRight, TrendingUp,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { useSaved } from "@/hooks/use-saved";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { hiringBand, type Sponsor } from "@/lib/types";
+import {
+  type Sponsor, type SponsorTier, TIER_BG, ACTIVITY_DOT,
+} from "@/lib/types";
 
-const BAND_DOT: Record<string, string> = {
-  High: "bg-emerald-500",
-  Medium: "bg-amber-500",
-  Low: "bg-zinc-400",
+const TIER_EMOJI: Record<SponsorTier, string> = {
+  Platinum: "🏆",
+  Gold: "🥇",
+  Silver: "🥈",
+  Bronze: "🥉",
+  Active: "●",
+  Inactive: "○",
 };
+
+function formatCos(sponsor: Sponsor): string {
+  const total = sponsor.cos2025Total;
+  const supp = sponsor.cos2025SwSuppressed || sponsor.cos2025GbmSuppressed;
+  if (!total && !supp) return "—";
+  if (!total && supp) return "< 5";
+  return total!.toLocaleString();
+}
 
 export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPro?: boolean }) {
   const { isSaved, toggle } = useSaved();
   const { toast } = useToast();
   const saved = isSaved(sponsor.id);
-  const band = hiringBand(sponsor.hiringLikelihoodScore);
+
+  const tier = sponsor.sponsorTier ?? "Inactive";
+  const activity = sponsor.hiringActivity ?? "Inactive";
+  const dotClass = ACTIVITY_DOT[activity as keyof typeof ACTIVITY_DOT] ?? "bg-zinc-300";
 
   const handleSave = () => {
     const nowSaved = toggle(sponsor.id);
@@ -31,29 +50,41 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
 
   return (
     <div className="group relative flex h-full flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-[0_18px_44px_-24px_rgba(0,0,0,0.45)]">
-      {/* hairline accent revealed on hover */}
+      {/* Hover accent */}
       <span
         className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-red-600/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         aria-hidden="true"
       />
 
-      {/* meta row */}
+      {/* Meta row */}
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           {sponsor.industryCategory}
         </span>
-        {sponsor.rating === "A-rated" ? (
-          <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-600">
-            <ShieldCheck className="size-3.5" /> A-rated
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Tier badge */}
+          <span
+            className={cn(
+              "inline-flex items-center gap-0.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+              TIER_BG[tier as SponsorTier] ?? "bg-zinc-50 text-zinc-500 border-zinc-200"
+            )}
+          >
+            {TIER_EMOJI[tier as SponsorTier]} {tier}
           </span>
-        ) : (
-          <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-amber-600">
-            <ShieldAlert className="size-3.5" /> B-rated
-          </span>
-        )}
+          {/* Rating */}
+          {sponsor.rating === "A" ? (
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-600">
+              <ShieldCheck className="size-3.5" /> A
+            </span>
+          ) : (
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-amber-600">
+              <ShieldAlert className="size-3.5" /> {sponsor.rating}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* name + location */}
+      {/* Name + location */}
       <div className="mt-3">
         <Link
           href={`/sponsors/${sponsor.id}`}
@@ -63,29 +94,38 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
           <ArrowUpRight className="mt-px size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
         </Link>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-          <MapPin className="size-3.5 shrink-0" /> {sponsor.town}, {sponsor.county}
+          <MapPin className="size-3.5 shrink-0" />
+          {sponsor.town}{sponsor.county ? `, ${sponsor.county}` : ""}
         </p>
       </div>
 
-      {/* stats — hairline separated, no boxes */}
+      {/* Stats */}
       <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border pt-4">
         <div>
-          <p className="eyebrow">Hiring</p>
+          <p className="eyebrow">Activity</p>
           <p className="mt-1.5 flex items-center gap-2 text-sm font-semibold">
-            <span className={cn("size-2 rounded-full", BAND_DOT[band])} aria-hidden="true" /> {band}
+            <span className={cn("size-2 rounded-full", dotClass)} aria-hidden="true" />
+            {activity}
           </p>
         </div>
         <div>
           <p className="eyebrow">CoS 2025</p>
-          <p className="mt-1.5 text-sm font-semibold tabular">{sponsor.cosActivity2025.toLocaleString()}</p>
+          <p className="mt-1.5 text-sm font-semibold tabular">
+            {isPro ? formatCos(sponsor) : (
+              sponsor.cos2025Total
+                ? <span className="blur-[4px] select-none">{sponsor.cos2025Total}</span>
+                : formatCos(sponsor)
+            )}
+          </p>
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">
-        {sponsor.route} · {sponsor.companySize}
+      <p className="mt-3 text-xs text-muted-foreground line-clamp-1">
+        {(sponsor.routes ?? [sponsor.route]).slice(0, 2).join(" · ")}
+        {(sponsor.routes ?? []).length > 2 && ` +${sponsor.routes.length - 2}`}
       </p>
 
-      {/* actions */}
+      {/* Actions */}
       <div className="mt-auto flex items-center gap-2 pt-4">
         <Link
           href={`/sponsors/${sponsor.id}`}
@@ -118,7 +158,7 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
         </Link>
       </div>
 
-      {/* pro insights */}
+      {/* Pro insights */}
       <div className="relative mt-4 border-t border-dashed border-border pt-4">
         <div
           className={cn(
@@ -127,10 +167,12 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
           )}
         >
           <span className="flex items-center gap-1.5">
-            <Briefcase className="size-3.5" /> {sponsor.liveJobsCount} live jobs
+            <TrendingUp className="size-3.5" />
+            Strength <span className="font-semibold text-foreground">{sponsor.sponsorStrengthScore}</span>/100
           </span>
-          <span>
-            Score <span className="font-semibold text-red-600">{sponsor.hiringLikelihoodScore}</span>/100
+          <span className="flex items-center gap-1.5">
+            <Briefcase className="size-3.5" />
+            Opp. <span className="font-semibold text-red-600">{sponsor.opportunityScore}</span>/100
           </span>
         </div>
         {!isPro && (

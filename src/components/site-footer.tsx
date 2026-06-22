@@ -6,27 +6,29 @@ const COLUMNS = [
     title: "Product",
     links: [
       { href: "/search", label: "Sponsor Search" },
+      { href: "/jobs", label: "Job Board" },
       { href: "/soc-codes", label: "SOC Code Intelligence" },
+      { href: "/cv-builder", label: "CV Builder" },
+      { href: "/community", label: "Community" },
       { href: "/pricing", label: "Pricing" },
-      { href: "/dashboard", label: "Dashboard" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { href: "/search", label: "How it works" },
-      { href: "/soc-codes", label: "Salary thresholds" },
+      { href: "/soc-codes", label: "Salary thresholds 2026" },
+      { href: "/soc-codes", label: "SOC code lookup" },
       { href: "/pricing", label: "Compare plans" },
-      { href: "/", label: "Open Government Data" },
+      { href: "/community", label: "Success stories" },
     ],
   },
   {
-    title: "Company",
+    title: "Account",
     links: [
-      { href: "/", label: "About" },
-      { href: "/", label: "Privacy" },
-      { href: "/", label: "Terms" },
-      { href: "/", label: "Contact" },
+      { href: "/login", label: "Sign in" },
+      { href: "/register", label: "Create account" },
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/pricing", label: "Upgrade to Pro" },
     ],
   },
 ];

@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Globe2, Menu, X } from "lucide-react";
+import { Globe2, Menu, X, User, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/", label: "Home" },
   { href: "/search", label: "Search" },
+  { href: "/sponsors/rankings", label: "Rankings" },
   { href: "/soc-codes", label: "SOC Codes" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/dashboard", label: "Dashboard" },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -63,10 +62,16 @@ export function SiteHeader() {
           </nav>
 
           <Link
-            href="/search"
-            className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700"
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:bg-muted"
           >
-            Request Access
+            <User className="size-4" /> Dashboard
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700"
+          >
+            <LogIn className="size-4" /> Sign in
           </Link>
         </div>
 
@@ -104,13 +109,22 @@ export function SiteHeader() {
                 </Link>
               );
             })}
-            <Link
-              href="/search"
-              onClick={() => setOpen(false)}
-              className="mt-1 rounded-full bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
-            >
-              Request Access
-            </Link>
+            <div className="mt-1 grid grid-cols-2 gap-2">
+              <Link
+                href="/dashboard"
+                onClick={() => setOpen(false)}
+                className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-semibold text-zinc-700"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-full bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
+              >
+                Sign in
+              </Link>
+            </div>
           </nav>
         </div>
       )}

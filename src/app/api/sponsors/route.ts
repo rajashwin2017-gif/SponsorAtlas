@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
-import { searchSponsors, type SortKey } from "@/lib/mock-data";
+import {
+  searchSponsors,
+  getIndustryList,
+  getCityList,
+  getRouteList,
+  type SortKey,
+} from "@/lib/sponsor-store";
 
 /**
  * GET /api/sponsors
- * Query params: q, industry (repeatable), city (repeatable), route (repeatable),
- *   aRated=1, minCos, band (repeatable), sort, page, pageSize
- *
- * Backed by mock data. In production this queries Postgres with pg_trgm fuzzy
- * search and returns the same shape.
+ * Query params:
+ *   q, industry (repeatable), city (repeatable), route (repeatable),
+ *   tier (repeatable), activity (repeatable), aRated=1,
+ *   minCos, sort, page, pageSize
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -19,17 +24,27 @@ export async function GET(req: Request) {
     industries: searchParams.getAll("industry"),
     cities: searchParams.getAll("city"),
     routes: searchParams.getAll("route"),
+    tiers: searchParams.getAll("tier"),
+    activities: searchParams.getAll("activity"),
     aRatedOnly: searchParams.get("aRated") === "1",
     minCos: Number(searchParams.get("minCos") ?? 0),
-    hiringBands: searchParams.getAll("band"),
     sort: (searchParams.get("sort") as SortKey) ?? "relevance",
   });
 
   const start = (page - 1) * pageSize;
-  const data = all.slice(start, start + pageSize);
 
   return NextResponse.json({
-    data,
-    pagination: { page, pageSize, total: all.length, totalPages: Math.ceil(all.length / pageSize) },
+    data: all.slice(start, start + pageSize),
+    pagination: {
+      page,
+      pageSize,
+      total: all.length,
+      totalPages: Math.ceil(all.length / pageSize),
+    },
+    meta: {
+      industryList: getIndustryList(),
+      cityList: getCityList(),
+      routeList: getRouteList(),
+    },
   });
 }

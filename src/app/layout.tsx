@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CustomCursor } from "@/components/custom-cursor";
+import { AuthSessionProvider } from "@/components/session-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,14 +49,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.variable} ${mono.variable} ${ebGaramond.variable} font-sans`}>
-        <ToastProvider>
-          <CustomCursor />
-          <div className="flex min-h-dvh flex-col">
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
-          </div>
-        </ToastProvider>
+        <AuthSessionProvider>
+          <ToastProvider>
+            <CustomCursor />
+            <div className="flex min-h-dvh flex-col">
+              <SiteHeader />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
+            </div>
+          </ToastProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );

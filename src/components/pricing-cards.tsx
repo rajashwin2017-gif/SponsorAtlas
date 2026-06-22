@@ -1,14 +1,50 @@
 "use client";
 
-import { Check, Sparkles } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { Check, Sparkles, Loader2 } from "lucide-react";
 import { PLANS } from "@/lib/pricing";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+async function startCheckout(planId: string): Promise<string | null> {
+  try {
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: planId }),
+    });
+    const data = await res.json();
+    if (data.url) return data.url;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function PricingCards() {
   const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  async function handleCta(planId: string) {
+    if (planId === "free") {
+      toast("You're on the Free plan. Start searching!", "success");
+      return;
+    }
+    setLoadingPlan(planId);
+    const url = await startCheckout(planId);
+    setLoadingPlan(null);
+    if (url) {
+      window.location.href = url;
+    } else {
+      toast(
+        "Stripe is not configured yet. Add STRIPE_SECRET_KEY and price IDs to your .env file to enable billing.",
+        "info"
+      );
+    }
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -39,20 +75,27 @@ export function PricingCards() {
             <span className="text-sm text-muted-foreground">{plan.period}</span>
           </div>
 
-          <Button
-            variant={plan.highlighted ? "gradient" : "outline"}
-            className="mt-6 w-full"
-            onClick={() =>
-              toast(
-                plan.id === "free"
-                  ? "Welcome aboard! Start searching for free."
-                  : `Stripe checkout for ${plan.name} would open here (integration stub).`,
-                "info"
-              )
-            }
-          >
-            {plan.cta}
-          </Button>
+          {plan.id === "free" ? (
+            <Link
+              href="/register"
+              className={cn(
+                "mt-6 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+              )}
+            >
+              {plan.cta}
+            </Link>
+          ) : (
+            <Button
+              variant={plan.highlighted ? "gradient" : "outline"}
+              className="mt-6 w-full"
+              disabled={loadingPlan === plan.id}
+              onClick={() => handleCta(plan.id)}
+            >
+              {loadingPlan === plan.id ? (
+                <><Loader2 className="size-4 animate-spin" /> Redirecting…</>
+              ) : plan.cta}
+            </Button>
+          )}
 
           <ul className="mt-6 space-y-3">
             {plan.features.map((f) => (

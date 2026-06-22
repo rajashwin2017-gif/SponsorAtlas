@@ -2,7 +2,8 @@
 // PostgreSQL with pg_trgm for fuzzy full-text sponsor search.
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
@@ -12,40 +13,120 @@ datasource db {
 }
 
 model Sponsor {
-  id                    String   @id @default(uuid())
-  organisationName      String
-  town                  String
-  county                String
-  route                 String // "Skilled Worker", "Health & Care", etc.
-  rating                String // "A-rated", "B-rated"
-  licenceStatus         String // "Active", "Revoked", "Suspended"
-  addedDate             DateTime
-  lastUpdated           DateTime @updatedAt
+  id               String @id @default(uuid())
+  organisationName String
+  normalisedName   String // UPPER() normalised for fuzzy matching
+  town             String
+  townNormalised   String // canonical city (title-cased, deduped)
+  county           String @default("")
+  rating           String // "A", "B", "Provisional"
+  ratingType       String @default("Worker") // "Worker", "Temporary Worker"
+  licenceStatus    String @default("Active")
+  addedDate        DateTime @default(now())
+  lastUpdated      DateTime @updatedAt
 
-  // Enriched fields
-  industryCategory      String?
-  companySize           String? // "Startup", "SME", "Enterprise"
-  sicCode               String?
-  companiesHouseNumber  String?
+  // Enriched classification
+  industryCategory String @default("Other")
+  companySize      String @default("SME") // "Startup", "SME", "Enterprise"
+  sicCode          String @default("")
+  companiesHouseNumber String @default("")
 
-  // Proprietary signals
-  hiringLikelihoodScore Int?      @default(0) // 0-100
-  cosActivity2024       Int?      @default(0)
-  cosActivity2025       Int?      @default(0)
-  cosActivity2026       Int?      @default(0)
-  liveJobsCount         Int?      @default(0)
-  lastJobPostedAt       DateTime?
+  // Sponsor intelligence scores (0–100, computed at import)
+  sponsorStrengthScore  Int @default(0)
+  opportunityScore      Int @default(0)
+
+  // Tier classification
+  sponsorTier    String @default("Inactive") // Platinum/Gold/Silver/Bronze/Active/Inactive
+  hiringActivity String @default("Inactive") // VeryHigh/High/Medium/Low/Inactive
+
+  // 2025 CoS data from FOI
+  cos2025Sw           Int?    // Skilled Worker CoS used
+  cos2025Gbm          Int?    // GBM CoS used
+  cos2025SwSuppressed Boolean @default(false) // true = 1–4 CoS (suppressed by Home Office)
+  cos2025GbmSuppressed Boolean @default(false)
+  cos2025Total        Int?    // sw + gbm combined
+
+  // Legacy / live signals
+  liveJobsCount   Int       @default(0)
+  lastJobPostedAt DateTime?
+  suggestedSocCodes String[]
 
   // Relationships
+  routes  SponsorRoute[]
   savedBy SavedSponsor[]
   alerts  OpportunityAlert[]
+  jobs    Job[]
 
-  @@index([organisationName])
-  @@index([town])
+  @@index([normalisedName])
+  @@index([townNormalised])
+  @@index([sponsorTier])
+  @@index([hiringActivity])
   @@index([industryCategory])
-  @@index([hiringLikelihoodScore])
-  @@index([route])
+  @@index([sponsorStrengthScore])
+  @@index([opportunityScore])
+  @@index([cos2025Total])
   @@map("sponsors")
+}
+
+model SponsorRoute {
+  id        String  @id @default(uuid())
+  sponsorId String
+  route     String  // "Skilled Worker", "Global Business Mobility: Senior or Specialist Worker", etc.
+  sponsor   Sponsor @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+
+  @@unique([sponsorId, route])
+  @@index([route])
+  @@map("sponsor_routes")
+}
+
+model CityStats {
+  id            String @id @default(uuid())
+  cityName      String @unique
+  normalised    String @unique // lowercase
+  totalSponsors Int    @default(0)
+  cos2025Total  Int    @default(0)
+  topIndustry   String @default("")
+  topRoute      String @default("")
+
+  @@map("city_stats")
+}
+
+model Job {
+  id             String    @id @default(uuid())
+  sponsorId      String
+  title          String
+  location       String?
+  salaryMin      Decimal?  @db.Decimal(10, 2)
+  salaryMax      Decimal?  @db.Decimal(10, 2)
+  jobType        String?   @default("Full-time")
+  visaSponsored  Boolean   @default(true)
+  source         String    @default("direct")
+  sourceUrl      String?
+  socCode        String?
+  description    String?
+  postedAt       DateTime  @default(now())
+  isActive       Boolean   @default(true)
+
+  sponsor        Sponsor   @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+
+  @@index([sponsorId])
+  @@index([postedAt])
+  @@map("jobs")
+}
+
+model CommunityPost {
+  id         String   @id @default(uuid())
+  authorName String
+  category   String   @default("question")
+  title      String
+  content    String
+  tags       String[]
+  upvotes    Int      @default(0)
+  replies    Int      @default(0)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@map("community_posts")
 }
 
 model SocCode {
@@ -80,6 +161,8 @@ model User {
   savedSponsors SavedSponsor[]
   alerts        OpportunityAlert[]
   fitChecks     FitCheck[]
+  accounts      Account[]
+  sessions      Session[]
 
   @@map("users")
 }
@@ -127,4 +210,46 @@ model FitCheck {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("fit_checks")
+}
+
+// ── NextAuth.js required models ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }

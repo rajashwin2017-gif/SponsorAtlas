@@ -1,0 +1,69 @@
+{
+  "totalSponsors": 126349,
+  "matchedToFOI": 56672,
+  "matchRate": 44.9,
+  "totalCos2025Sw": 985955,
+  "totalCos2025Gbm": 68726,
+  "tierBreakdown": {
+    "Platinum": 289,
+    "Gold": 355,
+    "Silver": 2238,
+    "Bronze": 12871,
+    "Active": 40919,
+    "Inactive": 69677
+  },
+  "activityBreakdown": {
+    "Very High": 644,
+    "High": 2238,
+    "Medium": 12871,
+    "Low": 40919,
+    "Inactive": 69677
+  },
+  "topIndustries": [
+    [
+      "Other",
+      72603
+    ],
+    [
+      "Healthcare",
+      14038
+    ],
+    [
+      "Technology",
+      6833
+    ],
+    [
+      "Hospitality",
+      6025
+    ],
+    [
+      "Finance",
+      4304
+    ],
+    [
+      "Creative & Media",
+      3362
+    ],
+    [
+      "Retail",
+      3275
+    ],
+    [
+      "Construction",
+      3016
+    ],
+    [
+      "Education",
+      2921
+    ],
+    [
+      "Consulting",
+      2814
+    ]
+  ],
+  "generatedAt": "2025-06-22T00:00:00Z",
+  "dataSource": {
+    "register": "Home Office Sponsor Register (June 2025)",
+    "foi": "FOI 2026/03173 \u2014 2025 CoS data (extracted March 2026)"
+  }
+}

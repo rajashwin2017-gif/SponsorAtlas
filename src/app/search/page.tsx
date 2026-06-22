@@ -2,10 +2,12 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { SearchClient } from "@/components/search/search-client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getIndustryList, getCityList, getRouteList } from "@/lib/sponsor-store";
 
 export const metadata: Metadata = {
-  title: "Sponsor Search",
-  description: "Search and filter 126,000+ UK visa sponsors by industry, city, route and hiring likelihood.",
+  title: "Sponsor Search · SponsorAtlas",
+  description:
+    "Search 126,349 verified UK visa sponsors with real 2025 CoS hiring data. Filter by tier, activity, industry, city and route.",
 };
 
 function SearchFallback() {
@@ -25,9 +27,18 @@ function SearchFallback() {
 }
 
 export default function SearchPage() {
+  // Pass initial filter lists from server so the first render has options immediately
+  const initialIndustries = getIndustryList();
+  const initialCities = getCityList();
+  const initialRoutes = getRouteList();
+
   return (
     <Suspense fallback={<SearchFallback />}>
-      <SearchClient />
+      <SearchClient
+        initialIndustries={initialIndustries}
+        initialCities={initialCities}
+        initialRoutes={initialRoutes}
+      />
     </Suspense>
   );
 }

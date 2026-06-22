@@ -8,3 +8,6 @@ next-env.d.ts
 /coverage
 /build
 prisma/dev.db
+# Large uncompressed data files — use .gz versions instead
+prisma/data/sponsors.json
+prisma/data/sponsors-slim.json
