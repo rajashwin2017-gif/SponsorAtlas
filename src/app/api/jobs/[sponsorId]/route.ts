@@ -292,11 +292,38 @@ export async function GET(
     });
   }
 
-  // ── Fallback: careers URL only ──
+  // ── Fallback: careers URL with keyword pre-filled where possible ──
+  let careersUrl = entry?.url;
+  if (careersUrl && keyword) {
+    // Append keyword to known search-friendly career URLs
+    if (careersUrl.includes("amazon.jobs")) {
+      careersUrl = `https://www.amazon.jobs/en-gb/search?keywords=${encodeURIComponent(keyword)}&location=United+Kingdom`;
+    } else if (careersUrl.includes("careers.google.com")) {
+      careersUrl = `https://careers.google.com/jobs/results/?q=${encodeURIComponent(keyword)}&location=United+Kingdom`;
+    } else if (careersUrl.includes("careers.microsoft.com")) {
+      careersUrl = `https://careers.microsoft.com/us/en/search-results?keywords=${encodeURIComponent(keyword)}&location=United+Kingdom`;
+    } else if (careersUrl.includes("metacareers.com")) {
+      careersUrl = `https://www.metacareers.com/jobs?q=${encodeURIComponent(keyword)}&offices[0]=London%2C+UK`;
+    } else if (careersUrl.includes("tcs.com")) {
+      careersUrl = `https://ibegin.tcs.com/iBegin/faces/portlets/AdvancedSearch.xhtml?searchKey=${encodeURIComponent(keyword)}&searchType=keyword`;
+    } else if (careersUrl.includes("deloitte.com")) {
+      careersUrl = `https://apply.deloitte.com/careers/SearchJobs/${encodeURIComponent(keyword)}?3_56_3=2419&listFilterMode=1`;
+    } else if (careersUrl.includes("kpmgcareers")) {
+      careersUrl = `https://www.kpmgcareers.co.uk/search/?keyword=${encodeURIComponent(keyword)}`;
+    } else if (careersUrl.includes("accenture.com")) {
+      careersUrl = `https://www.accenture.com/gb-en/careers/jobsearch?jk=${encodeURIComponent(keyword)}&sb=1&pg=1&is_rj=0&ct=United+Kingdom`;
+    } else if (careersUrl.includes("careers.jpmorgan")) {
+      careersUrl = `https://careers.jpmorgan.com/global/en/search-jobs?keywords=${encodeURIComponent(keyword)}&location=United+Kingdom`;
+    } else if (careersUrl.includes("goldmansachs")) {
+      careersUrl = `https://www.goldmansachs.com/careers/search.html#search=%22${encodeURIComponent(keyword)}%22`;
+    } else if (careersUrl.includes("hsbc.com/careers")) {
+      careersUrl = `https://mycareer.hsbc.com/en_GB/external/SearchJobs/${encodeURIComponent(keyword)}`;
+    }
+  }
   return NextResponse.json({
     ...base,
     source: entry ? (entry.type as JobsResponse["source"]) : "none",
-    careersUrl: entry?.url,
+    careersUrl,
     jobs: [],
   });
 }

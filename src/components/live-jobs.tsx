@@ -317,10 +317,14 @@ export function LiveJobs({ sponsorId, companyName, isPro = false }: LiveJobsProp
                       <Briefcase className="size-4 text-red-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-sm">Browse open roles at {data.companyName}</p>
+                      <p className="font-medium text-sm">
+                        {keyword ? `Search "${keyword}" jobs at ${data.companyName}` : `Browse open roles at ${data.companyName}`}
+                      </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {data.source === "nhs"
                           ? "Opens NHS Jobs — the official NHS recruitment portal"
+                          : keyword
+                          ? "Opens their careers site pre-filtered to your search"
                           : "Opens the company's official careers page"}
                       </p>
                     </div>
