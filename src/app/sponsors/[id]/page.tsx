@@ -212,7 +212,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           <LiveJobs
             sponsorId={sponsor.id}
             companyName={sponsor.organisationName}
-            isPro={false}
+            isPro={true}
           />
 
           {/* Visa routes held */}

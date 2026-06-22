@@ -205,6 +205,7 @@ export default function RankingsPage() {
             <RankingTable
               title={`Top ${cat.label} Sponsors by 2025 CoS`}
               sponsors={cat.sponsors}
+              showAll={true}
             />
           </section>
         ))}
