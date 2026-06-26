@@ -44,35 +44,35 @@ export function DashboardClient() {
   );
 
   return (
-    <div className="container py-8">
-      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+    <div className="container py-10">
+      <div className="grid gap-8 lg:grid-cols-[256px_1fr]">
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-20 lg:self-start">
-          <div className="surface-card p-4">
-            <div className="flex items-center gap-3 border-b border-border pb-4">
-              <span className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-red-600 to-zinc-900 font-heading font-bold text-white">
+          <div className="surface-card p-5">
+            <div className="flex items-center gap-3 border-b border-border pb-5">
+              <span className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-red-600 to-zinc-900 font-heading text-lg font-bold text-white">
                 {USER.name[0]}
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{USER.name}</p>
-                <Badge variant={isPro ? "emerald" : "outline"} className="mt-0.5">
+                <p className="truncate font-heading text-base font-semibold">{USER.name}</p>
+                <Badge variant={isPro ? "emerald" : "outline"} className="mt-1">
                   {TIER_LABEL[tier]}
                 </Badge>
               </div>
             </div>
 
-            <nav className="mt-3 space-y-0.5" aria-label="Dashboard">
+            <nav className="mt-4 space-y-0.5" aria-label="Dashboard">
               {NAV.map((n) => (
                 <button
                   key={n.id}
                   onClick={() => setTab(n.id)}
                   aria-current={tab === n.id ? "page" : undefined}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer",
                     tab === n.id ? "bg-red-600/10 text-red-600" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
-                  <n.icon className="size-4" /> {n.label}
+                  <n.icon className="size-4 shrink-0" /> {n.label}
                   {n.id === "saved" && savedSponsors.length > 0 && (
                     <Badge variant="default" className="ml-auto px-1.5 py-0">{savedSponsors.length}</Badge>
                   )}
@@ -193,11 +193,12 @@ export function DashboardClient() {
 function Overview({ savedCount, alerts, isPro }: { savedCount: number; alerts: number; isPro: boolean }) {
   return (
     <>
-      <div className="surface-card relative overflow-hidden p-6">
+      <div className="surface-card relative overflow-hidden px-7 py-8">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_100%_0%,hsl(0_72%_51%/0.12),transparent)]" aria-hidden="true" />
         <div className="relative">
-          <h1 className="font-display text-2xl tracking-tight">Welcome back, {USER.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Here&apos;s your sponsorship search at a glance.</p>
+          <p className="eyebrow mb-2">Dashboard</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Welcome back, {USER.name}</h1>
+          <p className="mt-2 text-base text-muted-foreground leading-relaxed">Here&apos;s your sponsorship search at a glance.</p>
         </div>
       </div>
 
@@ -208,12 +209,12 @@ function Overview({ savedCount, alerts, isPro }: { savedCount: number; alerts: n
       </div>
 
       {!isPro && (
-        <div className="surface-card flex flex-col items-start justify-between gap-4 border-red-600/30 bg-gradient-to-r from-red-600/[0.08] to-zinc-900/[0.06] p-6 sm:flex-row sm:items-center">
+        <div className="surface-card flex flex-col items-start justify-between gap-5 border-red-600/30 bg-gradient-to-r from-red-600/[0.08] to-zinc-900/[0.06] px-6 py-5 sm:flex-row sm:items-center">
           <div>
-            <p className="flex items-center gap-2 font-heading font-semibold">
+            <p className="flex items-center gap-2 font-heading text-base font-semibold">
               <Sparkles className="size-4 text-red-600" /> Unlock hiring signals & AI fit scoring
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               Upgrade to Pro for unlimited searches, CoS data, live jobs and weekly alerts.
             </p>
           </div>
@@ -230,10 +231,10 @@ function Overview({ savedCount, alerts, isPro }: { savedCount: number; alerts: n
             { icon: <Heart className="size-4 text-red-600" />, text: `You have ${savedCount} saved sponsor${savedCount === 1 ? "" : "s"}`, time: "Today" },
             { icon: <Activity className="size-4 text-zinc-700" />, text: "Welcome to The Sponsor Finder. Your search starts here", time: "Today" },
           ].map((a, i) => (
-            <div key={i} className="flex items-center gap-3 p-4">
-              <span className="grid size-9 place-items-center rounded-lg bg-muted">{a.icon}</span>
-              <p className="flex-1 text-sm">{a.text}</p>
-              <span className="text-xs text-muted-foreground">{a.time}</span>
+            <div key={i} className="flex items-center gap-4 px-5 py-4">
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted">{a.icon}</span>
+              <p className="flex-1 text-sm leading-snug">{a.text}</p>
+              <span className="shrink-0 text-xs tabular text-muted-foreground">{a.time}</span>
             </div>
           ))}
         </div>
@@ -306,9 +307,9 @@ function AlertsPanel({ alerts, setAlerts, toast }: {
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <section>
-      <div className="mb-4">
-        <h2 className="font-heading text-xl font-bold tracking-tight">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+      <div className="mb-5">
+        <h2 className="font-display text-2xl font-semibold tracking-tight">{title}</h2>
+        {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -317,9 +318,9 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 
 function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <div className="glass p-5 transition-transform duration-200 hover:-translate-y-0.5">
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">{icon} {label}</p>
-      <p className="mt-2 font-display text-3xl tabular">{value}</p>
+    <div className="glass p-6 transition-transform duration-200 hover:-translate-y-0.5">
+      <p className="eyebrow flex items-center gap-2">{icon} {label}</p>
+      <p className="mt-3 font-display text-4xl tabular">{value}</p>
     </div>
   );
 }
