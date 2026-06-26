@@ -31,13 +31,14 @@
 
   html {
     scroll-behavior: smooth;
+    background: #000; /* black canvas so body fade-in is a reverse dissolve from black */
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv11", "ss01";
     text-rendering: optimizeLegibility;
-    animation: page-fade-in 0.8s ease-out both;
+    animation: page-fade-in 1.2s ease-out both;
   }
 
   @keyframes page-fade-in {
