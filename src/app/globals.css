@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    color-scheme: light;
-    /* SponsorAtlas — 60 / 30 / 10 palette: white (60%) · black (30%) · red (10%) */
-    --background: 0 0% 100%;          /* white — dominant 60% */
-    --foreground: 0 0% 9%;            /* near-black text — 30% */
-    --surface: 0 0% 98%;             /* #fafafa subtle sections */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --primary: 0 72% 51%;            /* red #dc2626 — accent 10% */
+    color-scheme: dark;
+    /* The Sponsor Finder — deep space dark theme synced with splash screen */
+    --background: 222 47% 2%;         /* #030509 near-black space */
+    --foreground: 210 18% 94%;        /* #eceff4 near-white */
+    --surface: 222 40% 4%;
+    --card: 222 42% 4%;               /* dark card surface */
+    --card-foreground: 210 18% 94%;
+    --muted: 222 35% 8%;
+    --muted-foreground: 215 12% 50%;  /* medium grey */
+    --border: 222 28% 11%;            /* subtle dark border */
+    --input: 222 28% 11%;
+    --primary: 0 72% 51%;             /* red #dc2626 — accent */
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 9%;            /* black — secondary 30% */
-    --secondary-foreground: 0 0% 100%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    --ring: 0 72% 51%;               /* red focus ring */
+    --secondary: 222 35% 10%;
+    --secondary-foreground: 210 18% 94%;
+    --accent: 222 35% 10%;
+    --accent-foreground: 210 18% 94%;
+    --ring: 0 72% 51%;
     --radius: 0.75rem;
   }
 
@@ -79,13 +79,13 @@
   }
 
   .surface-card {
-    @apply rounded-xl border border-border bg-card shadow-sm;
+    @apply rounded-xl border border-white/[0.07] bg-white/[0.03] shadow-sm;
   }
 
-  /* Glassmorphism premium surface (light) */
+  /* Glassmorphism premium surface (dark) */
   .glass {
-    @apply rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-xl;
-    box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.6) inset, 0 12px 40px -20px hsl(0 0% 0% / 0.18);
+    @apply rounded-xl border border-white/[0.07] bg-white/[0.04] backdrop-blur-xl;
+    box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.05) inset, 0 12px 40px -20px hsl(0 0% 0% / 0.6);
   }
 
   /* Mono data-label eyebrow — uppercase, tracked */
@@ -122,12 +122,12 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  /* Animated grid pattern background for the hero (subtle on white) */
+  /* Animated grid pattern background for the hero (subtle on dark) */
   .grid-bg {
     background-image:
-      linear-gradient(to right, hsl(0 0% 0% / 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(0 0% 0% / 0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
+      linear-gradient(to right, hsl(0 0% 100% / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(0 0% 100% / 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 75%);
   }
 
@@ -219,21 +219,21 @@
   }
 }
 
-/* Custom scrollbar (light) */
+/* Custom scrollbar (dark) */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 82%);
+  background: hsl(222 28% 18%);
   border-radius: 8px;
   border: 2px solid hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 70%);
+  background: hsl(222 20% 28%);
 }
 
 /* ─────────────────── Hero commuters (minimal silhouettes) ─────────────────── */

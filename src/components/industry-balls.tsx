@@ -31,10 +31,11 @@ export function IndustryBalls() {
   return (
     <section className="container py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+        <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-red-500">Coverage</p>
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
           Every industry. Every route.
         </h2>
-        <p className="mt-4 text-muted-foreground">
+        <p className="mt-4 text-white/45">
           126,000+ sponsors across all major UK sectors — all searchable, all ranked by real CoS activity.
         </p>
       </div>
@@ -55,7 +56,7 @@ export function IndustryBalls() {
             <div className="h-28 w-28">
               <BallCanvas color={color} />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">{label}</span>
+            <span className="text-sm font-medium text-white/45">{label}</span>
           </motion.li>
         ))}
       </motion.ul>

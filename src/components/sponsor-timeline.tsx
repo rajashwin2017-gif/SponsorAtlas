@@ -97,17 +97,17 @@ function TimelineCard({ step, index }: { step: Step; index: number }) {
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, amount: 0.25 }}
         transition={{ duration: 0.55, ease: 'easeOut', delay: 0.1 }}
-        className="w-[calc(50%-2.5rem)] rounded-2xl border border-border bg-card p-6 shadow-sm"
+        className="w-[calc(50%-2.5rem)] rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6"
         style={{ borderLeft: `3px solid ${step.color}` }}
       >
         <span className="text-xs font-bold tracking-widest uppercase" style={{ color: step.color }}>
           {step.date}
         </span>
-        <h3 className="mt-2 font-heading text-lg font-semibold text-foreground">{step.title}</h3>
-        <p className="mt-0.5 text-xs text-muted-foreground font-medium">{step.category}</p>
+        <h3 className="mt-2 font-heading text-lg font-semibold text-white">{step.title}</h3>
+        <p className="mt-0.5 text-xs font-medium text-white/40">{step.category}</p>
         <ul className="mt-4 space-y-2">
           {step.points.map(pt => (
-            <li key={pt} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <li key={pt} className="flex items-start gap-2 text-sm text-white/45">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: step.color }} />
               {pt}
             </li>
@@ -137,10 +137,11 @@ export function SponsorTimeline() {
   return (
     <section className="container py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+        <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-red-500">Journey</p>
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
           Your path to UK sponsorship
         </h2>
-        <p className="mt-4 text-muted-foreground">
+        <p className="mt-4 text-white/45">
           From cold search to Certificate of Sponsorship — a proven six-step process.
         </p>
       </div>
@@ -148,7 +149,7 @@ export function SponsorTimeline() {
       {/* Timeline */}
       <div className="relative mx-auto mt-16 max-w-4xl">
         {/* Vertical line */}
-        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-border" aria-hidden="true" />
+        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/[0.07]" aria-hidden="true" />
 
         <div className="flex flex-col gap-12">
           {STEPS.map((step, i) => (

@@ -23,22 +23,20 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50">
-      <div className="container flex items-center justify-between gap-3 py-4">
+    <header className="sticky top-0 z-50 border-b border-white/[0.05] bg-background/80 backdrop-blur-md">
+      <div className="container flex items-center justify-between gap-3 py-3.5">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-red-600 to-zinc-900 text-white">
-            <Globe2 className="size-5" />
+        <Link href="/" className="flex items-center gap-2.5 font-heading text-base font-semibold tracking-tight text-foreground">
+          <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-red-600 to-red-900 text-white shadow-md shadow-red-600/20">
+            <Globe2 className="size-4" />
           </span>
-          <span>
-The Sponsor<span className="gradient-text"> Finder</span>
-          </span>
+          The Sponsor<span className="text-red-500"> Finder</span>
         </Link>
 
-        {/* Desktop: floating pill nav + detached CTA pill */}
-        <div className="hidden items-center gap-2.5 md:flex">
+        {/* Desktop nav */}
+        <div className="hidden items-center gap-2 md:flex">
           <nav
-            className="flex items-center gap-1 rounded-full bg-zinc-100 p-1.5 shadow-sm ring-1 ring-black/[0.04]"
+            className="flex items-center gap-0.5 rounded-full border border-white/[0.07] bg-white/[0.04] p-1 backdrop-blur-sm"
             aria-label="Primary"
           >
             {NAV.map((item) => {
@@ -49,10 +47,10 @@ The Sponsor<span className="gradient-text"> Finder</span>
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                    "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                     active
-                      ? "text-red-600"
-                      : "text-zinc-700 hover:bg-white hover:text-zinc-950"
+                      ? "bg-white/[0.08] text-white"
+                      : "text-white/50 hover:text-white/90"
                   )}
                 >
                   {item.label}
@@ -63,26 +61,26 @@ The Sponsor<span className="gradient-text"> Finder</span>
 
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:bg-muted"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] px-4 py-1.5 text-sm font-medium text-white/60 transition-colors hover:border-white/20 hover:text-white/90"
           >
-            <User className="size-4" /> Dashboard
+            <User className="size-3.5" /> Dashboard
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700"
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-5 py-1.5 text-sm font-semibold text-white shadow-sm shadow-red-600/30 transition-colors hover:bg-red-500"
           >
-            <LogIn className="size-4" /> Sign in
+            <LogIn className="size-3.5" /> Sign in
           </Link>
         </div>
 
-        {/* Mobile: hamburger inside a pill */}
+        {/* Mobile hamburger */}
         <button
-          className="grid size-11 place-items-center rounded-full bg-zinc-100 text-zinc-900 shadow-sm ring-1 ring-black/[0.04] md:hidden"
+          className="grid size-9 place-items-center rounded-full border border-white/[0.10] bg-white/[0.05] text-white/70 md:hidden"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+          {open ? <X className="size-4" /> : <Menu className="size-4" />}
         </button>
       </div>
 
@@ -90,7 +88,7 @@ The Sponsor<span className="gradient-text"> Finder</span>
       {open && (
         <div className="container md:hidden">
           <nav
-            className="flex flex-col gap-1 rounded-3xl bg-zinc-100 p-3 shadow-lg ring-1 ring-black/[0.04]"
+            className="mb-3 flex flex-col gap-1 rounded-2xl border border-white/[0.07] bg-white/[0.04] p-2 backdrop-blur-md"
             aria-label="Mobile"
           >
             {NAV.map((item) => {
@@ -101,8 +99,8 @@ The Sponsor<span className="gradient-text"> Finder</span>
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-full px-4 py-2.5 text-sm font-semibold transition-colors",
-                    active ? "text-red-600" : "text-zinc-700 hover:bg-white hover:text-zinc-950"
+                    "rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
+                    active ? "bg-white/[0.08] text-white" : "text-white/55 hover:text-white/90"
                   )}
                 >
                   {item.label}
@@ -113,14 +111,14 @@ The Sponsor<span className="gradient-text"> Finder</span>
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-semibold text-zinc-700"
+                className="rounded-xl border border-white/[0.10] px-4 py-2.5 text-center text-sm font-medium text-white/60"
               >
                 Dashboard
               </Link>
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="rounded-full bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
+                className="rounded-xl bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
               >
                 Sign in
               </Link>
