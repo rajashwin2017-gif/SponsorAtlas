@@ -35,19 +35,21 @@ export default function LandingPage() {
         <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(0_72%_51%/0.12),transparent)]" aria-hidden="true" />
         <HeroBackground />
 
-        <div className="container relative py-20 sm:py-28">
+        <div className="container relative py-24 sm:py-32">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="emerald" className="mx-auto mb-6 animate-fade-up px-3 py-1">
+            <Badge variant="emerald" className="mx-auto mb-8 animate-fade-up px-4 py-1.5">
               <span className="live-dot" aria-hidden="true" /> Real hiring signals, not just a sponsor list
             </Badge>
-            <h1 className="font-display text-4xl font-semibold leading-[1.04] tracking-tight sm:text-6xl">
-              Find UK Employers That <span className="gradient-text">Actually Sponsor</span>
+            <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+              Find UK Employers That{" "}
+              <span className="gradient-text">Actually Sponsor</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-              Real hiring signals from verified UK sponsors. Apply where it actually counts.
+            <p className="mx-auto mt-7 max-w-lg text-lg leading-relaxed text-muted-foreground">
+              126,000+ verified UK sponsors ranked by real CoS activity.
+              Stop applying blindly — target employers that hire.
             </p>
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/search" className={cn(buttonVariants({ variant: "gradient", size: "lg" }))}>
                 Start Free Search <ArrowRight className="size-4" />
               </Link>
@@ -56,7 +58,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-2">
               {TRUST.map((t) => (
                 <span key={t.label} className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <t.icon className="size-4 text-red-600" /> {t.label}
@@ -66,17 +68,17 @@ export default function LandingPage() {
           </div>
 
           {/* Stats bar */}
-          <div className="stagger mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="stagger mx-auto mt-20 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
             {[
               { value: 126419, suffix: "+", label: "Sponsors indexed" },
               { value: 654, suffix: "", label: "New this month" },
               { value: 24, suffix: "/7", label: "Daily updates" },
             ].map((s) => (
-              <div key={s.label} className="glass p-6 text-center transition-transform duration-200 hover:-translate-y-0.5">
-                <div className="font-display text-3xl text-foreground sm:text-4xl">
+              <div key={s.label} className="glass p-7 text-center transition-transform duration-200 hover:-translate-y-0.5">
+                <div className="font-display text-4xl text-foreground sm:text-5xl">
                   <StatCounter value={s.value} suffix={s.suffix} />
                 </div>
-                <p className="eyebrow mt-2">{s.label}</p>
+                <p className="eyebrow mt-3">{s.label}</p>
               </div>
             ))}
           </div>
@@ -84,28 +86,25 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="container py-20">
+      <section className="container py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl tracking-tight sm:text-4xl">How it works</h2>
-          <p className="mt-4 text-muted-foreground">
+          <p className="eyebrow mb-3 text-red-600">Process</p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">How it works</h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
             From blind applications to a targeted sponsorship strategy in five steps.
           </p>
         </div>
 
-        <ol className="stagger mt-14 grid gap-6 md:grid-cols-5">
+        <ol className="stagger mt-14 grid gap-5 md:grid-cols-5">
           {STEPS.map((step, i) => (
             <li key={step.title} className="relative">
-              <div className="surface-card flex h-full flex-col p-5">
+              <div className="surface-card flex h-full flex-col p-6">
                 <span className="grid size-11 place-items-center rounded-lg bg-gradient-to-br from-red-600/20 to-zinc-900/20 text-red-600">
                   <step.icon className="size-5" />
                 </span>
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="font-heading text-xs font-bold text-red-600 tabular">
-                    0{i + 1}
-                  </span>
-                  <h3 className="font-heading text-sm font-semibold">{step.title}</h3>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">{step.desc}</p>
+                <p className="mt-4 font-mono text-xs font-bold text-red-600">0{i + 1}</p>
+                <h3 className="mt-1 font-heading text-sm font-semibold leading-snug">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
               </div>
             </li>
           ))}
@@ -116,7 +115,7 @@ export default function LandingPage() {
       <IndustryBalls />
 
       {/* ── Demo placeholder ── */}
-      <section className="container pb-20">
+      <section className="container pb-24">
         <div className="surface-card relative mx-auto flex aspect-video max-w-4xl items-center justify-center overflow-hidden">
           <div className="absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,hsl(0_72%_51%/0.1),transparent)]" aria-hidden="true" />
@@ -124,8 +123,8 @@ export default function LandingPage() {
             <span className="mx-auto grid size-16 place-items-center rounded-full bg-red-600/15 text-red-600 ring-1 ring-red-600/30">
               <PlayCircle className="size-8" />
             </span>
-            <p className="mt-4 font-heading font-semibold">Platform walkthrough</p>
-            <p className="text-sm text-muted-foreground">2 min · See the search & fit engine in action</p>
+            <p className="mt-5 font-display text-lg font-semibold tracking-tight">Platform walkthrough</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">2 min · See the search & fit engine in action</p>
           </div>
         </div>
       </section>
@@ -134,12 +133,13 @@ export default function LandingPage() {
       <SponsorTimeline />
 
       {/* ── Pricing preview ── */}
-      <section className="container py-20">
+      <section className="container py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+          <p className="eyebrow mb-3 text-red-600">Pricing</p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
             Simple, honest pricing
           </h2>
-          <p className="mt-4 text-muted-foreground">
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
             Start free. Upgrade when you&apos;re ready to unlock hiring signals and AI fit scoring.
           </p>
         </div>
@@ -154,14 +154,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="container pb-24">
-        <div className="surface-card relative overflow-hidden p-10 text-center sm:p-16">
+      <section className="container pb-28">
+        <div className="surface-card relative overflow-hidden p-12 text-center sm:p-20">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,hsl(0_72%_51%/0.15),transparent)]" aria-hidden="true" />
           <div className="relative">
-            <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+            <p className="eyebrow mb-4 text-red-600">Get started</p>
+            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
               Start finding real sponsors today
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+            <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
               Join thousands of international workers building a smarter, evidence-based job search.
             </p>
             <Link
