@@ -14,19 +14,6 @@
   #canvas-wrap { position: fixed; inset: 0; }
   canvas { display: block; width: 100% !important; height: 100% !important; }
 
-  #skip-btn {
-    position: fixed; top: 24px; right: 24px; z-index: 300;
-    opacity: 0; pointer-events: none;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.14);
-    color: rgba(255,255,255,0.7);
-    padding: 8px 20px; border-radius: 100px;
-    font-size: 12px; font-weight: 400; font-family: 'Inter', sans-serif;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    cursor: pointer; backdrop-filter: blur(16px);
-    transition: background 0.2s, color 0.2s;
-  }
-  #skip-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
 
   /* ── Dissolve overlay: fades in over globe before navigation ── */
   #dissolve-overlay {
@@ -124,7 +111,6 @@
 <div id="bottom-veil"></div>
 <div id="dissolve-overlay"></div>
 
-<button id="skip-btn" aria-label="Skip animation">Skip</button>
 
 <div id="final-ui" role="main" aria-label="The Sponsor Finder">
 
@@ -506,7 +492,6 @@ function showUI() {
   if (uiShown) return;
   uiShown = true;
   done = true;
-  document.getElementById('skip-btn').style.display = 'none';
 
   // Build tagline spans for word-by-word reveal
   const TAGLINE = ['Connecting', 'people', 'to', 'UK', 'employers', 'that', 'actually', 'sponsor'];
@@ -549,14 +534,6 @@ function skip() {
   window._starsMat.uniforms.uOpacity.value = 0.3;
   showUI();
 }
-
-// ── Skip button ───────────────────────────────────────────────────────────────
-const skipBtn = document.getElementById('skip-btn');
-skipBtn.addEventListener('click', skip);
-setTimeout(() => {
-  skipBtn.style.pointerEvents = 'all';
-  gsap.to(skipBtn, { opacity: 1, duration: 0.5 });
-}, 600);
 
 // ── Timers ────────────────────────────────────────────────────────────────────
 setTimeout(toPhase2, 2000);
