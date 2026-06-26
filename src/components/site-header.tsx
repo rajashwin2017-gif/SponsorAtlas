@@ -31,7 +31,7 @@ export function SiteHeader() {
             <Globe2 className="size-5" />
           </span>
           <span>
-            Sponsor<span className="gradient-text">Atlas</span>
+The Sponsor<span className="gradient-text"> Finder</span>
           </span>
         </Link>
 

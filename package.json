@@ -16,10 +16,14 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "@stripe/stripe-js": "^9.8.0",
+    "@types/three": "^0.185.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eslint-config-next": "^14.2.35",
+    "framer-motion": "^12.42.0",
     "lucide-react": "^0.460.0",
     "next": "^14.2.35",
     "next-auth": "^4.24.14",
@@ -27,7 +31,8 @@
     "react-dom": "^18.3.1",
     "recharts": "^2.13.3",
     "stripe": "^22.2.2",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "^2.5.5",
+    "three": "^0.168.0"
   },
   "devDependencies": {
     "@types/node": "^20",

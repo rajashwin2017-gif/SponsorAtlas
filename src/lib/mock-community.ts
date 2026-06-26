@@ -25,7 +25,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     category: "success_story",
     title: "Got sponsored by a London fintech in 3 months — here's exactly what I did",
     content:
-      "I moved from Lagos with a student visa and had 6 months to find a sponsor. The key insight: most job boards don't filter by active sponsors. I used SponsorAtlas to shortlist 12 companies with CoS activity >20 in 2025, then cross-referenced their LinkedIn job posts. Of those 12, 9 were actually hiring. I applied to all 9, got 4 interviews and 1 offer. Certificate of Sponsorship issued in 8 days. The whole process took 11 weeks from first application to BRP card. Happy to answer questions.",
+      "I moved from Lagos with a student visa and had 6 months to find a sponsor. The key insight: most job boards don't filter by active sponsors. I used The Sponsor Finder to shortlist 12 companies with CoS activity >20 in 2025, then cross-referenced their LinkedIn job posts. Of those 12, 9 were actually hiring. I applied to all 9, got 4 interviews and 1 offer. Certificate of Sponsorship issued in 8 days. The whole process took 11 weeks from first application to BRP card. Happy to answer questions.",
     tags: ["fintech", "software-engineer", "london", "nigeria", "3-months"],
     upvotes: 847,
     replies: 134,

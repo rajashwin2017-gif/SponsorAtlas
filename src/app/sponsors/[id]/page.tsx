@@ -178,7 +178,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           <div className="surface-card p-5">
             <h2 className="font-heading text-base font-semibold">2025 CoS Breakdown</h2>
             <p className="mb-4 text-xs text-muted-foreground">
-              Certificates of Sponsorship issued Jan–Dec 2025 · Source: Home Office FOI 2026/03173
+              Certificates of Sponsorship issued Jan–Dec 2025
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-xl border border-border bg-muted/30 p-4">

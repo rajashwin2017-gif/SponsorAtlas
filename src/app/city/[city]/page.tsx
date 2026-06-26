@@ -26,7 +26,7 @@ export function generateMetadata({ params }: { params: { city: string } }): Meta
   );
   const display = stats?.cityName ?? cityName;
   return {
-    title: `UK Visa Sponsors in ${display} 2025 · SponsorAtlas`,
+    title: `UK Visa Sponsors in ${display} 2025 · The Sponsor Finder`,
     description: `${stats?.totalSponsors.toLocaleString() ?? "Hundreds of"} licensed UK visa sponsors in ${display}. ${stats?.cos2025Total ? `${stats.cos2025Total.toLocaleString()} Certificates of Sponsorship issued in 2025.` : ""} Find the best employers to target for visa sponsorship.`,
   };
 }

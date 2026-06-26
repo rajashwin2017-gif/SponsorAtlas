@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getIndustryList, getCityList, getRouteList } from "@/lib/sponsor-store";
 
 export const metadata: Metadata = {
-  title: "Sponsor Search · SponsorAtlas",
+  title: "Sponsor Search · The Sponsor Finder",
   description:
     "Search 126,349 verified UK visa sponsors with real 2025 CoS hiring data. Filter by tier, activity, industry, city and route.",
 };

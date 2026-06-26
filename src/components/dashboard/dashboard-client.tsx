@@ -228,7 +228,7 @@ function Overview({ savedCount, alerts, isPro }: { savedCount: number; alerts: n
           {[
             { icon: <TrendingUp className="size-4 text-red-600" />, text: "Sponsor index refreshed: 654 new sponsors added", time: "2h ago" },
             { icon: <Heart className="size-4 text-red-600" />, text: `You have ${savedCount} saved sponsor${savedCount === 1 ? "" : "s"}`, time: "Today" },
-            { icon: <Activity className="size-4 text-zinc-700" />, text: "Welcome to SponsorAtlas. Your search starts here", time: "Today" },
+            { icon: <Activity className="size-4 text-zinc-700" />, text: "Welcome to The Sponsor Finder. Your search starts here", time: "Today" },
           ].map((a, i) => (
             <div key={i} className="flex items-center gap-3 p-4">
               <span className="grid size-9 place-items-center rounded-lg bg-muted">{a.icon}</span>

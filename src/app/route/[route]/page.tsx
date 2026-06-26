@@ -29,7 +29,7 @@ export function generateMetadata({ params }: { params: { route: string } }): Met
   const routeData = getRouteStats().find((r) => r.slug === params.route);
   if (!routeData) return { title: "Route not found" };
   return {
-    title: `${routeData.route} Visa Sponsors UK 2025 · SponsorAtlas`,
+    title: `${routeData.route} Visa Sponsors UK 2025 · The Sponsor Finder`,
     description: `${routeData.totalSponsors.toLocaleString()} UK employers licensed to sponsor the ${routeData.route} visa. Find the top hiring companies by 2025 CoS volume.`,
   };
 }

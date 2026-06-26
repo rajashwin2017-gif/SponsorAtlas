@@ -64,7 +64,7 @@ function LoginForm() {
 
         <div className="surface-card p-7">
           <h1 className="font-display text-2xl tracking-tight">Welcome back</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to your SponsorAtlas account.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to your The Sponsor Finder account.</p>
 
           {/* Google OAuth */}
           <Button

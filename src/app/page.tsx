@@ -6,6 +6,8 @@ import {
 import { StatCounter } from "@/components/stat-counter";
 import { HeroBackground } from "@/components/hero-background";
 import { PricingCards } from "@/components/pricing-cards";
+import { IndustryBalls } from "@/components/industry-balls";
+import { SponsorTimeline } from "@/components/sponsor-timeline";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,7 +41,7 @@ export default function LandingPage() {
               <span className="live-dot" aria-hidden="true" /> Real hiring signals, not just a sponsor list
             </Badge>
             <h1 className="font-display text-4xl font-semibold leading-[1.04] tracking-tight sm:text-6xl">
-              Find UK Employers That <span className="gradient-text">Actually Sponsor Visas</span>
+              Find UK Employers That <span className="gradient-text">Actually Sponsor</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
               Real hiring signals from verified UK sponsors. Apply where it actually counts.
@@ -110,6 +112,9 @@ export default function LandingPage() {
         </ol>
       </section>
 
+      {/* ── Industry balls ── */}
+      <IndustryBalls />
+
       {/* ── Demo placeholder ── */}
       <section className="container pb-20">
         <div className="surface-card relative mx-auto flex aspect-video max-w-4xl items-center justify-center overflow-hidden">
@@ -124,6 +129,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Journey timeline ── */}
+      <SponsorTimeline />
 
       {/* ── Pricing preview ── */}
       <section className="container py-20">

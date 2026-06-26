@@ -43,7 +43,7 @@ export function SiteFooter() {
               <span className="grid size-8 place-items-center rounded-lg bg-red-600 text-white">
                 <Globe2 className="size-5" />
               </span>
-              Sponsor<span className="text-red-500">Atlas</span>
+              The Sponsor<span className="text-red-500"> Finder</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-zinc-400">
               UK visa sponsorship intelligence. Find employers with proven sponsorship history and
@@ -74,7 +74,7 @@ export function SiteFooter() {
           <div className="flex gap-3">
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-red-500" aria-hidden="true" />
             <p className="text-xs leading-relaxed text-zinc-400">
-              <span className="font-semibold text-red-400">Important:</span> SponsorAtlas is an
+              <span className="font-semibold text-red-400">Important:</span> The Sponsor Finder is an
               informational research platform. We do not provide immigration advice, legal advice, or
               guarantee visa sponsorship or employment. All data is sourced from publicly available UK
               government records under the{" "}
@@ -92,7 +92,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-zinc-500 sm:flex-row">
-          <p>© {new Date().getFullYear()} SponsorAtlas. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} The Sponsor Finder. All rights reserved.</p>
           <p className="tabular">Data last refreshed: 17 June 2026</p>
         </div>
       </div>

@@ -12,7 +12,7 @@ const FAQS = [
   { q: "Do I need a credit card to start?", a: "No. The Free plan requires no card and gives you 5 sponsor checks, 5 salary checks and 5 SOC lookups every month." },
   { q: "Can I cancel anytime?", a: "Yes. Subscriptions are month-to-month with no long-term contract. Cancel from your dashboard and you keep Pro access until the period ends." },
   { q: "Where does your data come from?", a: "The sponsor register is published by the UK Home Office under the Open Government Licence v3.0. We enrich it with hiring and CoS-activity signals." },
-  { q: "Is this immigration advice?", a: "No. SponsorAtlas is an informational research tool. We don't provide legal or immigration advice, or guarantee sponsorship or employment." },
+  { q: "Is this immigration advice?", a: "No. The Sponsor Finder is an informational research tool. We don't provide legal or immigration advice, or guarantee sponsorship or employment." },
 ];
 
 export default function PricingPage() {

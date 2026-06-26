@@ -10,7 +10,7 @@ import type { SponsorTier } from "@/lib/types";
 import { TIER_BG } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "UK Visa Sponsor Rankings 2025 · SponsorAtlas",
+  title: "UK Visa Sponsor Rankings 2025 · The Sponsor Finder",
   description:
     "The top UK companies by visa sponsorship volume in 2025. Ranked by Certificates of Sponsorship issued — NHS trusts, tech giants, consultancies and more.",
 };

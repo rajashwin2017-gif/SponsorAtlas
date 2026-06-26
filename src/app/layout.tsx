@@ -28,8 +28,8 @@ const ebGaramond = EB_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL("https://sponsoratlas.app"),
   title: {
-    default: "SponsorAtlas · Find UK Employers That Actually Sponsor Visas",
-    template: "%s · SponsorAtlas",
+    default: "The Sponsor Finder · Find UK Employers That Actually Sponsor Visas",
+    template: "%s · The Sponsor Finder",
   },
   description:
     "126,000+ UK Skilled Worker sponsors indexed with real hiring signals, CoS activity and salary compatibility. Stop applying blindly to weak sponsors.",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     "Health and Care visa", "UK jobs visa sponsorship",
   ],
   openGraph: {
-    title: "SponsorAtlas · UK Visa Sponsorship Intelligence",
+    title: "The Sponsor Finder · UK Visa Sponsorship Intelligence",
     description: "Real hiring signals from 126,000+ UK sponsors. No more guessing.",
     type: "website",
     locale: "en_GB",

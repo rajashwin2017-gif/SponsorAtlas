@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sponsor Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000510; font-family: 'Inter', sans-serif; }
+
+  #canvas-wrap { position: fixed; inset: 0; }
+  canvas { display: block; width: 100% !important; height: 100% !important; }
+
+  #skip-btn {
+    position: fixed; top: 24px; right: 24px; z-index: 300;
+    opacity: 0; pointer-events: none;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.7);
+    padding: 8px 20px; border-radius: 100px;
+    font-size: 12px; font-weight: 400; font-family: 'Inter', sans-serif;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; backdrop-filter: blur(16px);
+    transition: background 0.2s, color 0.2s;
+  }
+  #skip-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
+
+  /* ── Dissolve overlay: fades in over globe before navigation ── */
+  #dissolve-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── Bottom veil: dark gradient so text is legible over the globe ── */
+  #bottom-veil {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
+    height: 52%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0,3,12,0.55) 30%,
+      rgba(0,3,12,0.88) 60%,
+      rgba(0,3,12,0.97) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ── Final UI overlay ── */
+  #final-ui {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end;
+    padding-bottom: 28px;
+    pointer-events: none;
+  }
+
+  /* Brand lockup */
+  .brand-lockup {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+    opacity: 0; transform: translateY(14px);
+  }
+  .logo-icon {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%);
+    display: grid; place-items: center;
+    box-shadow: 0 0 20px rgba(220,38,38,0.45), 0 0 40px rgba(220,38,38,0.15);
+  }
+  .brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px; font-weight: 300;
+    color: #fff; letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  .brand-name em { color: #ef4444; font-style: normal; font-weight: 600; }
+
+  /* Tagline — words revealed one-by-one */
+  .tagline-wrap {
+    margin-bottom: 14px; text-align: center;
+    overflow: hidden;
+  }
+  .tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 300;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.20em; text-transform: uppercase;
+    line-height: 1.7;
+  }
+  .tagline .word {
+    display: inline-block;
+    opacity: 0; transform: translateY(10px);
+  }
+  /* highlight word */
+  .tagline .hl {
+    color: rgba(255,255,255,0.85); font-weight: 400;
+  }
+
+  /* Divider rule */
+  .divider {
+    width: 32px; height: 1px;
+    background: rgba(255,255,255,0.18);
+    margin: 0 auto 12px;
+    opacity: 0; transform: scaleX(0);
+    transform-origin: center;
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-lockup, .tagline .word, .divider, .cta-row { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-wrap">
+  <canvas id="c"></canvas>
+</div>
+
+<div id="bottom-veil"></div>
+<div id="dissolve-overlay"></div>
+
+<button id="skip-btn" aria-label="Skip animation">Skip</button>
+
+<div id="final-ui" role="main" aria-label="The Sponsor Finder">
+
+  <!-- Brand lockup -->
+  <div class="brand-lockup" id="brand-lockup">
+    <div class="logo-icon" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M2 12h20"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    </div>
+    <span class="brand-name">The Sponsor <em>Finder</em></span>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider" id="ui-divider"></div>
+
+  <!-- Tagline — words injected by JS for stagger -->
+  <div class="tagline-wrap">
+    <p class="tagline" id="tagline-text" aria-label="Connecting people to UK employers that actually sponsor"></p>
+  </div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const R          = 1.0;    // earth radius
+const CLOUD_R    = 1.022;
+const ATM_R      = 1.08;
+const STAR_N     = 10000;
+const FINAL_SCALE = 0.70;
+
+// ── Renderer ─────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+
+// ── Scene / Camera ───────────────────────────────────────────────────────────
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x000510);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 200);
+camera.position.z = 2.0;
+
+// ── Post-processing ──────────────────────────────────────────────────────────
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.4, 0.8, 0.2
+);
+composer.addPass(bloom);
+
+// ── Lights ───────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x112244, 0.8));
+const sun = new THREE.DirectionalLight(0xfff5e0, 3.2);
+sun.position.set(3, 1.5, 6);
+scene.add(sun);
+
+// ── Globe group (scaled as a unit during Phase 2) ────────────────────────────
+const globeGroup = new THREE.Group();
+scene.add(globeGroup);
+
+// ── Stars ─────────────────────────────────────────────────────────────────────
+{
+  const pos  = new Float32Array(STAR_N * 3);
+  const size = new Float32Array(STAR_N);
+  for (let i = 0; i < STAR_N; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const r  = 50 + Math.random() * 30;
+    pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+    pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+    pos[i*3+2] = r * Math.cos(ph);
+    size[i] = 0.5 + Math.random() * 1.8;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,  3));
+  geo.setAttribute('aSize',    new THREE.BufferAttribute(size, 1));
+
+  const starMat = new THREE.ShaderMaterial({
+    uniforms: { uOpacity: { value: 1.0 } },
+    vertexShader: `
+      attribute float aSize;
+      uniform float uOpacity;
+      varying float vA;
+      void main() {
+        vA = uOpacity;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = aSize * (280.0 / -mv.z);
+        gl_Position  = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      varying float vA;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
+        gl_FragColor = vec4(1.0, 1.0, 1.0, smoothstep(0.5, 0.0, d) * vA);
+      }`,
+    transparent: true, depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const stars = new THREE.Points(geo, starMat);
+  scene.add(stars);
+  window._stars    = stars;
+  window._starsMat = starMat;
+}
+
+// ── Texture helper ────────────────────────────────────────────────────────────
+function crisp(tex) {
+  tex.anisotropy      = renderer.capabilities.getMaxAnisotropy();
+  tex.minFilter       = THREE.LinearMipmapLinearFilter;
+  tex.magFilter       = THREE.LinearFilter;
+  tex.generateMipmaps = true;
+  tex.needsUpdate     = true;
+  return tex;
+}
+
+const texLoader = new THREE.TextureLoader();
+const TURBAN = 'https://raw.githubusercontent.com/turban/webgl-earth/master/images/';
+const TEX3JS = 'https://threejs.org/examples/textures/planets/';
+
+// ── Custom photorealistic Earth shader ───────────────────────────────────────
+// Blends day/night textures at terminator + specular ocean shine
+const earthUniforms = {
+  uDay:     { value: null },
+  uNight:   { value: null },
+  uWater:   { value: null },   // water mask: white=ocean, black=land
+  uBump:    { value: null },
+  uClouds:  { value: null },
+  uSunDir:  { value: new THREE.Vector3(0.9, 0.35, 1.0).normalize() },
+  uCamPos:  { value: camera.position },
+};
+
+const earthMat = new THREE.ShaderMaterial({
+  uniforms: earthUniforms,
+  vertexShader: `
+    varying vec2  vUv;
+    varying vec3  vNormal;
+    varying vec3  vWorldPos;
+    void main() {
+      vUv      = uv;
+      vNormal  = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+      vWorldPos= (modelMatrix * vec4(position, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`,
+  fragmentShader: `
+    uniform sampler2D uDay;
+    uniform sampler2D uNight;
+    uniform sampler2D uWater;
+    uniform sampler2D uBump;
+    uniform sampler2D uClouds;
+    uniform vec3 uSunDir;
+    uniform vec3 uCamPos;
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vWorldPos;
+
+    void main() {
+      vec3 N   = normalize(vNormal);
+      vec3 sun = normalize(uSunDir);
+      vec3 V   = normalize(uCamPos - vWorldPos);
+
+      // Day / night blend
+      float NdotL   = dot(N, sun);
+      float dayMix  = smoothstep(-0.12, 0.18, NdotL);
+
+      vec4 dayCol   = texture2D(uDay,   vUv);
+      vec4 nightCol = texture2D(uNight, vUv);
+
+      // Night city lights only on clearly dark side
+      nightCol.rgb  *= 3.5;
+      float nightOnly = clamp(-NdotL * 4.0, 0.0, 1.0);
+      vec4 baseCol  = mix(dayCol, nightCol, nightOnly * (1.0 - dayMix));
+
+      // Diffuse lighting — bright on lit face
+      float diffuse = max(NdotL, 0.0);
+      float ambient = 0.20;
+      baseCol.rgb  *= (diffuse * 1.2 + ambient);
+
+      // Gentle ocean gloss — just enough to distinguish sea from land
+      float waterMask = texture2D(uWater, vUv).r;
+      vec3  H         = normalize(sun + V);
+      float spec      = pow(max(dot(N, H), 0.0), 900.0);
+      vec3  specColor = vec3(0.7, 0.88, 1.0) * spec * waterMask * dayMix * 0.10;
+      baseCol.rgb    += specColor;
+
+      // Thin wispy clouds — partial coverage, surface clearly visible underneath
+      vec4  cloudSample = texture2D(uClouds, vUv);
+      float cloudRaw    = dot(cloudSample.rgb, vec3(0.299, 0.587, 0.114));
+      float cloud       = smoothstep(0.38, 0.80, cloudRaw);   // high threshold → sparse coverage
+      float cloudLit    = cloud * (diffuse * 1.05 + ambient);
+      baseCol.rgb       = mix(baseCol.rgb, vec3(cloudLit + 0.02), cloud * 0.55); // 55% max opacity
+
+      // Terminator atmospheric tint (subtle orange-gold glow at boundary)
+      float terminator = smoothstep(0.0, 0.22, NdotL) * smoothstep(0.28, 0.06, NdotL);
+      baseCol.rgb     += vec3(0.9, 0.5, 0.15) * terminator * 0.35;
+
+      gl_FragColor = vec4(baseCol.rgb, 1.0);
+    }`,
+});
+
+// Load textures into shader
+texLoader.load(TURBAN + '2_no_clouds_8k.jpg', t => {
+  earthUniforms.uDay.value = crisp(t);
+}, undefined, () => {
+  texLoader.load(TEX3JS + 'earth_atmos_2048.jpg', t => { earthUniforms.uDay.value = crisp(t); });
+});
+texLoader.load(TURBAN + '5_night_8k.jpg', t => {
+  earthUniforms.uNight.value = crisp(t);
+});
+texLoader.load(TURBAN + 'water_8k.png', t => {
+  earthUniforms.uWater.value = crisp(t);
+}, undefined, () => {
+  texLoader.load(TEX3JS + 'earth_specular_2048.jpg', t => { earthUniforms.uWater.value = crisp(t); });
+});
+texLoader.load(TURBAN + 'elev_bump_8k.jpg', t => {
+  earthUniforms.uBump.value = crisp(t);
+});
+
+// ── Dual atmosphere layers ────────────────────────────────────────────────────
+// Outer glow (wide Rayleigh scatter — blue haze)
+const atmOuterMat = new THREE.ShaderMaterial({
+  uniforms: { uSunDir: earthUniforms.uSunDir },
+  vertexShader: `
+    varying vec3 vN; varying vec3 vV;
+    void main() {
+      vN = normalize(normalMatrix * normal);
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vV = normalize(-mv.xyz);
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `
+    uniform vec3 uSunDir;
+    varying vec3 vN; varying vec3 vV;
+    void main() {
+      float rim   = pow(max(0.55 - dot(vN, vV), 0.0), 5.0);
+      vec3  blue  = vec3(0.22, 0.52, 1.0);
+      gl_FragColor= vec4(blue * rim * 2.2, rim * 0.9);
+    }`,
+  transparent: true, side: THREE.BackSide,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+});
+globeGroup.add(new THREE.Mesh(new THREE.SphereGeometry(ATM_R, 64, 64), atmOuterMat));
+window._atmMat = atmOuterMat;
+
+// Inner fresnel glow (tighter, lighter cyan at edges)
+const atmInnerMat = new THREE.ShaderMaterial({
+  uniforms: {},
+  vertexShader: `
+    varying vec3 vN; varying vec3 vV;
+    void main() {
+      vN = normalize(normalMatrix * normal);
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vV = normalize(-mv.xyz);
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `
+    varying vec3 vN; varying vec3 vV;
+    void main() {
+      float rim   = pow(max(0.62 - dot(vN, vV), 0.0), 8.0);
+      vec3  cyan  = vec3(0.55, 0.82, 1.0);
+      gl_FragColor= vec4(cyan * rim * 1.6, rim * 0.7);
+    }`,
+  transparent: true, side: THREE.FrontSide,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+});
+globeGroup.add(new THREE.Mesh(new THREE.SphereGeometry(R * 1.015, 64, 64), atmInnerMat));
+
+const earthHiGeo = new THREE.SphereGeometry(R, 128, 128);
+const earthMesh  = new THREE.Mesh(earthHiGeo, earthMat);
+earthMesh.rotation.y = -Math.PI * 0.55; // start facing Atlantic/Africa, not Pacific
+globeGroup.add(earthMesh);
+
+// ── Clouds texture → fed into Earth shader ────────────────────────────────────
+function makeCloudCanvas() {
+  const S = 2048, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, S, S);
+
+  // Realistic cloud bands — clusters of small wispy blobs, not full coverage
+  const BANDS = [
+    { yMin: 0.05, yMax: 0.22, count: 60,  rMin: 18, rMax: 55,  alpha: 0.85 }, // polar
+    { yMin: 0.22, yMax: 0.38, count: 45,  rMin: 12, rMax: 40,  alpha: 0.70 }, // mid-lat N
+    { yMin: 0.38, yMax: 0.55, count: 25,  rMin: 8,  rMax: 28,  alpha: 0.55 }, // tropics (sparse)
+    { yMin: 0.55, yMax: 0.72, count: 50,  rMin: 12, rMax: 42,  alpha: 0.72 }, // mid-lat S
+    { yMin: 0.72, yMax: 0.90, count: 55,  rMin: 16, rMax: 50,  alpha: 0.80 }, // polar S
+  ];
+
+  BANDS.forEach(({ yMin, yMax, count, rMin, rMax, alpha }) => {
+    for (let i = 0; i < count; i++) {
+      // Cluster clouds so there are clear gaps between them
+      const cx = Math.random() * S;
+      const cy = (yMin + Math.random() * (yMax - yMin)) * S;
+      // Each "cloud system" is 2-5 overlapping blobs
+      const blobs = 2 + Math.floor(Math.random() * 4);
+      for (let b = 0; b < blobs; b++) {
+        const bx = cx + (Math.random() - 0.5) * rMax * 1.2;
+        const by = cy + (Math.random() - 0.5) * rMax * 0.5;
+        const r  = rMin + Math.random() * (rMax - rMin);
+        const a  = alpha * (0.5 + Math.random() * 0.5);
+        const g  = ctx.createRadialGradient(bx, by, 0, bx, by, r);
+        g.addColorStop(0,    `rgba(255,255,255,${a})`);
+        g.addColorStop(0.45, `rgba(255,255,255,${a * 0.4})`);
+        g.addColorStop(1,    'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  });
+
+  return new THREE.CanvasTexture(c);
+}
+// Procedural canvas — smooth radial gradient blobs, no compression artifacts
+earthUniforms.uClouds.value = crisp(makeCloudCanvas());
+
+// ── Thin cloud shell for 3D parallax depth ────────────────────────────────────
+const cloudShellMat = new THREE.MeshStandardMaterial({
+  transparent: true, opacity: 0.0, depthWrite: false,
+});
+const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(CLOUD_R, 64, 64), cloudShellMat);
+globeGroup.add(cloudMesh);
+
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let rotSpeed = 0.05;
+let phase    = 1;
+let done     = false;
+let uiShown  = false;
+const clock  = new THREE.Clock();
+let elapsed  = 0;
+
+// ── Phase 2 transition ────────────────────────────────────────────────────────
+function toPhase2() {
+  phase = 2;
+
+  gsap.to({ v: rotSpeed }, {
+    v: 0.15, duration: 1.5, ease: 'power2.inOut',
+    onUpdate(){ rotSpeed = this.targets()[0].v; }
+  });
+  gsap.to(globeGroup.scale,    { x: FINAL_SCALE, y: FINAL_SCALE, z: FINAL_SCALE, duration: 1.5, ease: 'power2.inOut', delay: 0.15 });
+  gsap.to(globeGroup.position, { y: 0, duration: 1.5, ease: 'power2.inOut', delay: 0.15 });
+  gsap.to(camera.position,     { z: 3.6, y: 0, duration: 1.5, ease: 'power2.inOut', delay: 0.1 });
+  gsap.to({ f: 75 }, { f: 60, duration: 1.5, ease: 'power2.inOut', delay: 0.1,
+    onUpdate(){ camera.fov = this.targets()[0].f; camera.updateProjectionMatrix(); } });
+  gsap.to({ f: 75 }, {
+    f: 60, duration: 1.5, ease: 'power2.inOut', delay: 0.1,
+    onUpdate(){ camera.fov = this.targets()[0].f; camera.updateProjectionMatrix(); }
+  });
+  // Intensify outer atmosphere glow during transition (scale the globe group handles visual shrink)
+  gsap.to(window._starsMat.uniforms.uOpacity, { value: 0.3, duration: 1.5 });
+
+  setTimeout(() => { if (!uiShown) showUI(); }, 1200);
+}
+
+function showUI() {
+  if (uiShown) return;
+  uiShown = true;
+  done = true;
+  document.getElementById('skip-btn').style.display = 'none';
+
+  // Build tagline spans for word-by-word reveal
+  const TAGLINE = ['Connecting', 'people', 'to', 'UK', 'employers', 'that', 'actually', 'sponsor'];
+  const HIGHLIGHT = new Set(['Connecting', 'actually', 'sponsor']);
+  const tEl = document.getElementById('tagline-text');
+  TAGLINE.forEach((word, i) => {
+    const s = document.createElement('span');
+    s.className = 'word' + (HIGHLIGHT.has(word) ? ' hl' : '');
+    s.textContent = word;
+    tEl.appendChild(s);
+    if (i < TAGLINE.length - 1) tEl.appendChild(document.createTextNode(' '));
+  });
+
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+  tl.to('#brand-lockup', { opacity: 1, y: 0, duration: 0.8 })
+    .to('#ui-divider', { opacity: 1, scaleX: 1, duration: 0.5, ease: 'power2.out' }, '-=0.3')
+    .to('.word', { opacity: 1, y: 0, duration: 0.45, stagger: 0.07, ease: 'power2.out' }, '-=0.2')
+    .call(() => {
+      // Hold 3s, then dissolve the overlay in slowly over the still-spinning globe
+      gsap.to('#dissolve-overlay', {
+        opacity: 1,
+        duration: 1.4,
+        delay: 3,
+        ease: 'power1.inOut',
+        onComplete: () => { window.location.href = '/'; }
+      });
+    });
+}
+
+function skip() {
+  gsap.killTweensOf(globeGroup.scale);
+  gsap.killTweensOf(camera.position);
+  done = true;
+
+  globeGroup.scale.setScalar(FINAL_SCALE);
+  globeGroup.position.y = 0;
+  camera.position.set(0, 0, 3.6); camera.fov = 60; camera.updateProjectionMatrix();
+  rotSpeed = 0.15;
+  window._starsMat.uniforms.uOpacity.value = 0.3;
+  showUI();
+}
+
+// ── Skip button ───────────────────────────────────────────────────────────────
+const skipBtn = document.getElementById('skip-btn');
+skipBtn.addEventListener('click', skip);
+setTimeout(() => {
+  skipBtn.style.pointerEvents = 'all';
+  gsap.to(skipBtn, { opacity: 1, duration: 0.5 });
+}, 600);
+
+// ── Timers ────────────────────────────────────────────────────────────────────
+setTimeout(toPhase2, 2000);
+
+// ── Animation loop ────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  elapsed += dt * 1000;
+
+  // Globe rotation — clouds baked into shader, rotate the whole group
+  earthMesh.rotation.y += rotSpeed * dt;
+
+  // Rotate sun direction opposite to earth spin so terminator stays fixed in world
+  earthUniforms.uCamPos.value.copy(camera.position);
+
+  // Star drift
+  window._stars.rotation.y += 0.00004;
+
+  composer.render();
+}
+
+// ── Resize ────────────────────────────────────────────────────────────────────
+new ResizeObserver(() => {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  composer.setSize(w, h);
+}).observe(document.documentElement);
+
+animate();
+</script>
+</body>
+</html>
