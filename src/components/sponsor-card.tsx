@@ -14,11 +14,11 @@ import {
   type Sponsor, type SponsorTier, TIER_BG, ACTIVITY_DOT,
 } from "@/lib/types";
 
-const TIER_EMOJI: Record<SponsorTier, string> = {
-  Platinum: "🏆",
-  Gold: "🥇",
-  Silver: "🥈",
-  Bronze: "🥉",
+const TIER_ICON: Record<SponsorTier, string> = {
+  Platinum: "◆",
+  Gold: "▲",
+  Silver: "■",
+  Bronze: "●",
   Active: "●",
   Inactive: "○",
 };
@@ -58,18 +58,19 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
 
       {/* Meta row */}
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="eyebrow truncate">
           {sponsor.industryCategory}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           {/* Tier badge */}
           <span
             className={cn(
-              "inline-flex items-center gap-0.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+              "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
               TIER_BG[tier as SponsorTier] ?? "bg-zinc-50 text-zinc-500 border-zinc-200"
             )}
           >
-            {TIER_EMOJI[tier as SponsorTier]} {tier}
+            <span className="text-[8px] leading-none" aria-hidden="true">{TIER_ICON[tier as SponsorTier]}</span>
+            {tier}
           </span>
           {/* Rating */}
           {sponsor.rating === "A" ? (
@@ -88,12 +89,12 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
       <div className="mt-3">
         <Link
           href={`/sponsors/${sponsor.id}`}
-          className="inline-flex items-start gap-1 font-heading text-[15px] font-semibold leading-snug tracking-tight transition-colors hover:text-red-600"
+          className="inline-flex items-start gap-1 font-heading text-base font-semibold leading-snug tracking-tight transition-colors hover:text-red-600"
         >
           {sponsor.organisationName}
-          <ArrowUpRight className="mt-px size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+          <ArrowUpRight className="mt-0.5 size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
         </Link>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
           <MapPin className="size-3.5 shrink-0" />
           {sponsor.town}{sponsor.county ? `, ${sponsor.county}` : ""}
         </p>
@@ -138,7 +139,7 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
           aria-pressed={saved}
           aria-label={saved ? "Remove from saved" : "Save sponsor"}
           className={cn(
-            "grid size-9 place-items-center rounded-lg border border-border transition-colors hover:border-red-600/50",
+            "grid size-9 cursor-pointer place-items-center rounded-lg border border-border transition-colors hover:border-red-600/50",
             saved && "border-red-600/50 bg-red-600/10"
           )}
         >
@@ -152,7 +153,7 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
         <Link
           href={`/sponsors/${sponsor.id}#fit`}
           aria-label="Run Fit Check"
-          className="grid size-9 place-items-center rounded-lg border border-border text-zinc-700 transition-colors hover:border-zinc-700/50 hover:bg-zinc-900/5"
+          className="grid size-9 cursor-pointer place-items-center rounded-lg border border-border text-zinc-700 transition-colors hover:border-zinc-700/50 hover:bg-zinc-900/5"
         >
           <Zap className="size-4" />
         </Link>

@@ -367,9 +367,9 @@ export function SearchClient({
     <div className="container py-10 sm:py-14">
       {/* Header */}
       <header className="mx-auto max-w-xl text-center">
-        <p className="eyebrow">UK Sponsor Intelligence</p>
-        <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">Sponsor Search</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
+        <p className="eyebrow text-red-600">UK Sponsor Intelligence</p>
+        <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Sponsor Search</h1>
+        <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">
           <span className="font-semibold text-foreground tabular">126,349</span> verified UK sponsors with{" "}
           <span className="font-semibold text-foreground">real 2025 hiring data</span>.
         </p>
@@ -404,7 +404,7 @@ export function SearchClient({
         <aside className="hidden lg:block">
           <div className="sticky top-24">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-sm font-semibold tracking-tight">Filters</h2>
+              <h2 className="font-heading text-base font-semibold tracking-tight">Filters</h2>
               {activeFilterCount > 0 && (
                 <button onClick={clearAll} className="text-xs font-medium text-muted-foreground transition-colors hover:text-red-600">
                   Clear all
@@ -490,8 +490,8 @@ export function SearchClient({
                 <span className="grid size-14 place-items-center rounded-full bg-muted text-muted-foreground">
                   <SearchX className="size-7" />
                 </span>
-                <h3 className="mt-5 font-heading text-lg font-semibold">No sponsors match your filters</h3>
-                <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+                <h3 className="mt-5 font-display text-xl font-semibold tracking-tight">No sponsors match your filters</h3>
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
                   Try removing a filter or widening your CoS activity range.
                 </p>
                 <Button variant="gradient" size="sm" className="mt-6" onClick={clearAll}>
