@@ -17,8 +17,8 @@ import { cn, formatGBP, timeAgo } from "@/lib/utils";
 import type { SponsorTier } from "@/lib/types";
 import { TIER_BG } from "@/lib/types";
 
-const TIER_EMOJI: Record<SponsorTier, string> = {
-  Platinum: "🏆", Gold: "🥇", Silver: "🥈", Bronze: "🥉", Active: "●", Inactive: "○",
+const TIER_ICON: Record<SponsorTier, string> = {
+  Platinum: "◆", Gold: "▲", Silver: "■", Bronze: "●", Active: "●", Inactive: "○",
 };
 
 export function generateStaticParams() {
@@ -41,11 +41,11 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
 function ScoreMeter({ score, label, color }: { score: number; label: string; color: string }) {
   return (
     <div>
-      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-        <span>{label}</span>
-        <span className={cn("font-bold", color)}>{score}/100</span>
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-sm font-medium text-foreground">{label}</span>
+        <span className={cn("font-bold tabular", color)}>{score}<span className="text-xs font-normal text-muted-foreground">/100</span></span>
       </div>
-      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
           className={cn("h-full rounded-full transition-all duration-700", color.replace("text-", "bg-"))}
           style={{ width: `${score}%` }}
@@ -57,19 +57,19 @@ function ScoreMeter({ score, label, color }: { score: number; label: string; col
 
 function MetricCard({ label, value, icon, hint }: { label: string; value: string; icon: React.ReactNode; hint?: string }) {
   return (
-    <div className="surface-card p-4">
-      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">{icon} {label}</p>
-      <p className="mt-1.5 font-heading text-lg font-bold">{value}</p>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    <div className="surface-card p-5">
+      <p className="eyebrow flex items-center gap-1.5">{icon} {label}</p>
+      <p className="mt-2 font-display text-xl font-semibold leading-tight">{value}</p>
+      {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
 
 function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <dt className="flex items-center gap-1.5 text-muted-foreground">{icon} {label}</dt>
-      <dd className="tabular font-medium">{value}</dd>
+    <div className="flex items-center justify-between gap-3 py-2.5">
+      <dt className="flex items-center gap-1.5 text-sm text-muted-foreground">{icon} {label}</dt>
+      <dd className="text-sm font-semibold tabular">{value}</dd>
     </div>
   );
 }
@@ -109,7 +109,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
     <div className="container py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <Link href="/search" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+      <Link href="/search" className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
         <ArrowLeft className="size-4" /> Back to search
       </Link>
 
@@ -124,7 +124,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
                 "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold",
                 TIER_BG[tier]
               )}>
-                {TIER_EMOJI[tier]} {tier} Tier
+                <span className="text-[8px]" aria-hidden="true">{TIER_ICON[tier]}</span> {tier} Tier
               </span>
               {sponsor.rating === "A" ? (
                 <Badge variant="emerald"><ShieldCheck className="size-3.5" /> A-rated</Badge>
@@ -135,10 +135,10 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
                 {sponsor.licenceStatus}
               </Badge>
             </div>
-            <h1 className="mt-3 font-display text-3xl tracking-tight">{sponsor.organisationName}</h1>
-            <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
-              <MapPin className="size-4" />
-              <Link href={`/city/${sponsor.town.toLowerCase()}`} className="hover:text-red-600">
+            <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{sponsor.organisationName}</h1>
+            <p className="mt-2.5 flex items-center gap-1.5 text-base text-muted-foreground">
+              <MapPin className="size-4 shrink-0" />
+              <Link href={`/city/${sponsor.town.toLowerCase()}`} className="transition-colors hover:text-red-600">
                 {sponsor.town}{sponsor.county ? `, ${sponsor.county}` : ""}
               </Link>
             </p>
@@ -154,49 +154,53 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
 
           {/* Intelligence scores */}
           <div className="surface-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-heading text-base font-semibold">Sponsor Intelligence Scores</h2>
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="eyebrow mb-1">Pro Intelligence</p>
+                <h2 className="font-display text-lg font-semibold">Sponsor Intelligence Scores</h2>
+              </div>
               <Badge variant="cyan" className="text-[10px]">Pro</Badge>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <ScoreMeter score={sponsor.sponsorStrengthScore} label="Sponsor Strength Score" color="text-emerald-600" />
               <ScoreMeter score={sponsor.opportunityScore} label="Opportunity Score" color="text-red-600" />
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+            <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-lg bg-muted/50 p-3">
-                <p className="font-semibold text-foreground mb-1">Strength factors</p>
-                <p>A/B rating · CoS volume · Route breadth · GBM activity</p>
+                <p className="text-xs font-semibold text-foreground mb-1">Strength factors</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">A/B rating · CoS volume · Route breadth · GBM activity</p>
               </div>
               <div className="rounded-lg bg-muted/50 p-3">
-                <p className="font-semibold text-foreground mb-1">Opportunity factors</p>
-                <p>CoS volume · City demand · Route breadth · Tier</p>
+                <p className="text-xs font-semibold text-foreground mb-1">Opportunity factors</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">CoS volume · City demand · Route breadth · Tier</p>
               </div>
             </div>
           </div>
 
           {/* CoS breakdown */}
           <div className="surface-card p-5">
-            <h2 className="font-heading text-base font-semibold">2025 CoS Breakdown</h2>
-            <p className="mb-4 text-xs text-muted-foreground">
+            <p className="eyebrow mb-1">Home Office FOI Data</p>
+            <h2 className="font-display text-lg font-semibold">2025 CoS Breakdown</h2>
+            <p className="mb-5 mt-1 text-sm text-muted-foreground">
               Certificates of Sponsorship issued Jan–Dec 2025
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-xl border border-border bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Skilled Worker</p>
-                <p className="font-display text-2xl font-bold tabular">
+                <p className="eyebrow mb-2">Skilled Worker</p>
+                <p className="font-display text-2xl font-semibold tabular">
                   {sponsor.cos2025Sw?.toLocaleString() ?? (sponsor.cos2025SwSuppressed ? "< 5" : "—")}
                 </p>
                 {sponsor.cos2025SwSuppressed && (
-                  <p className="text-xs text-muted-foreground mt-1">Suppressed by Home Office (1–4 CoS)</p>
+                  <p className="text-xs text-muted-foreground mt-1.5">Suppressed by Home Office (1–4 CoS)</p>
                 )}
               </div>
               <div className="rounded-xl border border-border bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Global Business Mobility</p>
-                <p className="font-display text-2xl font-bold tabular">
+                <p className="eyebrow mb-2">Global Business Mobility</p>
+                <p className="font-display text-2xl font-semibold tabular">
                   {sponsor.cos2025Gbm?.toLocaleString() ?? (sponsor.cos2025GbmSuppressed ? "< 5" : "—")}
                 </p>
                 {sponsor.cos2025GbmSuppressed && (
-                  <p className="text-xs text-muted-foreground mt-1">Suppressed by Home Office (1–4 CoS)</p>
+                  <p className="text-xs text-muted-foreground mt-1.5">Suppressed by Home Office (1–4 CoS)</p>
                 )}
               </div>
             </div>
@@ -218,13 +222,14 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           {/* Visa routes held */}
           {(sponsor.routes ?? []).length > 0 && (
             <div className="surface-card p-5">
-              <h2 className="font-heading text-base font-semibold">Visa Routes Licensed</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <p className="eyebrow mb-1">Licences held</p>
+              <h2 className="font-display text-lg font-semibold">Visa Routes Licensed</h2>
+              <div className="mt-4 flex flex-wrap gap-2">
                 {(sponsor.routes ?? [sponsor.route]).map((r) => (
                   <Link
                     key={r}
                     href={`/route/${r.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}
-                    className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-red-600/40 hover:text-red-600"
+                    className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-red-600/40 hover:text-red-600"
                   >
                     <Globe className="size-3" /> {r}
                   </Link>
@@ -236,17 +241,18 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           {/* Suggested roles */}
           {suggestedSoc.length > 0 && (
             <div className="surface-card p-5">
-              <h2 className="font-heading text-base font-semibold">Suggested Roles to Target</h2>
-              <p className="mb-3 text-xs text-muted-foreground">SOC codes aligned to this sponsor&apos;s hiring patterns</p>
+              <p className="eyebrow mb-1">Career targeting</p>
+              <h2 className="font-display text-lg font-semibold">Suggested Roles to Target</h2>
+              <p className="mb-4 mt-1 text-sm text-muted-foreground">SOC codes aligned to this sponsor&apos;s hiring patterns</p>
               <div className="grid gap-3 sm:grid-cols-3">
                 {suggestedSoc.map((soc) => (
                   <Link
                     key={soc!.socCode}
                     href={`/soc-codes?q=${soc!.socCode}`}
-                    className="rounded-lg border border-border bg-surface/50 p-3 transition-colors hover:border-zinc-900/40"
+                    className="rounded-lg border border-border bg-surface/50 p-3 transition-colors hover:border-red-600/30 hover:bg-red-600/[0.03]"
                   >
-                    <p className="font-mono text-xs text-zinc-700">SOC {soc!.socCode}</p>
-                    <p className="mt-1 line-clamp-2 text-sm font-medium">{soc!.occupationTitle}</p>
+                    <p className="font-mono text-xs font-medium text-red-600">SOC {soc!.socCode}</p>
+                    <p className="mt-1.5 line-clamp-2 text-sm font-semibold leading-snug">{soc!.occupationTitle}</p>
                     <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                       <Banknote className="size-3.5" /> {formatGBP(soc!.goingRate2026)}
                     </p>
@@ -259,30 +265,31 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           {/* Similar sponsors */}
           {similar.length > 0 && (
             <div className="surface-card p-5">
-              <h2 className="font-heading text-base font-semibold">Similar Sponsors</h2>
-              <p className="mb-3 text-xs text-muted-foreground">Same industry or city · ranked by opportunity score</p>
+              <p className="eyebrow mb-1">More like this</p>
+              <h2 className="font-display text-lg font-semibold">Similar Sponsors</h2>
+              <p className="mb-4 mt-1 text-sm text-muted-foreground">Same industry or city · ranked by opportunity score</p>
               <ul className="divide-y divide-border">
                 {similar.map((s) => (
                   <li key={s.id}>
                     <Link
                       href={`/sponsors/${s.id}`}
-                      className="flex items-center justify-between gap-3 py-3 transition-colors hover:text-red-600"
+                      className="flex items-center justify-between gap-3 py-3.5 transition-colors hover:text-red-600"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{s.organisationName}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="truncate text-sm font-semibold">{s.organisationName}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {s.town} · {s.industryCategory} ·{" "}
                           {s.cos2025Total ? `${s.cos2025Total.toLocaleString()} CoS` : s.hiringActivity}
                         </p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5">
                         <span className={cn(
-                          "text-xs font-semibold",
+                          "text-xs font-semibold tabular",
                           s.opportunityScore >= 70 ? "text-emerald-600" : s.opportunityScore >= 40 ? "text-amber-600" : "text-zinc-400"
                         )}>
-                          {s.opportunityScore}/100
+                          {s.opportunityScore}<span className="font-normal text-muted-foreground">/100</span>
                         </span>
-                        <ChevronRight className="size-4" />
+                        <ChevronRight className="size-4 text-muted-foreground" />
                       </div>
                     </Link>
                   </li>
@@ -298,8 +305,8 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           <SponsorActions sponsorId={sponsor.id} name={sponsor.organisationName} />
 
           <div className="surface-card p-5">
-            <h2 className="font-heading text-sm font-semibold">Quick Facts</h2>
-            <dl className="mt-3 space-y-2.5 text-sm">
+            <p className="eyebrow mb-3">Quick Facts</p>
+            <dl className="divide-y divide-border">
               {sponsor.companiesHouseNumber && (
                 <Fact icon={<Hash className="size-3.5" />} label="Companies House" value={sponsor.companiesHouseNumber} />
               )}
@@ -327,13 +334,14 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           {/* Rankings link */}
           <Link
             href="/sponsors/rankings"
-            className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 p-4 transition-colors hover:border-amber-300"
+            className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 p-5 transition-colors hover:border-amber-300 hover:bg-amber-100/60"
           >
             <div>
+              <p className="eyebrow mb-1 text-amber-700">Rankings</p>
               <p className="text-sm font-semibold text-amber-900">UK Sponsor Rankings</p>
-              <p className="text-xs text-amber-700">See how this sponsor compares to the top 100</p>
+              <p className="mt-0.5 text-xs text-amber-700">See how this sponsor compares to the top 100</p>
             </div>
-            <ChevronRight className="size-4 text-amber-600" />
+            <ChevronRight className="size-4 shrink-0 text-amber-600" />
           </Link>
         </div>
       </div>
