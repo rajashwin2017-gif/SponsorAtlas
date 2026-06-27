@@ -38,16 +38,16 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
   };
 }
 
-function ScoreMeter({ score, label, color }: { score: number; label: string; color: string }) {
+function ScoreMeter({ score, label, textColor, barColor }: { score: number; label: string; textColor: string; barColor: string }) {
   return (
     <div>
       <div className="mb-2.5 flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">{label}</span>
-        <span className={cn("text-lg font-bold tabular", color)}>{score}<span className="text-xs font-normal text-muted-foreground">/100</span></span>
+        <span className={cn("text-lg font-bold tabular", textColor)}>{score}<span className="text-xs font-normal text-muted-foreground">/100</span></span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className={cn("h-full rounded-full transition-all duration-700", color.replace("text-", "bg-"))}
+          className={cn("h-full rounded-full transition-all duration-700", barColor)}
           style={{ width: `${score}%` }}
         />
       </div>
@@ -170,8 +170,8 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
               <Badge variant="cyan" className="text-[10px]">Pro</Badge>
             </div>
             <div className="space-y-5">
-              <ScoreMeter score={sponsor.sponsorStrengthScore} label="Sponsor Strength Score" color="text-emerald-600" />
-              <ScoreMeter score={sponsor.opportunityScore} label="Opportunity Score" color="text-red-600" />
+              <ScoreMeter score={sponsor.sponsorStrengthScore} label="Sponsor Strength Score" textColor="text-emerald-600" barColor="bg-emerald-500" />
+              <ScoreMeter score={sponsor.opportunityScore} label="Opportunity Score" textColor="text-red-600" barColor="bg-red-600" />
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-lg bg-muted/50 p-3">
