@@ -41,9 +41,9 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
 function ScoreMeter({ score, label, color }: { score: number; label: string; color: string }) {
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium text-foreground">{label}</span>
-        <span className={cn("font-bold tabular", color)}>{score}<span className="text-xs font-normal text-muted-foreground">/100</span></span>
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="text-sm font-semibold text-foreground">{label}</span>
+        <span className={cn("text-lg font-bold tabular", color)}>{score}<span className="text-xs font-normal text-muted-foreground">/100</span></span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
@@ -55,12 +55,20 @@ function ScoreMeter({ score, label, color }: { score: number; label: string; col
   );
 }
 
-function MetricCard({ label, value, icon, hint }: { label: string; value: string; icon: React.ReactNode; hint?: string }) {
+const ACTIVITY_COLOR: Record<string, string> = {
+  "Very High": "text-emerald-600",
+  "High": "text-emerald-600",
+  "Medium": "text-amber-600",
+  "Low": "text-zinc-500",
+  "Inactive": "text-zinc-400",
+};
+
+function MetricCard({ label, value, icon, hint, valueColor }: { label: string; value: string; icon: React.ReactNode; hint?: string; valueColor?: string }) {
   return (
     <div className="surface-card p-5">
       <p className="eyebrow flex items-center gap-1.5">{icon} {label}</p>
-      <p className="mt-2 font-display text-xl font-semibold leading-tight">{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      <p className={cn("mt-2 font-display text-2xl font-semibold leading-tight", valueColor)}>{value}</p>
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -109,7 +117,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
     <div className="container py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <Link href="/search" className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+      <Link href="/search" className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
         <ArrowLeft className="size-4" /> Back to search
       </Link>
 
@@ -117,7 +125,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
         {/* ── Left column ── */}
         <div className="space-y-6">
           {/* Header */}
-          <div>
+          <div className="pb-6 border-b border-border">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="cyan">{sponsor.industryCategory}</Badge>
               <span className={cn(
@@ -135,8 +143,8 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
                 {sponsor.licenceStatus}
               </Badge>
             </div>
-            <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{sponsor.organisationName}</h1>
-            <p className="mt-2.5 flex items-center gap-1.5 text-base text-muted-foreground">
+            <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-5xl">{sponsor.organisationName}</h1>
+            <p className="mt-3 flex items-center gap-1.5 text-base text-muted-foreground">
               <MapPin className="size-4 shrink-0" />
               <Link href={`/city/${sponsor.town.toLowerCase()}`} className="transition-colors hover:text-red-600">
                 {sponsor.town}{sponsor.county ? `, ${sponsor.county}` : ""}
@@ -146,7 +154,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
 
           {/* Key metrics */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <MetricCard label="Activity" value={activity} icon={<ActivityIcon className="size-4" />} hint="2025 hiring" />
+            <MetricCard label="Activity" value={activity} icon={<ActivityIcon className="size-4" />} hint="2025 hiring" valueColor={ACTIVITY_COLOR[activity]} />
             <MetricCard label="CoS 2025" value={cosDisplay} icon={<TrendingUp className="size-4" />} hint="total issued" />
             <MetricCard label="Visa Routes" value={`${(sponsor.routes ?? []).length}`} icon={<Globe className="size-4" />} hint="licenced" />
             <MetricCard label="Tier" value={tier} icon={<Trophy className="size-4" />} hint={sponsor.rating + "-rated"} />
