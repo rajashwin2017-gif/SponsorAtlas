@@ -19,7 +19,7 @@ export interface JobListing {
 export interface JobsResponse {
   sponsorId: string;
   companyName: string;
-  source: "greenhouse" | "lever" | "workable" | "nhs" | "url" | "none";
+  source: "greenhouse" | "lever" | "workable" | "nhs" | "adzuna" | "url" | "none";
   careersUrl?: string;
   jobs: JobListing[];
   totalJobs?: number;
@@ -211,6 +211,54 @@ async function fetchNHSJobs(orgName: string, keyword = "", location = ""): Promi
   return jobs;
 }
 
+// ── Adzuna ────────────────────────────────────────────────────────────────────
+
+async function fetchAdzuna(companyName: string, keyword = ""): Promise<JobListing[]> {
+  const appId = process.env.ADZUNA_APP_ID;
+  const appKey = process.env.ADZUNA_APP_KEY;
+  if (!appId || !appKey) return [];
+
+  // Use keyword if provided, otherwise search by company name
+  const what = keyword || companyName;
+  const params = new URLSearchParams({
+    app_id: appId,
+    app_key: appKey,
+    results_per_page: "20",
+    what,
+    where: "UK",
+    content_type: "application/json",
+  });
+  // Restrict to the specific company when not keyword-searching
+  if (!keyword) params.set("company", companyName);
+
+  const url = `https://api.adzuna.com/v1/api/jobs/gb/search/1?${params}`;
+  try {
+    const res = await fetch(url, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results ?? []).map((j: Record<string, unknown>) => {
+      const loc = j.location as { display_name?: string } | undefined;
+      const sal = j.salary_min as number | undefined;
+      const salMax = j.salary_max as number | undefined;
+      const company = (j.company as { display_name?: string })?.display_name;
+      return {
+        id: String(j.id ?? ""),
+        title: String(j.title ?? ""),
+        location: loc?.display_name ?? "",
+        department: company ?? undefined,
+        salaryMin: sal,
+        salaryMax: salMax,
+        salaryText: sal ? `£${Math.round(sal / 1000)}k–£${Math.round((salMax ?? sal) / 1000)}k` : undefined,
+        description: j.description ? String(j.description).slice(0, 300) : undefined,
+        applyUrl: String(j.redirect_url ?? j.adref ?? ""),
+        postedAt: j.created ? String(j.created) : undefined,
+      } satisfies JobListing;
+    });
+  } catch {
+    return [];
+  }
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function GET(
@@ -292,7 +340,18 @@ export async function GET(
     });
   }
 
-  // ── Fallback: careers URL with keyword pre-filled where possible ──
+  // ── Adzuna fallback: covers all 126K sponsors with no dedicated ATS ──
+  const adzunaJobs = await fetchAdzuna(sponsor.organisationName, keyword);
+  if (adzunaJobs.length > 0) {
+    return NextResponse.json({
+      ...base,
+      source: "adzuna" as const,
+      jobs: adzunaJobs,
+      totalJobs: adzunaJobs.length,
+    });
+  }
+
+  // ── Last resort: careers URL with keyword pre-filled where possible ──
   let careersUrl = entry?.url;
   if (careersUrl && keyword) {
     // Append keyword to known search-friendly career URLs

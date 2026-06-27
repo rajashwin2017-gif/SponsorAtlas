@@ -336,11 +336,9 @@ export function LiveJobs({ sponsorId, companyName, isPro = false }: LiveJobsProp
               {/* Truly no data and no careers URL */}
               {data.jobs.length === 0 && !hasFilter && !data.careersUrl && (
                 <div className="rounded-xl bg-muted/40 p-5 text-center">
-                  <p className="text-sm text-muted-foreground">No job listings found for this organisation.</p>
+                  <p className="text-sm text-muted-foreground">No current job listings found for this sponsor.</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Add your <span className="font-medium">ADZUNA_APP_ID</span> and{" "}
-                    <span className="font-medium">ADZUNA_APP_KEY</span> to Netlify environment variables
-                    to enable jobs from all 126K sponsors.
+                    Try searching by job title above, or check back later.
                   </p>
                 </div>
               )}
