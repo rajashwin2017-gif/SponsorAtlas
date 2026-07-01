@@ -7,7 +7,7 @@ import { StatCounter } from "@/components/stat-counter";
 import { HeroBackground } from "@/components/hero-background";
 import { PricingCards } from "@/components/pricing-cards";
 import { IndustryBalls } from "@/components/industry-balls";
-import { SponsorTimeline } from "@/components/sponsor-timeline";
+import { PlatformDemo } from "@/components/platform-demo";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,9 +35,9 @@ export default function LandingPage() {
         <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(0_72%_51%/0.12),transparent)]" aria-hidden="true" />
         <HeroBackground />
 
-        <div className="container relative py-24 sm:py-32">
+        <div className="container relative pb-20 pt-8 sm:pb-28 sm:pt-12">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="emerald" className="mx-auto mb-8 animate-fade-up px-4 py-1.5">
+            <Badge variant="emerald" className="mx-auto mb-6 animate-fade-up px-4 py-1.5">
               <span className="live-dot" aria-hidden="true" /> Real hiring signals, not just a sponsor list
             </Badge>
             <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
@@ -68,9 +68,9 @@ export default function LandingPage() {
           </div>
 
           {/* Stats bar */}
-          <div className="stagger mx-auto mt-20 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="stagger mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
             {[
-              { value: 126419, suffix: "+", label: "Sponsors indexed" },
+              { value: 126000, suffix: "+", label: "Sponsors indexed" },
               { value: 654, suffix: "", label: "New this month" },
               { value: 24, suffix: "/7", label: "Daily updates" },
             ].map((s) => (
@@ -95,15 +95,28 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <ol className="stagger mt-14 grid gap-5 md:grid-cols-5">
+        <ol className="stagger relative mt-16 grid gap-4 md:grid-cols-5">
+          {/* connecting flow line — shows the progression between steps (desktop) */}
+          <div
+            className="pointer-events-none absolute inset-x-8 top-12 hidden h-0.5 bg-[repeating-linear-gradient(90deg,hsl(0_72%_51%/0.35)_0_8px,transparent_8px_16px)] md:block"
+            aria-hidden="true"
+          />
           {STEPS.map((step, i) => (
-            <li key={step.title} className="relative">
-              <div className="surface-card flex h-full flex-col p-6">
-                <span className="grid size-11 place-items-center rounded-lg bg-gradient-to-br from-red-600/20 to-zinc-900/20 text-red-600">
+            <li key={step.title} className="group relative">
+              <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-red-600/40 hover:shadow-[0_18px_44px_-20px_rgba(220,38,38,0.45)]">
+                {/* oversized ghost numeral */}
+                <span
+                  className="pointer-events-none absolute -right-1 -top-4 select-none font-display text-8xl font-bold leading-none text-red-600/[0.07] transition-all duration-300 group-hover:scale-110 group-hover:text-red-600/[0.14]"
+                  aria-hidden="true"
+                >
+                  {i + 1}
+                </span>
+                {/* punchy gradient icon tile */}
+                <span className="relative grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_6px_16px_-6px_rgba(220,38,38,0.6)] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                   <step.icon className="size-5" />
                 </span>
-                <p className="mt-4 font-mono text-xs font-bold text-red-600">0{i + 1}</p>
-                <h3 className="mt-1 font-heading text-sm font-semibold leading-snug">{step.title}</h3>
+                <p className="mt-5 font-mono text-[11px] font-bold tracking-[0.18em] text-red-600">STEP 0{i + 1}</p>
+                <h3 className="mt-1 font-heading text-base font-semibold leading-snug">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
               </div>
             </li>
@@ -114,23 +127,17 @@ export default function LandingPage() {
       {/* ── Industry balls ── */}
       <IndustryBalls />
 
-      {/* ── Demo placeholder ── */}
+      {/* ── Interactive platform demo ── */}
       <section className="container pb-24">
-        <div className="surface-card relative mx-auto flex aspect-video max-w-4xl items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,hsl(0_72%_51%/0.1),transparent)]" aria-hidden="true" />
-          <div className="relative text-center">
-            <span className="mx-auto grid size-16 place-items-center rounded-full bg-red-600/15 text-red-600 ring-1 ring-red-600/30">
-              <PlayCircle className="size-8" />
-            </span>
-            <p className="mt-5 font-display text-lg font-semibold tracking-tight">Platform walkthrough</p>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">2 min · See the search & fit engine in action</p>
-          </div>
+        <div className="mx-auto mb-10 max-w-2xl text-center">
+          <p className="eyebrow mb-3 text-red-600">Live demo</p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">See the search &amp; fit engine in action</h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            Watch a real query run end-to-end — search, ranked sponsors, and an instant sponsorship-fit score.
+          </p>
         </div>
+        <PlatformDemo />
       </section>
-
-      {/* ── Journey timeline ── */}
-      <SponsorTimeline />
 
       {/* ── Pricing preview ── */}
       <section className="container py-24">

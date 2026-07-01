@@ -1,30 +1,30 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
+import {
+  Cpu, Stethoscope, Landmark, HardHat, GraduationCap, ConciergeBell, Lightbulb,
+  type LucideIcon,
+} from 'lucide-react'
 
-const BallCanvas = dynamic(
-  () => import('@/components/canvas/ball-canvas').then(m => ({ default: m.BallCanvas })),
-  { ssr: false }
-)
-
-const INDUSTRIES = [
-  { label: 'Technology',    emoji: '💻', color: '#3B82F6' },
-  { label: 'Healthcare',    emoji: '🏥', color: '#10B981' },
-  { label: 'Finance',       emoji: '📈', color: '#F59E0B' },
-  { label: 'Engineering',   emoji: '⚙️',  color: '#8B5CF6' },
-  { label: 'Education',     emoji: '🎓', color: '#EF4444' },
-  { label: 'Hospitality',   emoji: '🏨', color: '#F97316' },
-  { label: 'Consulting',    emoji: '💼', color: '#06B6D4' },
+const INDUSTRIES: {
+  label: string; icon: LucideIcon; color: string; bg: string; border: string;
+}[] = [
+  { label: 'Technology',  icon: Cpu,           color: '#3B82F6', bg: 'from-blue-50 to-blue-100/60',    border: 'hover:border-blue-300'  },
+  { label: 'Healthcare',  icon: Stethoscope,   color: '#10B981', bg: 'from-emerald-50 to-emerald-100/60', border: 'hover:border-emerald-300' },
+  { label: 'Finance',     icon: Landmark,      color: '#D97706', bg: 'from-amber-50 to-amber-100/60',   border: 'hover:border-amber-300'  },
+  { label: 'Engineering', icon: HardHat,       color: '#7C3AED', bg: 'from-violet-50 to-violet-100/60', border: 'hover:border-violet-300' },
+  { label: 'Education',   icon: GraduationCap, color: '#DC2626', bg: 'from-red-50 to-red-100/60',       border: 'hover:border-red-300'    },
+  { label: 'Hospitality', icon: ConciergeBell, color: '#EA580C', bg: 'from-orange-50 to-orange-100/60', border: 'hover:border-orange-300' },
+  { label: 'Consulting',  icon: Lightbulb,     color: '#0891B2', bg: 'from-cyan-50 to-cyan-100/60',    border: 'hover:border-cyan-300'   },
 ]
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.07 } },
 }
 const item = {
-  hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.35, ease: 'easeOut' as const } },
 }
 
 export function IndustryBalls() {
@@ -44,18 +44,20 @@ export function IndustryBalls() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
-        className="mt-14 flex flex-wrap items-center justify-center gap-8"
+        className="mt-14 flex flex-wrap items-center justify-center gap-3"
       >
-        {INDUSTRIES.map(({ label, emoji, color }) => (
-          <motion.li
-            key={label}
-            variants={item}
-            className="flex flex-col items-center gap-3"
-          >
-            <div className="h-28 w-28">
-              <BallCanvas color={color} />
+        {INDUSTRIES.map(({ label, icon: Icon, color, bg, border }) => (
+          <motion.li key={label} variants={item}>
+            <div
+              className={`group flex cursor-default flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-gradient-to-b ${bg} px-6 py-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${border}`}
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm transition-transform duration-200 group-hover:scale-110">
+                <Icon className="size-6" style={{ color }} aria-hidden="true" />
+              </span>
+              <span className="text-xs font-semibold tracking-wide text-slate-700 uppercase">
+                {label}
+              </span>
             </div>
-            <span className="text-sm font-medium text-muted-foreground">{label}</span>
           </motion.li>
         ))}
       </motion.ul>

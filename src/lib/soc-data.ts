@@ -1,97 +1,129 @@
 import type { SocCode } from "./types";
 
-// Representative subset of the UK SOC 2020 occupation codes relevant to the
-// Skilled Worker route, with illustrative 2026 going rates. Figures are
-// indicative for demo purposes and derived from publicly modelled thresholds.
+/**
+ * UK Skilled Worker occupation codes with OFFICIAL salary data.
+ *
+ * Sources (UK Home Office / gov.uk, Open Government Licence v3.0):
+ *  • Standard & lower "going rates" — Immigration Rules Appendix Skilled Worker,
+ *    "going rates for eligible occupation codes". Last updated 22 July 2025.
+ *    https://www.gov.uk/government/publications/skilled-worker-visa-going-rates-for-eligible-occupations/skilled-worker-visa-going-rates-for-eligible-occupation-codes
+ *  • Immigration Salary List (isOnIsl) — last updated 11 November 2025.
+ *    https://www.gov.uk/government/publications/skilled-worker-visa-immigration-salary-list/skilled-worker-visa-immigration-salary-list
+ *  • Healthcare & education roles (nationalPayScale: true) have going rates set
+ *    by national pay scales (NHS / STRB), which vary by pay band and UK region —
+ *    so no single figure applies. For those rows the numeric fields hold the
+ *    general Skilled Worker salary floor (£25,000) only as a conservative
+ *    minimum; the UI shows "national pay scale" instead of a fixed number.
+ *    https://www.gov.uk/government/publications/skilled-worker-visa-eligible-healthcare-and-education-jobs/skilled-worker-visa-eligible-healthcare-and-education-jobs
+ *
+ * Going-rate annual figures assume a 37.5-hour week. This is a representative
+ * subset of eligible occupations, not the full list. Always verify the current
+ * figure for a specific role on gov.uk — rules and rates change.
+ */
+
+export const SOC_DATA_SOURCES = {
+  goingRatesUrl:
+    "https://www.gov.uk/government/publications/skilled-worker-visa-going-rates-for-eligible-occupations/skilled-worker-visa-going-rates-for-eligible-occupation-codes",
+  goingRatesUpdated: "22 July 2025",
+  islUrl:
+    "https://www.gov.uk/government/publications/skilled-worker-visa-immigration-salary-list/skilled-worker-visa-immigration-salary-list",
+  islUpdated: "11 November 2025",
+  healthEduUrl:
+    "https://www.gov.uk/skilled-worker-visa/if-you-work-in-healthcare-or-education",
+} as const;
+
+// General Skilled Worker salary floor used as a placeholder minimum for
+// national-pay-scale (NHS/STRB) roles where no single going rate applies.
+const PAY_SCALE_FLOOR = 25000;
+
 export const SOC_CODES: SocCode[] = [
-  { socCode: "2136", occupationTitle: "Programmers and software development professionals", skillLevel: "RQF 6", goingRate2026: 49400, lowerRate2026: 39520, isOnIsl: false, isOnTsl: false, industryCategory: "Tech", description: "Design, build, test and maintain software systems and applications." },
-  { socCode: "2135", occupationTitle: "IT business analysts, architects and systems designers", skillLevel: "RQF 6", goingRate2026: 51200, lowerRate2026: 40960, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2134", occupationTitle: "IT project and programme managers", skillLevel: "RQF 6", goingRate2026: 53700, lowerRate2026: 42960, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2133", occupationTitle: "IT specialist managers", skillLevel: "RQF 6", goingRate2026: 52500, lowerRate2026: 42000, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2137", occupationTitle: "Web design and development professionals", skillLevel: "RQF 6", goingRate2026: 41600, lowerRate2026: 33280, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2139", occupationTitle: "Information technology professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 45300, lowerRate2026: 36240, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2433", occupationTitle: "Actuaries, economists and statisticians", skillLevel: "RQF 6", goingRate2026: 50100, lowerRate2026: 40080, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "2421", occupationTitle: "Chartered and certified accountants", skillLevel: "RQF 6", goingRate2026: 47800, lowerRate2026: 38240, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "2423", occupationTitle: "Management consultants and business analysts", skillLevel: "RQF 6", goingRate2026: 48900, lowerRate2026: 39120, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "3534", occupationTitle: "Finance and investment analysts and advisers", skillLevel: "RQF 4", goingRate2026: 42700, lowerRate2026: 34160, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "2412", occupationTitle: "Barristers and judges", skillLevel: "RQF 6", goingRate2026: 56400, lowerRate2026: 45120, isOnIsl: false, isOnTsl: false, industryCategory: "Legal" },
-  { socCode: "2413", occupationTitle: "Solicitors and lawyers", skillLevel: "RQF 6", goingRate2026: 50600, lowerRate2026: 40480, isOnIsl: false, isOnTsl: false, industryCategory: "Legal" },
-  { socCode: "2111", occupationTitle: "Chemical scientists", skillLevel: "RQF 6", goingRate2026: 39800, lowerRate2026: 31840, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2112", occupationTitle: "Biological scientists", skillLevel: "RQF 6", goingRate2026: 38200, lowerRate2026: 30560, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2113", occupationTitle: "Physical scientists", skillLevel: "RQF 6", goingRate2026: 41100, lowerRate2026: 32880, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2114", occupationTitle: "Social and humanities scientists", skillLevel: "RQF 6", goingRate2026: 37500, lowerRate2026: 30000, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2122", occupationTitle: "Mechanical engineers", skillLevel: "RQF 6", goingRate2026: 44600, lowerRate2026: 35680, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2123", occupationTitle: "Electrical engineers", skillLevel: "RQF 6", goingRate2026: 45200, lowerRate2026: 36160, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2124", occupationTitle: "Electronics engineers", skillLevel: "RQF 6", goingRate2026: 45800, lowerRate2026: 36640, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2126", occupationTitle: "Design and development engineers", skillLevel: "RQF 6", goingRate2026: 46300, lowerRate2026: 37040, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2127", occupationTitle: "Production and process engineers", skillLevel: "RQF 6", goingRate2026: 43900, lowerRate2026: 35120, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2121", occupationTitle: "Civil engineers", skillLevel: "RQF 6", goingRate2026: 44100, lowerRate2026: 35280, isOnIsl: true, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2129", occupationTitle: "Engineering professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 43200, lowerRate2026: 34560, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2461", occupationTitle: "Quality control and planning engineers", skillLevel: "RQF 6", goingRate2026: 42000, lowerRate2026: 33600, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
-  { socCode: "2211", occupationTitle: "Medical practitioners", skillLevel: "RQF 6", goingRate2026: 58900, lowerRate2026: 47120, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2212", occupationTitle: "Psychologists", skillLevel: "RQF 6", goingRate2026: 43500, lowerRate2026: 34800, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2222", occupationTitle: "Physiotherapists", skillLevel: "RQF 6", goingRate2026: 35600, lowerRate2026: 28480, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2231", occupationTitle: "Nurses", skillLevel: "RQF 6", goingRate2026: 31500, lowerRate2026: 25200, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare", description: "Registered nurses delivering clinical care across NHS and private settings." },
-  { socCode: "2232", occupationTitle: "Midwives", skillLevel: "RQF 6", goingRate2026: 34200, lowerRate2026: 27360, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2219", occupationTitle: "Health professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 37800, lowerRate2026: 30240, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "6131", occupationTitle: "Care workers and home carers", skillLevel: "RQF 2", goingRate2026: 25600, lowerRate2026: 25600, isOnIsl: false, isOnTsl: true, industryCategory: "Healthcare", description: "Adult social care roles eligible under the Health & Care visa." },
-  { socCode: "6132", occupationTitle: "Senior care workers", skillLevel: "RQF 3", goingRate2026: 27300, lowerRate2026: 24500, isOnIsl: false, isOnTsl: true, industryCategory: "Healthcare" },
-  { socCode: "2314", occupationTitle: "Secondary education teaching professionals", skillLevel: "RQF 6", goingRate2026: 36800, lowerRate2026: 30000, isOnIsl: false, isOnTsl: false, industryCategory: "Education" },
-  { socCode: "2315", occupationTitle: "Primary and nursery education teaching professionals", skillLevel: "RQF 6", goingRate2026: 33900, lowerRate2026: 27120, isOnIsl: false, isOnTsl: false, industryCategory: "Education" },
-  { socCode: "2311", occupationTitle: "Higher education teaching professionals", skillLevel: "RQF 6", goingRate2026: 45700, lowerRate2026: 36560, isOnIsl: false, isOnTsl: false, industryCategory: "Education" },
-  { socCode: "2319", occupationTitle: "Teaching and other educational professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 34500, lowerRate2026: 27600, isOnIsl: false, isOnTsl: false, industryCategory: "Education" },
-  { socCode: "3543", occupationTitle: "Marketing associate professionals", skillLevel: "RQF 4", goingRate2026: 35400, lowerRate2026: 28320, isOnIsl: false, isOnTsl: false, industryCategory: "Marketing" },
-  { socCode: "2473", occupationTitle: "Advertising and public relations professionals", skillLevel: "RQF 6", goingRate2026: 38600, lowerRate2026: 30880, isOnIsl: false, isOnTsl: false, industryCategory: "Marketing" },
-  { socCode: "3421", occupationTitle: "Graphic designers", skillLevel: "RQF 4", goingRate2026: 31200, lowerRate2026: 26000, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "3422", occupationTitle: "Product, clothing and related designers", skillLevel: "RQF 4", goingRate2026: 32400, lowerRate2026: 26000, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "3416", occupationTitle: "Arts officers, producers and directors", skillLevel: "RQF 6", goingRate2026: 36100, lowerRate2026: 28880, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "1131", occupationTitle: "Financial managers and directors", skillLevel: "RQF 6", goingRate2026: 62500, lowerRate2026: 50000, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "1132", occupationTitle: "Marketing, sales and advertising directors", skillLevel: "RQF 6", goingRate2026: 60800, lowerRate2026: 48640, isOnIsl: false, isOnTsl: false, industryCategory: "Marketing" },
-  { socCode: "1136", occupationTitle: "Information technology directors", skillLevel: "RQF 6", goingRate2026: 71200, lowerRate2026: 56960, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "1121", occupationTitle: "Production managers and directors in manufacturing", skillLevel: "RQF 6", goingRate2026: 47900, lowerRate2026: 38320, isOnIsl: false, isOnTsl: false, industryCategory: "Manufacturing" },
-  { socCode: "1122", occupationTitle: "Production managers and directors in construction", skillLevel: "RQF 6", goingRate2026: 49600, lowerRate2026: 39680, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "5314", occupationTitle: "Plumbers and heating and ventilating engineers", skillLevel: "RQF 3", goingRate2026: 35200, lowerRate2026: 31680, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "5315", occupationTitle: "Carpenters and joiners", skillLevel: "RQF 3", goingRate2026: 32800, lowerRate2026: 29520, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "5312", occupationTitle: "Bricklayers and masons", skillLevel: "RQF 3", goingRate2026: 31500, lowerRate2026: 28350, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "5316", occupationTitle: "Glaziers, window fabricators and fitters", skillLevel: "RQF 3", goingRate2026: 30200, lowerRate2026: 27180, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "5249", occupationTitle: "Electrical and electronic trades n.e.c.", skillLevel: "RQF 3", goingRate2026: 34600, lowerRate2026: 31140, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "2451", occupationTitle: "Architects", skillLevel: "RQF 6", goingRate2026: 45900, lowerRate2026: 36720, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "2452", occupationTitle: "Town planning officers", skillLevel: "RQF 6", goingRate2026: 39400, lowerRate2026: 31520, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "2453", occupationTitle: "Quantity surveyors", skillLevel: "RQF 6", goingRate2026: 43700, lowerRate2026: 34960, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "2455", occupationTitle: "Construction project managers", skillLevel: "RQF 6", goingRate2026: 50300, lowerRate2026: 40240, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
-  { socCode: "3511", occupationTitle: "Air traffic controllers", skillLevel: "RQF 6", goingRate2026: 54200, lowerRate2026: 43360, isOnIsl: false, isOnTsl: false, industryCategory: "Logistics" },
-  { socCode: "3512", occupationTitle: "Aircraft pilots and flight engineers", skillLevel: "RQF 6", goingRate2026: 63800, lowerRate2026: 51040, isOnIsl: false, isOnTsl: false, industryCategory: "Logistics" },
-  { socCode: "2424", occupationTitle: "Business and financial project management professionals", skillLevel: "RQF 6", goingRate2026: 48200, lowerRate2026: 38560, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "2425", occupationTitle: "Actuaries", skillLevel: "RQF 6", goingRate2026: 55600, lowerRate2026: 44480, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
-  { socCode: "2150", occupationTitle: "Research and development managers", skillLevel: "RQF 6", goingRate2026: 52800, lowerRate2026: 42240, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2162", occupationTitle: "Data scientists", skillLevel: "RQF 6", goingRate2026: 50700, lowerRate2026: 40560, isOnIsl: false, isOnTsl: false, industryCategory: "Tech", description: "Apply statistical, ML and analytics methods to derive business insight." },
-  { socCode: "2161", occupationTitle: "Cyber security professionals", skillLevel: "RQF 6", goingRate2026: 52300, lowerRate2026: 41840, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2163", occupationTitle: "Database administrators", skillLevel: "RQF 6", goingRate2026: 45100, lowerRate2026: 36080, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
-  { socCode: "2141", occupationTitle: "Conservation professionals", skillLevel: "RQF 6", goingRate2026: 34800, lowerRate2026: 27840, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2142", occupationTitle: "Environment professionals", skillLevel: "RQF 6", goingRate2026: 37200, lowerRate2026: 29760, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
-  { socCode: "2442", occupationTitle: "Social workers", skillLevel: "RQF 6", goingRate2026: 36200, lowerRate2026: 28960, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2443", occupationTitle: "Probation officers", skillLevel: "RQF 6", goingRate2026: 35100, lowerRate2026: 28080, isOnIsl: false, isOnTsl: false, industryCategory: "Public Sector" },
-  { socCode: "2449", occupationTitle: "Welfare professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 33400, lowerRate2026: 26720, isOnIsl: false, isOnTsl: false, industryCategory: "Public Sector" },
-  { socCode: "3213", occupationTitle: "Paramedics", skillLevel: "RQF 6", goingRate2026: 35900, lowerRate2026: 28720, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "3216", occupationTitle: "Dispensing opticians", skillLevel: "RQF 4", goingRate2026: 31800, lowerRate2026: 25440, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2215", occupationTitle: "Dental practitioners", skillLevel: "RQF 6", goingRate2026: 47600, lowerRate2026: 38080, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2216", occupationTitle: "Veterinarians", skillLevel: "RQF 6", goingRate2026: 41300, lowerRate2026: 33040, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2223", occupationTitle: "Occupational therapists", skillLevel: "RQF 6", goingRate2026: 34900, lowerRate2026: 27920, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2224", occupationTitle: "Speech and language therapists", skillLevel: "RQF 6", goingRate2026: 35500, lowerRate2026: 28400, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2225", occupationTitle: "Dieticians", skillLevel: "RQF 6", goingRate2026: 33700, lowerRate2026: 26960, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "2226", occupationTitle: "Pharmacists", skillLevel: "RQF 6", goingRate2026: 43800, lowerRate2026: 35040, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "3217", occupationTitle: "Pharmaceutical technicians", skillLevel: "RQF 4", goingRate2026: 29400, lowerRate2026: 25000, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare" },
-  { socCode: "5223", occupationTitle: "Metal working production and maintenance fitters", skillLevel: "RQF 3", goingRate2026: 33100, lowerRate2026: 29790, isOnIsl: false, isOnTsl: false, industryCategory: "Manufacturing" },
-  { socCode: "5225", occupationTitle: "Air-conditioning and refrigeration engineers", skillLevel: "RQF 3", goingRate2026: 34200, lowerRate2026: 30780, isOnIsl: false, isOnTsl: false, industryCategory: "Manufacturing" },
-  { socCode: "8114", occupationTitle: "Chemical and related process operatives", skillLevel: "RQF 2", goingRate2026: 26400, lowerRate2026: 25000, isOnIsl: false, isOnTsl: true, industryCategory: "Manufacturing" },
-  { socCode: "5119", occupationTitle: "Agriculture and fishing trades n.e.c.", skillLevel: "RQF 3", goingRate2026: 26000, lowerRate2026: 25000, isOnIsl: false, isOnTsl: true, industryCategory: "Agriculture" },
-  { socCode: "1213", occupationTitle: "Managers in agriculture and horticulture", skillLevel: "RQF 6", goingRate2026: 33600, lowerRate2026: 26880, isOnIsl: false, isOnTsl: false, industryCategory: "Agriculture" },
-  { socCode: "3411", occupationTitle: "Artists", skillLevel: "RQF 6", goingRate2026: 30800, lowerRate2026: 25000, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "3413", occupationTitle: "Actors, entertainers and presenters", skillLevel: "RQF 6", goingRate2026: 32500, lowerRate2026: 26000, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "3414", occupationTitle: "Dancers and choreographers", skillLevel: "RQF 3", goingRate2026: 29000, lowerRate2026: 25000, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "3415", occupationTitle: "Musicians", skillLevel: "RQF 6", goingRate2026: 31600, lowerRate2026: 25280, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
-  { socCode: "2472", occupationTitle: "Public relations professionals", skillLevel: "RQF 6", goingRate2026: 37300, lowerRate2026: 29840, isOnIsl: false, isOnTsl: false, industryCategory: "Marketing" },
-  { socCode: "3545", occupationTitle: "Sales accounts and business development managers", skillLevel: "RQF 4", goingRate2026: 40200, lowerRate2026: 32160, isOnIsl: false, isOnTsl: false, industryCategory: "Sales" },
-  { socCode: "1190", occupationTitle: "Managers and directors in retail and wholesale", skillLevel: "RQF 6", goingRate2026: 38800, lowerRate2026: 31040, isOnIsl: false, isOnTsl: false, industryCategory: "Retail" },
-  { socCode: "5434", occupationTitle: "Chefs", skillLevel: "RQF 3", goingRate2026: 31300, lowerRate2026: 28170, isOnIsl: false, isOnTsl: false, industryCategory: "Hospitality" },
+  // ── Managers & directors ──────────────────────────────────────────────────
+  { socCode: "1131", occupationTitle: "Financial managers and directors", skillLevel: "RQF 6", goingRate2026: 75100, lowerRate2026: 49700, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
+  { socCode: "1132", occupationTitle: "Marketing, sales and advertising directors", skillLevel: "RQF 6", goingRate2026: 87300, lowerRate2026: 60000, isOnIsl: false, isOnTsl: false, industryCategory: "Marketing" },
+  { socCode: "1136", occupationTitle: "Human resource managers and directors", skillLevel: "RQF 6", goingRate2026: 52900, lowerRate2026: 41200, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
+  { socCode: "1121", occupationTitle: "Production managers and directors in manufacturing", skillLevel: "RQF 6", goingRate2026: 55000, lowerRate2026: 40000, isOnIsl: false, isOnTsl: false, industryCategory: "Manufacturing" },
+  { socCode: "1122", occupationTitle: "Production managers and directors in construction", skillLevel: "RQF 6", goingRate2026: 53400, lowerRate2026: 41400, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+
+  // ── Information technology ────────────────────────────────────────────────
+  { socCode: "2134", occupationTitle: "Programmers and software development professionals", skillLevel: "RQF 6", goingRate2026: 54700, lowerRate2026: 40000, isOnIsl: false, isOnTsl: false, industryCategory: "Tech", description: "Design, build, test and maintain software systems and applications." },
+  { socCode: "2133", occupationTitle: "IT business analysts, architects and systems designers", skillLevel: "RQF 6", goingRate2026: 54900, lowerRate2026: 42400, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
+  { socCode: "2135", occupationTitle: "Cyber security professionals", skillLevel: "RQF 6", goingRate2026: 48500, lowerRate2026: 35300, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
+  { socCode: "2136", occupationTitle: "IT quality and testing professionals", skillLevel: "RQF 6", goingRate2026: 41200, lowerRate2026: 34500, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
+  { socCode: "2137", occupationTitle: "IT network professionals", skillLevel: "RQF 6", goingRate2026: 45600, lowerRate2026: 38100, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
+  { socCode: "2139", occupationTitle: "Information technology professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 52300, lowerRate2026: 38700, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
+  { socCode: "2141", occupationTitle: "Web design professionals", skillLevel: "RQF 6", goingRate2026: 43800, lowerRate2026: 31300, isOnIsl: false, isOnTsl: false, industryCategory: "Tech" },
+
+  // ── Science & research ────────────────────────────────────────────────────
+  { socCode: "2161", occupationTitle: "Research and development (R&D) managers", skillLevel: "RQF 6", goingRate2026: 54400, lowerRate2026: 40000, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
+  { socCode: "2162", occupationTitle: "Other researchers, unspecified discipline", skillLevel: "RQF 6", goingRate2026: 43600, lowerRate2026: 37400, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
+  { socCode: "2111", occupationTitle: "Chemical scientists", skillLevel: "RQF 6", goingRate2026: 39900, lowerRate2026: 31300, isOnIsl: true, isOnTsl: false, industryCategory: "Science" },
+  { socCode: "2112", occupationTitle: "Biological scientists", skillLevel: "RQF 6", goingRate2026: 40300, lowerRate2026: 30700, isOnIsl: true, isOnTsl: false, industryCategory: "Science" },
+  { socCode: "2113", occupationTitle: "Biochemists and biomedical scientists", skillLevel: "RQF 6", goingRate2026: 45900, lowerRate2026: 35100, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
+  { socCode: "2114", occupationTitle: "Physical scientists", skillLevel: "RQF 6", goingRate2026: 54600, lowerRate2026: 41500, isOnIsl: false, isOnTsl: false, industryCategory: "Science" },
+
+  // ── Finance & legal ───────────────────────────────────────────────────────
+  { socCode: "2433", occupationTitle: "Actuaries, economists and statisticians", skillLevel: "RQF 6", goingRate2026: 55100, lowerRate2026: 40700, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
+  { socCode: "2421", occupationTitle: "Chartered and certified accountants", skillLevel: "RQF 6", goingRate2026: 49200, lowerRate2026: 36900, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
+  { socCode: "2423", occupationTitle: "Taxation experts", skillLevel: "RQF 6", goingRate2026: 48500, lowerRate2026: 35400, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
+  { socCode: "3534", occupationTitle: "Financial accounts managers", skillLevel: "RQF 4", goingRate2026: 44700, lowerRate2026: 34800, isOnIsl: false, isOnTsl: false, industryCategory: "Finance" },
+  { socCode: "2412", occupationTitle: "Solicitors and lawyers", skillLevel: "RQF 6", goingRate2026: 51600, lowerRate2026: 39000, isOnIsl: false, isOnTsl: false, industryCategory: "Legal" },
+
+  // ── Engineering ───────────────────────────────────────────────────────────
+  { socCode: "2122", occupationTitle: "Mechanical engineers", skillLevel: "RQF 6", goingRate2026: 46800, lowerRate2026: 38400, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+  { socCode: "2123", occupationTitle: "Electrical engineers", skillLevel: "RQF 6", goingRate2026: 58700, lowerRate2026: 47100, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+  { socCode: "2124", occupationTitle: "Electronics engineers", skillLevel: "RQF 6", goingRate2026: 52000, lowerRate2026: 41200, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+  { socCode: "2126", occupationTitle: "Aerospace engineers", skillLevel: "RQF 6", goingRate2026: 52400, lowerRate2026: 43400, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+  { socCode: "2127", occupationTitle: "Engineering project managers and project engineers", skillLevel: "RQF 6", goingRate2026: 51900, lowerRate2026: 40600, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+  { socCode: "2121", occupationTitle: "Civil engineers", skillLevel: "RQF 6", goingRate2026: 50400, lowerRate2026: 39200, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+  { socCode: "2129", occupationTitle: "Engineering professionals n.e.c.", skillLevel: "RQF 6", goingRate2026: 46100, lowerRate2026: 37500, isOnIsl: false, isOnTsl: false, industryCategory: "Engineering" },
+
+  // ── Construction & skilled trades ─────────────────────────────────────────
+  { socCode: "2451", occupationTitle: "Architects", skillLevel: "RQF 6", goingRate2026: 47600, lowerRate2026: 37800, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "2452", occupationTitle: "Chartered architectural technologists, planning officers and consultants", skillLevel: "RQF 6", goingRate2026: 35800, lowerRate2026: 28200, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "2453", occupationTitle: "Quantity surveyors", skillLevel: "RQF 6", goingRate2026: 48600, lowerRate2026: 38500, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "2455", occupationTitle: "Construction project managers and related professionals", skillLevel: "RQF 6", goingRate2026: 44300, lowerRate2026: 36600, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "5315", occupationTitle: "Plumbers and heating and ventilating installers and repairers", skillLevel: "RQF 3", goingRate2026: 38100, lowerRate2026: 31400, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "5316", occupationTitle: "Carpenters and joiners", skillLevel: "RQF 3", goingRate2026: 33400, lowerRate2026: 27800, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "5312", occupationTitle: "Stonemasons and related trades", skillLevel: "RQF 3", goingRate2026: 33400, lowerRate2026: 28500, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "5314", occupationTitle: "Roofers, roof tilers and slaters", skillLevel: "RQF 3", goingRate2026: 33400, lowerRate2026: 25300, isOnIsl: true, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "5249", occupationTitle: "Electrical and electronic trades n.e.c.", skillLevel: "RQF 3", goingRate2026: 45800, lowerRate2026: 35600, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+  { socCode: "5225", occupationTitle: "Air-conditioning and refrigeration installers and repairers", skillLevel: "RQF 3", goingRate2026: 41100, lowerRate2026: 35500, isOnIsl: false, isOnTsl: false, industryCategory: "Construction" },
+
+  // ── Manufacturing ─────────────────────────────────────────────────────────
+  { socCode: "5223", occupationTitle: "Metal working production and maintenance fitters", skillLevel: "RQF 3", goingRate2026: 39300, lowerRate2026: 29900, isOnIsl: false, isOnTsl: false, industryCategory: "Manufacturing" },
+
+  // ── Creative & arts ───────────────────────────────────────────────────────
+  { socCode: "2142", occupationTitle: "Graphic and multimedia designers", skillLevel: "RQF 4", goingRate2026: 33400, lowerRate2026: 26200, isOnIsl: true, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "3421", occupationTitle: "Interior designers", skillLevel: "RQF 4", goingRate2026: 35200, lowerRate2026: 29600, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "3422", occupationTitle: "Clothing, fashion and accessories designers", skillLevel: "RQF 4", goingRate2026: 36500, lowerRate2026: 29100, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "3411", occupationTitle: "Artists", skillLevel: "RQF 4", goingRate2026: 38200, lowerRate2026: 26600, isOnIsl: true, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "3414", occupationTitle: "Dancers and choreographers", skillLevel: "RQF 4", goingRate2026: 33400, lowerRate2026: 28500, isOnIsl: true, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "3415", occupationTitle: "Musicians", skillLevel: "RQF 4", goingRate2026: 37500, lowerRate2026: 30100, isOnIsl: true, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "3416", occupationTitle: "Arts officers, producers and directors", skillLevel: "RQF 6", goingRate2026: 38100, lowerRate2026: 28800, isOnIsl: true, isOnTsl: false, industryCategory: "Creative" },
+  { socCode: "2472", occupationTitle: "Archivists, conservators and curators", skillLevel: "RQF 6", goingRate2026: 33400, lowerRate2026: 29600, isOnIsl: false, isOnTsl: false, industryCategory: "Creative" },
+
+  // ── Transport & logistics ─────────────────────────────────────────────────
+  { socCode: "3511", occupationTitle: "Aircraft pilots and air traffic controllers", skillLevel: "RQF 6", goingRate2026: 80400, lowerRate2026: 64100, isOnIsl: false, isOnTsl: false, industryCategory: "Logistics" },
+  { socCode: "3512", occupationTitle: "Ship and hovercraft officers", skillLevel: "RQF 6", goingRate2026: 58300, lowerRate2026: 39100, isOnIsl: false, isOnTsl: false, industryCategory: "Logistics" },
+
+  // ── Healthcare — national pay scale (NHS) ─────────────────────────────────
+  { socCode: "2211", occupationTitle: "Generalist medical practitioners", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2212", occupationTitle: "Specialist medical practitioners", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2231", occupationTitle: "Midwifery nurses", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2233", occupationTitle: "Registered specialist nurses", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true, description: "Registered nurses delivering clinical care across NHS and private settings." },
+  { socCode: "2234", occupationTitle: "Registered nurse practitioners", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2235", occupationTitle: "Registered mental health nurses", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2221", occupationTitle: "Physiotherapists", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2225", occupationTitle: "Clinical psychologists", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+  { socCode: "2461", occupationTitle: "Social workers", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Healthcare", nationalPayScale: true },
+
+  // ── Adult social care — Immigration Salary List ───────────────────────────
+  { socCode: "6135", occupationTitle: "Care workers and home carers", skillLevel: "RQF 3", goingRate2026: 25000, lowerRate2026: 25000, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare", description: "Adult social care role; minimum £12.82/hour (~£25,000). Eligible under the Health & Care visa." },
+  { socCode: "6136", occupationTitle: "Senior care workers", skillLevel: "RQF 3", goingRate2026: 25000, lowerRate2026: 25000, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
+  { socCode: "6131", occupationTitle: "Nursing auxiliaries and assistants", skillLevel: "RQF 3", goingRate2026: 25000, lowerRate2026: 25000, isOnIsl: true, isOnTsl: false, industryCategory: "Healthcare" },
+
+  // ── Education — national pay scale (STRB / national pay scales) ────────────
+  { socCode: "2313", occupationTitle: "Secondary education teaching professionals", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Education", nationalPayScale: true },
+  { socCode: "2314", occupationTitle: "Primary education teaching professionals", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Education", nationalPayScale: true },
+  { socCode: "2312", occupationTitle: "Further education teaching professionals", skillLevel: "RQF 6", goingRate2026: PAY_SCALE_FLOOR, lowerRate2026: PAY_SCALE_FLOOR, isOnIsl: false, isOnTsl: false, industryCategory: "Education", nationalPayScale: true },
 ];

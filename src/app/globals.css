@@ -237,6 +237,26 @@
   background: hsl(0 0% 70%);
 }
 
+/* Thin, unobtrusive scrollbar for the filter rail */
+.filter-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(0 0% 80%) transparent;
+}
+.filter-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.filter-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.filter-scroll::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 85%);
+  border: none;
+  border-radius: 9999px;
+}
+.filter-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 72%);
+}
+
 /* ─────────────────── Hero commuters (minimal silhouettes) ─────────────────── */
 .hw-layer {
   position: absolute;

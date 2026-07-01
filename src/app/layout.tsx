@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CustomCursor } from "@/components/custom-cursor";
 import { AuthSessionProvider } from "@/components/session-provider";
+import { DevTierUnlock } from "@/components/dev-tier-unlock";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,9 +49,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      {/* Auto-unlock Pro+ for testing — remove before production launch */}
-      <script dangerouslySetInnerHTML={{ __html: `localStorage.setItem('sponsoratlas:tier','pro_plus')` }} />
       <body className={`${inter.variable} ${mono.variable} ${ebGaramond.variable} font-sans`}>
+        {/* Dev-only: auto-unlock Pro+ for local testing. Never runs in production. */}
+        {process.env.NODE_ENV !== "production" && <DevTierUnlock />}
         <AuthSessionProvider>
           <ToastProvider>
             <CustomCursor />

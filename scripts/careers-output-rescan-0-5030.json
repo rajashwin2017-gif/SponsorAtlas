@@ -1,0 +1,782 @@
+{
+  "HEALTH EDUCATION ENGLAND": {
+    "type": "url",
+    "url": "https://www.healthcareers.nhs.uk/"
+  },
+  "FRAMATOME LIMITED": {
+    "type": "url",
+    "url": "https://framatome-career.talent-soft.com/my-account/log-in.aspx"
+  },
+  "THE CITY OF EDINBURGH COUNCIL": {
+    "type": "url",
+    "url": "https://www.edinburgh.gov.uk/jobs-training-volunteering"
+  },
+  "SPIRE HEALTHCARE LTD": {
+    "type": "url",
+    "url": "https://elij.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX"
+  },
+  "ACTIVE MANCO LTD": {
+    "type": "url",
+    "url": "https://activeman.com/mental-resilience-training-for-men-in-high-stress-careers/"
+  },
+  "HARRIS FEDERATION": {
+    "type": "url",
+    "url": "https://www.harriscareers.org.uk"
+  },
+  "CAMBRIDGE UNIVERSITY PRESS ASSESSMENT": {
+    "type": "url",
+    "url": "https://www.cambridgeassessment.org.uk/the-network/join-our-assessment-community/"
+  },
+  "REPLY LIMITED": {
+    "type": "url",
+    "url": "https://www.reply.com/en/about/careers"
+  },
+  "RUSKIN MILL TRUST LIMITED": {
+    "type": "url",
+    "url": "https://rmt.org/jobs/"
+  },
+  "EPAM SYSTEMS LTD": {
+    "type": "url",
+    "url": "https://www.epam.com/careers/locations/japan"
+  },
+  "CARE NEXUS LTD": {
+    "type": "url",
+    "url": "https://care-nexus.co.uk/join-us"
+  },
+  "DAFFODIL CARE LIMITED": {
+    "type": "url",
+    "url": "https://www.daffodilcare.ie/careers-2/"
+  },
+  "WORLDPAY UK LTD": {
+    "type": "url",
+    "url": "https://jobs.worldpay.com"
+  },
+  "ITOCHU EUROPE PLC": {
+    "type": "url",
+    "url": "https://www.itochu.com/us/en/careers/index.html"
+  },
+  "CAMBRIDGESHIRE COUNTY COUNCIL": {
+    "type": "url",
+    "url": "https://www.cambridgeshire.gov.uk/council/jobs-and-careers"
+  },
+  "NATIONWIDE CARE FINCHLEY LIMITED": {
+    "type": "url",
+    "url": "https://nationwidecareplus.com.au/career/"
+  },
+  "FLOW HEALTHCARE LTD": {
+    "type": "url",
+    "url": "https://flowhealthcareltd.co.uk/job-form"
+  },
+  "PELAGONIAN LIMITED": {
+    "type": "url",
+    "url": "https://pelagonian.com/careers.html"
+  },
+  "OPTIMA CARE GROUP LLP": {
+    "type": "url",
+    "url": "https://uk.indeed.com/cmp/Optima-Care-Ltd-2/jobs"
+  },
+  "VJ CARERS LTD": {
+    "type": "url",
+    "url": "https://vjcarers.com/work-for-us/"
+  },
+  "ALBERT BARTLETT SONS AIRDRIE LIMITED": {
+    "type": "workable",
+    "token": "albert-bartlett"
+  },
+  "PREMIERCARE MIDLANDS LTD": {
+    "type": "url",
+    "url": "https://precare.com/careers"
+  },
+  "DOLPHIN HOMES LTD": {
+    "type": "url",
+    "url": "https://uk.indeed.com/q-dolphin-homes-l-havant-jobs.html?vjk=556d1e9a5eb20bfd"
+  },
+  "SAIPEM LTD": {
+    "type": "url",
+    "url": "https://www.saipem.com/en/people/careers"
+  },
+  "DYNAMIC PEOPLE LTD": {
+    "type": "url",
+    "url": "https://jobs.dynamicpeople.com/"
+  },
+  "NATIONWIDE CARE SERVICES LTD": {
+    "type": "url",
+    "url": "https://nationwidecareplus.com.au/career/"
+  },
+  "FONTHILL CARE HARRY PARK LTD": {
+    "type": "url",
+    "url": "https://www.fonthillcare.co.uk/careers/"
+  },
+  "INFORMA UK LIMITED": {
+    "type": "url",
+    "url": "https://www.informa.com/talent/recruitment-warning/"
+  },
+  "TREDENCE UK LIMITED": {
+    "type": "url",
+    "url": "https://www.tredence.com/careers/greatest-of-ai"
+  },
+  "PENHELLIS COMMUNITY CARE LTD": {
+    "type": "url",
+    "url": "https://penhellis.co.uk/recruitmentTraining.html"
+  },
+  "KTS CARE ANGELS LTD": {
+    "type": "url",
+    "url": "https://www.ktscareangels.co.uk/Job-Vacancies/"
+  },
+  "RMH CARE LTD": {
+    "type": "url",
+    "url": "https://www.rmhcare.org/careers-benefits/"
+  },
+  "ROBERT BOSCH LTD": {
+    "type": "url",
+    "url": "https://www.bosch.com/careers/"
+  },
+  "POINT72 UK LIMITED": {
+    "type": "url",
+    "url": "https://oss.1p3a.com/static/image/common/wq_career.jpg!ss"
+  },
+  "RICHEMONT INTERNATIONAL LIMITED": {
+    "type": "url",
+    "url": "https://www.richemont.com/talent/career-areas/"
+  },
+  "HOWDEN GROUP HOLDINGS LIMITED": {
+    "type": "url",
+    "url": "https://www.chartindustries.com/careers"
+  },
+  "OLIVER CONNELL SON LTD": {
+    "type": "url",
+    "url": "https://oliverconnell.com/Careers.html"
+  },
+  "INVENIO BUSINESS SOLUTIONS LTD": {
+    "type": "url",
+    "url": "https://inveniobs.com/career-openings.php"
+  },
+  "BADOO LIMITED": {
+    "type": "lever",
+    "token": "bumbleinc"
+  },
+  "VML UK LIMITED": {
+    "type": "url",
+    "url": "https://www.vml.com/careers"
+  },
+  "VSHIPS UK LTD": {
+    "type": "url",
+    "url": "https://vgrouplimited.com/join-our-group/"
+  },
+  "NATIONWIDE CARE SERVICES BIRMINGHAM CENTRAL LTD": {
+    "type": "url",
+    "url": "https://nationwidecareplus.com.au/career/"
+  },
+  "MIDVIEW HEALTHCARE LTD": {
+    "type": "url",
+    "url": "https://www.mid-viewhealthcare.co.uk/safe-recruitment-process/"
+  },
+  "ELDER AND PATON PERTH LTD": {
+    "type": "url",
+    "url": "https://bodyrepairscotland.co.uk/recruitment.html"
+  },
+  "FUJITSU SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://global.fujitsu/en-global/careers"
+  },
+  "SURREY QUALITY CARE SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://sqcltd.com/career.html"
+  },
+  "FLUX CORP LTD": {
+    "type": "url",
+    "url": "https://www.fluxx.io/fluxx-careers-2025"
+  },
+  "THE PIRBRIGHT INSTITUTE": {
+    "type": "url",
+    "url": "https://isw.changeworknow.co.uk/pirbright/vms/e/careers/search/new"
+  },
+  "SAFRAN ENGINEERING SERVICES UK LTD": {
+    "type": "url",
+    "url": "https://www.safran-group.com/careers/why-join-us"
+  },
+  "PENSPEN LIMITED": {
+    "type": "url",
+    "url": "https://www.penspen.com/work/current_vacancies/"
+  },
+  "HITACHI EUROPE LTD": {
+    "type": "url",
+    "url": "https://careers.hitachi.com/"
+  },
+  "HITACHI SOLUTIONS EUROPE LTD": {
+    "type": "url",
+    "url": "https://careers.hitachi.com/"
+  },
+  "ROSS COMPANIES LIMITED": {
+    "type": "url",
+    "url": "https://www.ross-companies.com/careers"
+  },
+  "KENYLINK SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://www.kenylinkcare.co.uk/recruitment.htm"
+  },
+  "LOXFORD SCHOOL TRUST LIMITED": {
+    "type": "url",
+    "url": "https://www.loxfordschooltrust.net/755/vacancies"
+  },
+  "HULL CITY COUNCIL": {
+    "type": "url",
+    "url": "https://hull.wd103.myworkdayjobs.com/en-GB/HCC"
+  },
+  "NYK GROUP EUROPE LIMITED": {
+    "type": "url",
+    "url": "https://www.nyk.com/recruit/"
+  },
+  "BEAM ABA SERVICES": {
+    "type": "url",
+    "url": "https://beamaba.com/why-work-with-us/"
+  },
+  "SCRUMCONNECT": {
+    "type": "url",
+    "url": "https://scrumconnect.zohorecruit.eu/jobs/Careers"
+  },
+  "INSPIRE DENTAL SOUTHALL LTD": {
+    "type": "url",
+    "url": "https://www.inspiredentalgroupcareers.co.uk/"
+  },
+  "FERRERO UK LIMITED": {
+    "type": "url",
+    "url": "https://www.ferrerocareers.com/int/en/"
+  },
+  "RIVER LEARNING TRUST": {
+    "type": "url",
+    "url": "https://riverlearningtrust.org/16/careers"
+  },
+  "SAFRAN ELECTRICAL POWER UK LTD": {
+    "type": "url",
+    "url": "https://www.safran-group.com/careers/why-join-us"
+  },
+  "DUNDEE CITY COUNCIL": {
+    "type": "url",
+    "url": "https://dundeecity.gov.uk/services/jobs-&-business"
+  },
+  "OFR CONSULTANTS LIMITED": {
+    "type": "url",
+    "url": "https://ofrconsultants.com/careers-2/"
+  },
+  "CIRCET UK LIMITED": {
+    "type": "url",
+    "url": "https://www.circet.ie/join-us"
+  },
+  "DANES EDUCATIONAL TRUST": {
+    "type": "url",
+    "url": "https://www.daneseducationaltrust.org.uk/274/join-us"
+  },
+  "CARE EXPERTISE GROUP LIMITED": {
+    "type": "url",
+    "url": "https://careexpertise.co.uk/work-for-us/"
+  },
+  "CINNAMON COLLECTION LIMITED": {
+    "type": "url",
+    "url": "https://harri.com/The-Cinnamon-Club-Career"
+  },
+  "SENACARE LTD": {
+    "type": "url",
+    "url": "https://www.senacare.co.uk/Careers.html"
+  },
+  "5 DIMENSIONS TRUST": {
+    "type": "url",
+    "url": "https://www.5dimensionstrust.com/About/Work-With-Us/"
+  },
+  "TEMPNUR LTD": {
+    "type": "url",
+    "url": "https://tempnur.co.uk/work-for-us/"
+  },
+  "BEUMER GROUP UK LIMITED": {
+    "type": "url",
+    "url": "https://www.beumergroup.com/careers/"
+  },
+  "OXFORD SPACE SYSTEMS LTD": {
+    "type": "url",
+    "url": "https://oxford.space/Recruitment/"
+  },
+  "CONNECT NURSING LIMITED": {
+    "type": "url",
+    "url": "https://connectnursing.co.uk/work-for-us/"
+  },
+  "FORGE HOUSE CARE LTD": {
+    "type": "url",
+    "url": "https://www.forgehousecare.com/jobs/"
+  },
+  "THE LISTER HOSPITAL": {
+    "type": "url",
+    "url": "https://www.hcahealthcare.co.uk/careers"
+  },
+  "AMUNDI UK LIMITED": {
+    "type": "url",
+    "url": "https://about.amundi.com/join-us"
+  },
+  "ANCHUSA CARE LIMITED": {
+    "type": "url",
+    "url": "https://anchusacare.co.uk/vacancies/"
+  },
+  "KINETIC NURSING SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://kinetic-nursing.co.uk/vacancies-"
+  },
+  "SANCTUARY LTD": {
+    "type": "url",
+    "url": "https://www.sanctuary.co.uk/join-our-team"
+  },
+  "NS CML LTD": {
+    "type": "url",
+    "url": "https://nscmlt.org/new-career-span-competence"
+  },
+  "CARE SOLUTIONS HOMECARE LTD": {
+    "type": "url",
+    "url": "https://carehomecare.com/careers/"
+  },
+  "DNATA CATERING UK LIMITED": {
+    "type": "url",
+    "url": "https://www.dnata.com/en/careers/"
+  },
+  "DEMIDAV LTD": {
+    "type": "url",
+    "url": "https://demidav.co.uk/careers/"
+  },
+  "PROTECTOR INSURANCE": {
+    "type": "url",
+    "url": "https://protectorinsurance.co.uk/careers/"
+  },
+  "PIONEERING INDEPENDENCE LIMITED": {
+    "type": "url",
+    "url": "https://pioneeringindependence.com/terms-of-recruitment/"
+  },
+  "HUDSON HARBOUR RESIDENTIAL LIMITED": {
+    "type": "url",
+    "url": "https://www.hvcc.edu/studentservices/career-transfer/index.html"
+  },
+  "HOLCIM UK LIMITED": {
+    "type": "url",
+    "url": "https://www.holcim.co.uk/careers"
+  },
+  "KINGFISHER PLC": {
+    "type": "url",
+    "url": "https://careers.kingfisher.com"
+  },
+  "DIACEUTICS PLC": {
+    "type": "url",
+    "url": "https://www.diaceutics.com/careers/students"
+  },
+  "BRIGHTER FUTURES FOR CHILDREN LIMITED": {
+    "type": "url",
+    "url": "https://brighterfuturesforchildren.org/young-peoples-zone/careers-service-for-young-people/"
+  },
+  "DURHAM COUNTY COUNCIL": {
+    "type": "url",
+    "url": "https://www.durham.gov.uk/jobsandcareers"
+  },
+  "CARE RESOLUTION LTD": {
+    "type": "url",
+    "url": "https://careresolution.zohorecruit.eu/jobs/Careers"
+  },
+  "DECHERT LLP": {
+    "type": "url",
+    "url": "https://www.dechert.com/careers.html"
+  },
+  "COOPER PARRY": {
+    "type": "url",
+    "url": "https://www.cooperparry.com/services/finance-recruitment/"
+  },
+  "LAILAS FINE FOODS LTD": {
+    "type": "url",
+    "url": "https://lailasfinefoods.co.uk/category/vacancies/"
+  },
+  "HUDSON LORNE LIMITED": {
+    "type": "url",
+    "url": "https://www.hvcc.edu/studentservices/career-transfer/index.html"
+  },
+  "PLESSEY SEMICONDUCTORS LIMITED": {
+    "type": "url",
+    "url": "https://plessey.com/careers/"
+  },
+  "XTRAC LTD": {
+    "type": "url",
+    "url": "https://www.xtrac.com/careers/"
+  },
+  "HUDSON ADVISORS UK LTD": {
+    "type": "url",
+    "url": "https://fa-exvv-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/Hudson"
+  },
+  "R M BECKETT LTD": {
+    "type": "url",
+    "url": "https://rbeckett.com/jobs.php"
+  },
+  "ASHDOWN CARE HOMES LIMITED": {
+    "type": "url",
+    "url": "https://ashdowncare.com/jobs/"
+  },
+  "ICBC LONDON PLC": {
+    "type": "url",
+    "url": "https://icbc.com/about-icbc/careers"
+  },
+  "MARANTOMARK LIMITED": {
+    "type": "url",
+    "url": "https://marantomark.co.uk/careers/why-work-us"
+  },
+  "MILDREDS LIMITED": {
+    "type": "url",
+    "url": "https://www.mildreds.com/careers/"
+  },
+  "BRAINOMIX LIMITED": {
+    "type": "workable",
+    "token": "brainomix-2"
+  },
+  "KERV GROUP LIMITED": {
+    "type": "url",
+    "url": "https://kerv.ai/careers/"
+  },
+  "BANKHOUSE CARE LIMITED": {
+    "type": "url",
+    "url": "https://biracarehomes.co.uk/careers/"
+  },
+  "MERCURIA UK LLP": {
+    "type": "url",
+    "url": "https://mercuria.com/careers/"
+  },
+  "OPAL CARE HOMES LIMITED": {
+    "type": "url",
+    "url": "https://opalcarehomes.co.uk/current-vacancies/"
+  },
+  "A3 CARE LTD": {
+    "type": "url",
+    "url": "https://acareerinteaching.com/"
+  },
+  "DURBIA LIMITED": {
+    "type": "url",
+    "url": "https://www.durbia.co.uk/jobseekers.php"
+  },
+  "EDEN CARE AT HOME LIMITED": {
+    "type": "url",
+    "url": "https://edencareathome.co.uk/careers/"
+  },
+  "IKEA LTD": {
+    "type": "url",
+    "url": "https://www.ikea.com/global/en/jobs/"
+  },
+  "PEARTREELIFECARE LIMITED": {
+    "type": "url",
+    "url": "https://peartreelifecare.com/join-our-team/"
+  },
+  "OAKTREE CAPITAL MANAGEMENT UK LLP": {
+    "type": "url",
+    "url": "https://www.oaktreecapital.com/careers"
+  },
+  "GRAND CARE LIMITED": {
+    "type": "url",
+    "url": "https://www.hugedomains.com/domain_profile.cfm?d=GrandCareers.com"
+  },
+  "BRAVO CARE LIMITED": {
+    "type": "url",
+    "url": "https://bravocareers.com"
+  },
+  "DR REDDYS LABORATORIES EU LTD": {
+    "type": "url",
+    "url": "https://jobs.smartrecruiters.com/my-applications/DrReddysLaboratoriesLimited?dcr_ci=DrReddysLaboratoriesLimited"
+  },
+  "SOCIAL CARE ALBA": {
+    "type": "url",
+    "url": "https://www.social-care.org/careers/"
+  },
+  "CLARKSONS PLC": {
+    "type": "url",
+    "url": "https://www.clarksons.com/home/careers/"
+  },
+  "BELGAUM MEDICAL CENTRE LTD": {
+    "type": "url",
+    "url": "https://belgaummedicalcentre.co.uk/jobs-training.html"
+  },
+  "MECHATHERM INTERNATIONAL LIMITED": {
+    "type": "url",
+    "url": "https://mechatherm.com/Jobs"
+  },
+  "MUZZ LTD": {
+    "type": "url",
+    "url": "https://muzz.com/us/en/careers/"
+  },
+  "ETON COLLEGE": {
+    "type": "url",
+    "url": "https://www.etoncollege.com/outside-the-classroom/career-education/"
+  },
+  "GOLDSTAR CARE SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://goldstarcareservices.co.uk/career/"
+  },
+  "ASSURED GROUP LTD": {
+    "type": "url",
+    "url": "https://www.assured.com/careers"
+  },
+  "THE AMWELL CARE HOME": {
+    "type": "url",
+    "url": "https://theamwellcare.com/careers/"
+  },
+  "DAWSON INTERNATIONAL UK LTD": {
+    "type": "url",
+    "url": "https://dawsonprecision.com/careers/"
+  },
+  "TWO SIGMA INTERNATIONAL LIMITED": {
+    "type": "url",
+    "url": "https://www.twosigma.com/careers/"
+  },
+  "FORTRAY GLOBAL SERVICES LTD": {
+    "type": "url",
+    "url": "https://www.fortray.com/uk/career-path/tech-salary-calculator/it-jobs-placement-courses/"
+  },
+  "OMODA JAECOO UK LIMITED": {
+    "type": "url",
+    "url": "https://omoda-jaecoo.co.uk/careers-at-wellington-omoda-jaecoo/"
+  },
+  "BD UK LTD": {
+    "type": "url",
+    "url": "https://jobs.bd.com/en"
+  },
+  "TLT LLP": {
+    "type": "url",
+    "url": "https://www.tlt.com/careers"
+  },
+  "PERSONALIZED CARE SERVICES": {
+    "type": "url",
+    "url": "https://www.personalized-care.co.uk/jobs"
+  },
+  "WEST LOTHIAN COUNCIL": {
+    "type": "url",
+    "url": "https://westlothian.gov.uk/jobs-and-employment"
+  },
+  "SUPERHEALTHCARE": {
+    "type": "url",
+    "url": "https://superhealthcare.co.uk/recruitment"
+  },
+  "EPSILON INTERNATIONAL UK LIMITED": {
+    "type": "url",
+    "url": "https://www.epsilon.com/apac/careers-at-epsilon"
+  },
+  "CONSILIO GLOBAL UK LIMITED": {
+    "type": "url",
+    "url": "https://www.consilio.com/about-consilio/careers"
+  },
+  "GLEISS LUTZ": {
+    "type": "url",
+    "url": "https://www.gleisslutz.com/en/career"
+  },
+  "PLAN UK": {
+    "type": "url",
+    "url": "https://www.plan.com/careers"
+  },
+  "TRANSFORMING SUPPORT BIRMINGHAM LTD": {
+    "type": "url",
+    "url": "https://flatfeerecruiterjobs.co.uk/transforming-plc"
+  },
+  "MITSUBISHI HC CAPITAL UK PLC": {
+    "type": "url",
+    "url": "https://www.mitsubishi-hc-capital.com/recruit/"
+  },
+  "CAUSEWAY TECHNOLOGIES LTD": {
+    "type": "url",
+    "url": "https://www.causeway.com/careers"
+  },
+  "ETHYPHARM UK LTD": {
+    "type": "url",
+    "url": "https://www.ethypharm.co.uk/join-us/why-work-with-ethypharm/"
+  },
+  "DUNCAN TOPLIS": {
+    "type": "url",
+    "url": "https://www.duncanvilleisd.org/departments/curriculum-and-instruction/academic-support/career-and-technical-education"
+  },
+  "ECCLESIASTICAL INSURANCE OFFICE PLC": {
+    "type": "url",
+    "url": "https://app.teamtailor.com/companies/xfpqKcBF8Ew@eu/dashboard"
+  },
+  "CARE EXCELLENCE LTD": {
+    "type": "url",
+    "url": "https://www.care-excellence.com/careers"
+  },
+  "SNAP ANALYTICS LTD": {
+    "type": "url",
+    "url": "https://snapanalytics.co.uk/careers"
+  },
+  "ACCOR UK LIMITED": {
+    "type": "url",
+    "url": "https://group.accor.com/en/group/people-at-our-heart/career-growth-and-development"
+  },
+  "CUBEDIGICO UK LTD": {
+    "type": "url",
+    "url": "https://cubedigico.com/careers.html"
+  },
+  "EUROPA SOLUTIONS LIMITED": {
+    "type": "url",
+    "url": "https://reason.com/2026/06/26/michigan-spent-1-8-billion-and-only-created-602-jobs/"
+  },
+  "HAMBLETON STEEL LIMITED": {
+    "type": "url",
+    "url": "https://hambletonsteel.co.uk/careers"
+  },
+  "QUO VADIS TRUST": {
+    "type": "url",
+    "url": "https://qvt.org.uk/client-volunteering-vacancies/"
+  },
+  "XML LTD": {
+    "type": "url",
+    "url": "https://www.xml.com/job-board/"
+  },
+  "CREDITSAFE SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://www.creditsafe.com/gb/en/careers.html"
+  },
+  "UNIVERSAL FABRICATIONS COVENTRY LTD": {
+    "type": "url",
+    "url": "https://universal-fabrications.co.uk/job-opportunities/"
+  },
+  "PROSEK UK LIMITED": {
+    "type": "url",
+    "url": "https://www.prosek.com/careers/"
+  },
+  "VISTAJET INTERNATIONAL LTD": {
+    "type": "url",
+    "url": "https://vistaglobal.com/careers/"
+  },
+  "DIGITAL APPLICATIONS INTERNATIONAL LIMITED": {
+    "type": "url",
+    "url": "https://dgaps.com/jobs-opportunities"
+  },
+  "LILY CARING ANGELS LTD": {
+    "type": "url",
+    "url": "https://lilycaringangels.com/join-us.php"
+  },
+  "LEON KENNEDY LTD": {
+    "type": "url",
+    "url": "https://kennedyremovals.com.au/careers/"
+  },
+  "OAKFIELD NURSING HOME": {
+    "type": "url",
+    "url": "https://oakfieldnursing.co.uk/careers/"
+  },
+  "PROPERTY CONTRACTORS 247": {
+    "type": "url",
+    "url": "https://propertycontractors247.com/career/"
+  },
+  "RED BRICK CARE": {
+    "type": "url",
+    "url": "https://redbrickcare.com/red-brick-care---jobs.html"
+  },
+  "SHOZTECH LTD": {
+    "type": "url",
+    "url": "http://www.shoztech.co.uk/jobs/"
+  },
+  "STAR ACADEMIES": {
+    "type": "url",
+    "url": "https://staracademies.org/about-us/supplier-opportunities-and-tenders/"
+  },
+  "SAMY LTD": {
+    "type": "url",
+    "url": "https://samy1.recruitee.com/"
+  },
+  "CACI LIMITED": {
+    "type": "url",
+    "url": "https://careers.caci.com/"
+  },
+  "HMM EUROPE LTD": {
+    "type": "url",
+    "url": "https://hmm.co.uk/careers/"
+  },
+  "AMGEN LIMITED": {
+    "type": "url",
+    "url": "https://www.amgen.co.uk/careers"
+  },
+  "LOUNGERS UK LTD": {
+    "type": "url",
+    "url": "https://loungers.co.uk/careers/"
+  },
+  "NATIONWIDE CARE SERVICES DUDLEY LTD": {
+    "type": "url",
+    "url": "https://nationwidecareplus.com.au/career/"
+  },
+  "GLANUA UK LTD": {
+    "type": "url",
+    "url": "https://glanua.com/about-glanua/current-vacancies/"
+  },
+  "ST IGNATIUS COLLEGE": {
+    "type": "url",
+    "url": "https://st-ignatius.enfield.sch.uk/3105/magis-curriculum-rshe-pshe-citizenship-careers-enrichment"
+  },
+  "DATATONIC LTD": {
+    "type": "url",
+    "url": "https://datatonic.com/careers/"
+  },
+  "CITYFIBRE HOLDINGS LTD": {
+    "type": "url",
+    "url": "https://cityfibre.com/careers"
+  },
+  "DIGITASLBI LIMITED": {
+    "type": "url",
+    "url": "https://www.digitas.com/en-in/careers"
+  },
+  "APPLEWOOD SUPPORT": {
+    "type": "url",
+    "url": "https://applewoodsupport.com/reception-administrator-job-vacancy/job-vacancies/"
+  },
+  "CLAIMSORTED LTD": {
+    "type": "url",
+    "url": "https://jobs.ashbyhq.com/claimsorted"
+  },
+  "CROSSLAND TANKERS LTD": {
+    "type": "url",
+    "url": "https://crosslandtankers.com/careers/"
+  },
+  "FIRST POINT 24 LTD": {
+    "type": "url",
+    "url": "https://firstpoint-mg.com/careers/"
+  },
+  "PROAV LIMITED": {
+    "type": "url",
+    "url": "https://www.proav.com/careers"
+  },
+  "INSULET INTERNATIONAL LIMITED": {
+    "type": "url",
+    "url": "https://insulet.wd5.myworkdayjobs.com/insuletcareers"
+  },
+  "NATURALMOTION LIMITED": {
+    "type": "url",
+    "url": "https://job-boards.greenhouse.io/nmcareers"
+  },
+  "JAVELIN GLOBAL COMMODITIES UK LTD": {
+    "type": "url",
+    "url": "https://javelincommodities.com/contact/careers/"
+  },
+  "NOTPLA LIMITED": {
+    "type": "url",
+    "url": "https://notpla.jobs.personio.com/"
+  },
+  "NENDRASYS TECHNOLOGIES UK LIMITED": {
+    "type": "url",
+    "url": "https://www.nendrasys.co.uk/careers.html"
+  },
+  "BOCCARD UK LIMITED": {
+    "type": "url",
+    "url": "https://www.boccard.com/adn-boccard/join-us/"
+  },
+  "ASPIRE SUPPORT LTD": {
+    "type": "url",
+    "url": "https://aspire-support.com/images/Aspire-Care-Worker-Job-Description.pdf"
+  },
+  "KOBELCO ECOSOLUTIONS CO LTD": {
+    "type": "url",
+    "url": "https://kobelco-eco.co.jp/recruit/top.html"
+  },
+  "BEHAVIOURLAB LIMITED": {
+    "type": "url",
+    "url": "https://www.behaviourlab.com/careers"
+  },
+  "PERCEPTYX UK LTD": {
+    "type": "url",
+    "url": "https://go.perceptyx.com/careers"
+  },
+  "ACS NORTH LTD": {
+    "type": "url",
+    "url": "https://acs.com/careers/"
+  }
+}

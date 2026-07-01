@@ -304,41 +304,29 @@ export function LiveJobs({ sponsorId, companyName, isPro = false }: LiveJobsProp
                 </div>
               )}
 
-              {/* No jobs + careers URL (NHS / direct link) */}
-              {data.jobs.length === 0 && !hasFilter && data.careersUrl && (
-                <a
-                  href={data.careersUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4 transition-colors hover:border-red-300 hover:bg-muted/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-full bg-red-50">
-                      <Briefcase className="size-4 text-red-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">
-                        {keyword ? `Search "${keyword}" jobs at ${data.companyName}` : `Browse open roles at ${data.companyName}`}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {data.source === "nhs"
-                          ? "Opens NHS Jobs — the official NHS recruitment portal"
-                          : keyword
-                          ? "Opens their careers site pre-filtered to your search"
-                          : "Opens the company's official careers page"}
-                      </p>
-                    </div>
+              {/* No jobs found (with or without careers URL) */}
+              {data.jobs.length === 0 && !hasFilter && (
+                <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center">
+                  <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-red-50">
+                    <Briefcase className="size-5 text-red-500" />
                   </div>
-                  <ExternalLink className="size-4 shrink-0 text-muted-foreground" />
-                </a>
-              )}
-
-              {/* Truly no data and no careers URL */}
-              {data.jobs.length === 0 && !hasFilter && !data.careersUrl && (
-                <div className="rounded-xl bg-muted/40 p-5 text-center">
-                  <p className="text-sm text-muted-foreground">No current job listings found for this sponsor.</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Try searching by job title above, or check back later.
+                  <p className="font-semibold text-sm text-foreground">No live listings right now</p>
+                  <p className="mt-1 text-xs text-muted-foreground max-w-xs mx-auto">
+                    We couldn't find active job postings for {data.companyName} at this time — they may post directly on their careers page.
+                  </p>
+                  {data.careersUrl && (
+                    <a
+                      href={data.careersUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                    >
+                      {data.source === "nhs" ? "Search NHS Jobs" : "Explore Careers Page"}
+                      <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Or try searching for a job title above
                   </p>
                 </div>
               )}

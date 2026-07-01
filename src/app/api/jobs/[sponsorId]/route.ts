@@ -213,24 +213,18 @@ async function fetchNHSJobs(orgName: string, keyword = "", location = ""): Promi
 
 // ── Adzuna ────────────────────────────────────────────────────────────────────
 
-async function fetchAdzuna(companyName: string, keyword = ""): Promise<JobListing[]> {
-  const appId = process.env.ADZUNA_APP_ID;
-  const appKey = process.env.ADZUNA_APP_KEY;
-  if (!appId || !appKey) return [];
+// Strip common legal suffixes so Adzuna's company filter matches the
+// employer name advertisers actually use (e.g. "Monzo Bank Ltd" → "Monzo Bank").
+function adzunaCompanyQuery(name: string): string {
+  return name
+    .replace(/\b(ltd|llp|plc|limited|llc|inc|uk|gb)\b\.?/gi, " ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^A-Za-z0-9&\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  // Use keyword if provided, otherwise search by company name
-  const what = keyword || companyName;
-  const params = new URLSearchParams({
-    app_id: appId,
-    app_key: appKey,
-    results_per_page: "20",
-    what,
-    where: "UK",
-    content_type: "application/json",
-  });
-  // Restrict to the specific company when not keyword-searching
-  if (!keyword) params.set("company", companyName);
-
+async function adzunaCall(params: URLSearchParams): Promise<JobListing[]> {
   const url = `https://api.adzuna.com/v1/api/jobs/gb/search/1?${params}`;
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
@@ -259,6 +253,31 @@ async function fetchAdzuna(companyName: string, keyword = ""): Promise<JobListin
   }
 }
 
+async function fetchAdzuna(companyName: string, keyword = ""): Promise<JobListing[]> {
+  const appId = process.env.ADZUNA_APP_ID;
+  const appKey = process.env.ADZUNA_APP_KEY;
+  if (!appId || !appKey) return [];
+
+  const company = adzunaCompanyQuery(companyName);
+  const auth = { app_id: appId, app_key: appKey, results_per_page: "20", where: "UK", content_type: "application/json" };
+
+  // Keyword search: title/keyword scoped to the company across the UK.
+  if (keyword) {
+    const p = new URLSearchParams({ ...auth, what: keyword });
+    if (company) p.set("company", company);
+    const scoped = await adzunaCall(p);
+    if (scoped.length) return scoped;
+    // Fall back to keyword-only UK search if the company filter is too narrow.
+    return adzunaCall(new URLSearchParams({ ...auth, what: `${company} ${keyword}`.trim() }));
+  }
+
+  // No keyword: list this employer's open UK roles.
+  // 1) precise company filter, 2) broad company-name search if that's empty.
+  const precise = await adzunaCall(new URLSearchParams({ ...auth, what: company, company }));
+  if (precise.length) return precise;
+  return adzunaCall(new URLSearchParams({ ...auth, what: company }));
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function GET(
@@ -284,75 +303,68 @@ export async function GET(
     keyword,
   };
 
-  // ── Greenhouse ──
-  if (entry?.type === "greenhouse" && entry.token) {
-    const jobs = await fetchGreenhouse(entry.token, keyword);
-    return NextResponse.json({
-      ...base,
-      source: "greenhouse",
-      careersUrl: `https://boards.greenhouse.io/${entry.token}`,
-      jobs: jobs.slice(0, 20),
-      totalJobs: jobs.length,
-    });
-  }
+  // Resolve the primary source (the company's own ATS / NHS feed) and its
+  // canonical careers URL. We try this first because it's the most accurate
+  // and links straight to the employer's apply flow.
+  let primaryJobs: JobListing[] = [];
+  let primarySource: JobsResponse["source"] = "none";
+  let primaryCareersUrl: string | undefined;
 
-  // ── Lever ──
-  if (entry?.type === "lever" && entry.token) {
-    const jobs = await fetchLever(entry.token, keyword);
-    return NextResponse.json({
-      ...base,
-      source: "lever",
-      careersUrl: `https://jobs.lever.co/${entry.token}`,
-      jobs: jobs.slice(0, 20),
-      totalJobs: jobs.length,
-    });
-  }
-
-  // ── Workable ──
-  if (entry?.type === "workable" && entry.token) {
-    const jobs = await fetchWorkable(entry.token, keyword);
-    return NextResponse.json({
-      ...base,
-      source: "workable",
-      careersUrl: `https://apply.workable.com/${entry.token}/`,
-      jobs: jobs.slice(0, 20),
-      totalJobs: jobs.length,
-    });
-  }
-
-  // ── NHS Jobs scrape (no API key needed) ──
   const isNHS =
     entry?.type === "nhs" ||
     /nhs|hospital|health.*trust|trust.*health|foundation trust/i.test(sponsor.organisationName);
 
-  if (isNHS) {
+  if (entry?.type === "greenhouse" && entry.token) {
+    primaryJobs = await fetchGreenhouse(entry.token, keyword);
+    primarySource = "greenhouse";
+    primaryCareersUrl = `https://boards.greenhouse.io/${entry.token}`;
+  } else if (entry?.type === "lever" && entry.token) {
+    primaryJobs = await fetchLever(entry.token, keyword);
+    primarySource = "lever";
+    primaryCareersUrl = `https://jobs.lever.co/${entry.token}`;
+  } else if (entry?.type === "workable" && entry.token) {
+    primaryJobs = await fetchWorkable(entry.token, keyword);
+    primarySource = "workable";
+    primaryCareersUrl = `https://apply.workable.com/${entry.token}/`;
+  } else if (isNHS) {
     const city = location || sponsor.town || "";
-    const jobs = await fetchNHSJobs(sponsor.organisationName, keyword, city);
-    const nhsSearch =
+    primaryJobs = await fetchNHSJobs(sponsor.organisationName, keyword, city);
+    primarySource = "nhs";
+    primaryCareersUrl =
+      entry?.url ??
       `https://www.jobs.nhs.uk/candidate/search/results?keyword=${encodeURIComponent(keyword)}` +
-      (city ? `&location=${encodeURIComponent(city)}&distance=5` : "");
+        (city ? `&location=${encodeURIComponent(city)}&distance=5` : "");
+  }
+
+  if (primaryJobs.length > 0) {
     return NextResponse.json({
       ...base,
-      source: "nhs",
-      careersUrl: entry?.url ?? nhsSearch,
-      jobs: jobs.slice(0, 20),
-      totalJobs: jobs.length,
+      source: primarySource,
+      careersUrl: primaryCareersUrl,
+      jobs: primaryJobs.slice(0, 20),
+      totalJobs: primaryJobs.length,
     });
   }
 
-  // ── Adzuna fallback: covers all 126K sponsors with no dedicated ATS ──
+  // ── Adzuna fallback ──
+  // The primary feed returned nothing (or the sponsor has no public ATS) —
+  // surface any live UK jobs for this employer from the Adzuna aggregator so
+  // the goal "if a UK job exists, show it" holds for every sponsor.
   const adzunaJobs = await fetchAdzuna(sponsor.organisationName, keyword);
   if (adzunaJobs.length > 0) {
     return NextResponse.json({
       ...base,
       source: "adzuna" as const,
+      // Keep the employer's own careers page as the "View all" target when we
+      // have one; otherwise the Adzuna apply links still let users through.
+      careersUrl: primaryCareersUrl ?? entry?.url,
       jobs: adzunaJobs,
       totalJobs: adzunaJobs.length,
     });
   }
 
   // ── Last resort: careers URL with keyword pre-filled where possible ──
-  let careersUrl = entry?.url;
+  let careersUrl = primaryCareersUrl ?? entry?.url;
   if (careersUrl && keyword) {
     // Append keyword to known search-friendly career URLs
     if (careersUrl.includes("amazon.jobs")) {
@@ -379,10 +391,22 @@ export async function GET(
       careersUrl = `https://mycareer.hsbc.com/en_GB/external/SearchJobs/${encodeURIComponent(keyword)}`;
     }
   }
+  // Always guarantee a careersUrl — fall back to Google "site:careers" search
+  // so every one of the 126K sponsors has a way for users to explore jobs.
+  const fallbackCareersUrl =
+    careersUrl ??
+    `https://www.google.com/search?q=${encodeURIComponent(`"${sponsor.organisationName}" careers jobs UK`)}`;
+
   return NextResponse.json({
     ...base,
-    source: entry ? (entry.type as JobsResponse["source"]) : "none",
-    careersUrl,
+    // Prefer the resolved primary source (e.g. "nhs" for trusts matched by
+    // name with no table entry) so the UI shows the right empty-state CTA.
+    source: primarySource !== "none"
+      ? primarySource
+      : entry
+        ? (entry.type as JobsResponse["source"])
+        : "none",
+    careersUrl: fallbackCareersUrl,
     jobs: [],
   });
 }

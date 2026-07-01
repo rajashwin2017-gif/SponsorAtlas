@@ -59,6 +59,8 @@ export interface SocCode {
   isOnIsl: boolean;
   isOnTsl: boolean;
   industryCategory: string;
+  /** Going rate set by a national pay scale (NHS/STRB) — varies by band/region, so no single figure applies. */
+  nationalPayScale?: boolean;
   description?: string;
 }
 

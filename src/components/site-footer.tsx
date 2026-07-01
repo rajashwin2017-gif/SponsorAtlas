@@ -1,43 +1,36 @@
 import Link from "next/link";
-import { Globe2, ShieldCheck } from "lucide-react";
+import { Globe2, ShieldCheck, Linkedin, Twitter, Instagram, MapPin, Mail } from "lucide-react";
+import { FooterBackToTop } from "@/components/footer-back-to-top";
 
-const COLUMNS = [
-  {
-    title: "Product",
-    links: [
-      { href: "/search", label: "Sponsor Search" },
-      { href: "/jobs", label: "Job Board" },
-      { href: "/soc-codes", label: "SOC Code Intelligence" },
-      { href: "/cv-builder", label: "CV Builder" },
-      { href: "/community", label: "Community" },
-      { href: "/pricing", label: "Pricing" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { href: "/soc-codes", label: "Salary thresholds 2026" },
-      { href: "/soc-codes", label: "SOC code lookup" },
-      { href: "/pricing", label: "Compare plans" },
-      { href: "/community", label: "Success stories" },
-    ],
-  },
-  {
-    title: "Account",
-    links: [
-      { href: "/login", label: "Sign in" },
-      { href: "/register", label: "Create account" },
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/pricing", label: "Upgrade to Pro" },
-    ],
-  },
+const QUICK_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/search", label: "Sponsor Search" },
+  { href: "/jobs", label: "Job Board" },
+  { href: "/soc-codes", label: "SOC Codes" },
+  { href: "/pricing", label: "Pricing" },
+];
+
+const SOCIAL = [
+  { href: "#", label: "LinkedIn", icon: Linkedin },
+  { href: "#", label: "X (Twitter)", icon: Twitter },
+  { href: "#", label: "Instagram", icon: Instagram },
+];
+
+const LEGAL = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/cookies", label: "Cookie Policy" },
 ];
 
 export function SiteFooter() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-zinc-950 text-zinc-300">
-      <div className="container py-12">
-        <div className="grid gap-10 md:grid-cols-[1.5fr_repeat(3,1fr)]">
+    <footer className="relative overflow-hidden bg-zinc-950 text-zinc-300">
+      <div className="container relative z-10 pt-16 pb-28 md:pb-[11vw]">
+        {/* Top: brand + columns */}
+        <div className="grid gap-10 md:grid-cols-[1.6fr_repeat(3,1fr)]">
+          {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 font-heading text-lg font-bold text-white">
               <span className="grid size-8 place-items-center rounded-lg bg-red-600 text-white">
@@ -45,28 +38,62 @@ export function SiteFooter() {
               </span>
               The Sponsor<span className="text-red-500"> Finder</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-zinc-400">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-400">
               UK visa sponsorship intelligence. Find employers with proven sponsorship history and
               real hiring signals.
             </p>
           </div>
-          {COLUMNS.map((col) => (
-            <div key={col.title}>
-              <h3 className="font-heading text-sm font-semibold text-white">{col.title}</h3>
-              <ul className="mt-4 space-y-2.5">
-                {col.links.map((l) => (
-                  <li key={l.label}>
-                    <Link
-                      href={l.href}
-                      className="text-sm text-zinc-400 transition-colors hover:text-white"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+
+          {/* Contact */}
+          <div>
+            <h3 className="font-display text-sm font-semibold uppercase tracking-[0.16em] text-white">Contact Us</h3>
+            <address className="mt-5 space-y-3 text-sm not-italic text-zinc-400">
+              <p className="flex items-start gap-2.5">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-red-500" aria-hidden="true" />
+                United Kingdom
+              </p>
+              <p>
+                <a href="mailto:hello@thesponsorfinder.app" className="flex items-center gap-2.5 font-medium text-white transition-colors hover:text-red-400">
+                  <Mail className="size-4 shrink-0 text-red-500" aria-hidden="true" />
+                  hello@thesponsorfinder.app
+                </a>
+              </p>
+            </address>
+          </div>
+
+          {/* Quick links */}
+          <div>
+            <h3 className="font-display text-sm font-semibold uppercase tracking-[0.16em] text-white">Quick Links</h3>
+            <ul className="mt-5 space-y-3">
+              {QUICK_LINKS.map((l) => (
+                <li key={l.label}>
+                  <Link href={l.href} className="text-sm text-zinc-400 transition-colors hover:text-white">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Social */}
+          <div>
+            <h3 className="font-display text-sm font-semibold uppercase tracking-[0.16em] text-white">Social</h3>
+            <ul className="mt-5 space-y-3">
+              {SOCIAL.map((s) => (
+                <li key={s.label}>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-2.5 text-sm text-zinc-400 transition-colors hover:text-white"
+                  >
+                    <s.icon className="size-4 text-zinc-500 transition-colors group-hover:text-red-500" aria-hidden="true" />
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* Persistent legal disclaimer — appears on every page */}
@@ -91,11 +118,39 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-zinc-500 sm:flex-row">
-          <p>© {new Date().getFullYear()} The Sponsor Finder. All rights reserved.</p>
-          <p className="tabular">Data last refreshed: 17 June 2026</p>
+        {/* Divider + bottom bar */}
+        <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {year} The Sponsor Finder. All rights reserved.</p>
+          <nav className="flex flex-wrap items-center gap-x-6 gap-y-2" aria-label="Legal">
+            {LEGAL.map((l) => (
+              <Link key={l.label} href={l.href} className="transition-colors hover:text-white">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
+
+      {/* Oversized watermark wordmark — scales to fit the width so the full name always shows */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-0 select-none overflow-hidden" aria-hidden="true">
+        <svg viewBox="0 0 1200 160" className="w-full translate-y-[8%]" role="presentation" focusable="false">
+          <text
+            x="600"
+            y="120"
+            textAnchor="middle"
+            textLength="1160"
+            lengthAdjust="spacingAndGlyphs"
+            fontSize="128"
+            fontWeight="700"
+            fill="rgba(255,255,255,0.05)"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            The Sponsor Finder
+          </text>
+        </svg>
+      </div>
+
+      <FooterBackToTop />
     </footer>
   );
 }

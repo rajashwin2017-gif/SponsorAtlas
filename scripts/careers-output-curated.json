@@ -1,0 +1,562 @@
+{
+  "TATA CONSULTANCY SERVICES": {
+    "type": "url",
+    "url": "https://www.tcs.com/careers"
+  },
+  "PRICEWATERHOUSECOOPERS LLP": {
+    "type": "url",
+    "url": "https://www.pwc.co.uk/careers.html"
+  },
+  "ACCENTURE UK LIMITED": {
+    "type": "url",
+    "url": "https://www.accenture.com/gb-en/careers"
+  },
+  "INFOSYS LIMITED": {
+    "type": "url",
+    "url": "https://www.infosys.com/careers.html"
+  },
+  "MCKINSEY COMPANY INC UNITED KINGDOM": {
+    "type": "url",
+    "url": "https://www.mckinsey.com/careers"
+  },
+  "THE BOSTON CONSULTING GROUP UK LLP": {
+    "type": "url",
+    "url": "https://careers.bcg.com/"
+  },
+  "COFORGE UK LIMITED": {
+    "type": "url",
+    "url": "https://www.coforge.com/careers"
+  },
+  "VIRTUSA CONSULTING AND SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://www.virtusa.com/careers"
+  },
+  "UST GLOBAL PRIVATE LIMITED": {
+    "type": "url",
+    "url": "https://www.ust.com/en/careers"
+  },
+  "RSM UK TAX AND ACCOUNTING LIMITED": {
+    "type": "url",
+    "url": "https://www.rsmuk.com/careers"
+  },
+  "NTT DATA UK LIMITED": {
+    "type": "url",
+    "url": "https://www.nttdata.com/global/en/careers"
+  },
+  "ATOS IT SERVICES UK LTD": {
+    "type": "url",
+    "url": "https://atos.net/en/careers"
+  },
+  "EPAM SYSTEMS LTD": {
+    "type": "url",
+    "url": "https://www.epam.com/careers"
+  },
+  "BARINGA PARTNERS LLP": {
+    "type": "url",
+    "url": "https://www.baringa.com/en/careers/"
+  },
+  "QUALITEST SOFTWARE TESTING LIMITED": {
+    "type": "url",
+    "url": "https://www.qualitestgroup.com/careers/"
+  },
+  "INTELLECT DESIGN ARENA LIMITED": {
+    "type": "url",
+    "url": "https://www.intellectdesign.com/careers/"
+  },
+  "ALTEN LIMITED": {
+    "type": "url",
+    "url": "https://www.alten.com/join-us/"
+  },
+  "LOGICA LTD TA CGI": {
+    "type": "url",
+    "url": "https://www.cgi.com/uk/en-gb/careers"
+  },
+  "BARCLAYS EXECUTION SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://home.barclays/careers/"
+  },
+  "BARCLAYS BANK PLC": {
+    "type": "url",
+    "url": "https://home.barclays/careers/"
+  },
+  "MORGAN STANLEY UK LIMITED": {
+    "type": "url",
+    "url": "https://www.morganstanley.com/careers"
+  },
+  "NATWEST GROUP PLC": {
+    "type": "url",
+    "url": "https://jobs.natwestgroup.com/"
+  },
+  "BLOOMBERG LP": {
+    "type": "url",
+    "url": "https://careers.bloomberg.com/"
+  },
+  "BNP PARIBAS LONDON BRANCH": {
+    "type": "url",
+    "url": "https://group.bnpparibas/en/careers"
+  },
+  "BANK OF AMERICA NA": {
+    "type": "url",
+    "url": "https://careers.bankofamerica.com/"
+  },
+  "BLACKROCK INVESTMENT MANAGEMENT UK LIMITED": {
+    "type": "url",
+    "url": "https://careers.blackrock.com/"
+  },
+  "MACQUARIE GROUP SERVICES AUSTRALIA PTY LTD UK BRANCH": {
+    "type": "url",
+    "url": "https://www.macquarie.com/uk/en/careers.html"
+  },
+  "CITADEL ENTERPRISE EUROPE LIMITED": {
+    "type": "url",
+    "url": "https://www.citadel.com/careers/"
+  },
+  "BANCO SANTANDER SA LONDON BRANCH": {
+    "type": "url",
+    "url": "https://www.santander.com/en/careers"
+  },
+  "MONZO BANK LTD": {
+    "type": "url",
+    "url": "https://monzo.com/careers/"
+  },
+  "NMROTHSCHILD SONS LIMITED": {
+    "type": "url",
+    "url": "https://www.rothschildandco.com/en/careers/"
+  },
+  "MUFG BANK LTD": {
+    "type": "url",
+    "url": "https://www.mufgemea.com/careers/"
+  },
+  "SOCIETE GENERALE LONDON BRANCH": {
+    "type": "url",
+    "url": "https://careers.societegenerale.com/"
+  },
+  "BANK OF NEW YORK MELLON": {
+    "type": "url",
+    "url": "https://www.bny.com/corporate/global/en/careers.html"
+  },
+  "DRW INVESTMENTS UK LTD": {
+    "type": "url",
+    "url": "https://drw.com/work-at-drw"
+  },
+  "STATE STREET BANK AND TRUST COMPANY": {
+    "type": "url",
+    "url": "https://careers.statestreet.com/"
+  },
+  "MASTERCARD UK MANAGEMENT SERVICES LTD": {
+    "type": "url",
+    "url": "https://careers.mastercard.com/"
+  },
+  "CREDIT AGRICOLE CORPORATE INVESTMENT BANK LONDON BRANCH": {
+    "type": "url",
+    "url": "https://www.ca-cib.com/careers"
+  },
+  "INVESTEC BANK PLC": {
+    "type": "url",
+    "url": "https://www.investec.com/en_gb/welcome-to-investec/careers.html"
+  },
+  "ARTHUR J GALLAGHER SERVICES UK LIMITED": {
+    "type": "url",
+    "url": "https://careers.ajg.com/"
+  },
+  "TOWERS WATSON LIMITED TA WILLIS TOWERS WATSON": {
+    "type": "url",
+    "url": "https://careers.wtwco.com/"
+  },
+  "BROOKFIELD ASSET MANAGER UK HOLDCO LIMITED": {
+    "type": "url",
+    "url": "https://www.brookfield.com/careers"
+  },
+  "CRISIL IREVNA UK LIMITED": {
+    "type": "url",
+    "url": "https://www.crisil.com/en/home/careers.html"
+  },
+  "TIKTOK INFORMATION TECHNOLOGIES UK LIMITED": {
+    "type": "url",
+    "url": "https://careers.tiktok.com/"
+  },
+  "MICROSOFT LIMITED": {
+    "type": "url",
+    "url": "https://careers.microsoft.com/"
+  },
+  "SKYSCANNER LIMITED": {
+    "type": "url",
+    "url": "https://www.skyscanner.net/jobs"
+  },
+  "ROOFOODS LTD TA DELIVEROO": {
+    "type": "url",
+    "url": "https://careers.deliveroo.co.uk/"
+  },
+  "SAP UK LIMITED": {
+    "type": "url",
+    "url": "https://jobs.sap.com/"
+  },
+  "HUAWEI TECHNOLOGIES UK CO LTD": {
+    "type": "url",
+    "url": "https://career.huawei.com/"
+  },
+  "SIEMENS MOBILITY LIMITED": {
+    "type": "url",
+    "url": "https://www.siemens.com/uk/en/company/jobs.html"
+  },
+  "BOOKINGCOM TRANSPORT LIMITED": {
+    "type": "url",
+    "url": "https://careers.booking.com/"
+  },
+  "DOUBLE NEGATIVE LIMITED": {
+    "type": "url",
+    "url": "https://www.dneg.com/careers/"
+  },
+  "LUXOFT FINANCIAL SERVICES UK LIMITED": {
+    "type": "url",
+    "url": "https://www.luxoft.com/careers"
+  },
+  "UNIVERSITY OF OXFORD": {
+    "type": "url",
+    "url": "https://www.jobs.ox.ac.uk/"
+  },
+  "THE UNIVERSITY OF CAMBRIDGE": {
+    "type": "url",
+    "url": "https://www.jobs.cam.ac.uk/"
+  },
+  "THE LONDON SCHOOL OF ECONOMICS AND POLITICAL SCIENCE": {
+    "type": "url",
+    "url": "https://jobs.lse.ac.uk/"
+  },
+  "UNIVERSITY OF DURHAM": {
+    "type": "url",
+    "url": "https://www.durham.ac.uk/about-us/jobs/"
+  },
+  "CAMBRIDGE UNIVERSITY PRESS ASSESSMENT": {
+    "type": "url",
+    "url": "https://www.cambridge.org/careers"
+  },
+  "CITY ST GEORGES UNIVERSITY OF LONDON": {
+    "type": "url",
+    "url": "https://www.city.ac.uk/about/jobs"
+  },
+  "UNIVERSITY OF THE WEST OF ENGLAND": {
+    "type": "url",
+    "url": "https://www.uwe.ac.uk/about/jobs"
+  },
+  "UNIVERSITY OF DUNDEE": {
+    "type": "url",
+    "url": "https://www.dundee.ac.uk/jobs"
+  },
+  "JAGUAR LAND ROVER LIMITED": {
+    "type": "url",
+    "url": "https://www.jaguarlandrovercareers.com/"
+  },
+  "BP PLC": {
+    "type": "url",
+    "url": "https://www.bp.com/en/global/corporate/careers.html"
+  },
+  "OVE ARUP AND PARTNERS INTERNATIONAL LTD": {
+    "type": "url",
+    "url": "https://www.arup.com/careers"
+  },
+  "ROLLSROYCE PLC": {
+    "type": "url",
+    "url": "https://careers.rolls-royce.com/"
+  },
+  "AIRBUS OPERATIONS LIMITED": {
+    "type": "url",
+    "url": "https://www.airbus.com/en/careers"
+  },
+  "SIEMENS GAMESA RENEWABLE ENERGY LIMITED": {
+    "type": "url",
+    "url": "https://www.siemensgamesa.com/en-int/careers"
+  },
+  "SCOTTISHPOWER LIMITED": {
+    "type": "url",
+    "url": "https://www.scottishpower.com/pages/careers.aspx"
+  },
+  "SCHLUMBERGER OILFIELD UK LIMITED": {
+    "type": "url",
+    "url": "https://careers.slb.com/"
+  },
+  "SCHLUMBERGER OILFIELD UK LTD": {
+    "type": "url",
+    "url": "https://careers.slb.com/"
+  },
+  "BAKER HUGHES ENERGY TECHNOLOGY UK LIMITED": {
+    "type": "url",
+    "url": "https://careers.bakerhughes.com/"
+  },
+  "BAE SYSTEMS PLC": {
+    "type": "url",
+    "url": "https://www.baesystems.com/en/careers"
+  },
+  "SEVERN TRENT": {
+    "type": "url",
+    "url": "https://careers.severntrent.com/"
+  },
+  "NETWORK RAIL INFRASTRUCTURE": {
+    "type": "url",
+    "url": "https://www.networkrail.co.uk/careers/"
+  },
+  "BAMFORD BUS COMPANY LIMITED TRADING AS WRIGHTBUS": {
+    "type": "url",
+    "url": "https://www.wrightbus.com/en-gb/careers"
+  },
+  "HALLIBURTON MANUFACTURING AND SERVICES LTD": {
+    "type": "url",
+    "url": "https://jobs.halliburton.com/"
+  },
+  "MCLAREN AUTOMOTIVE LIMITED": {
+    "type": "url",
+    "url": "https://careers.mclaren.com/"
+  },
+  "WILLIAMS GRAND PRIX ENGINEERING LIMITED": {
+    "type": "url",
+    "url": "https://www.williamsf1.com/careers"
+  },
+  "MERCEDESBENZ GRAND PRIX LTD": {
+    "type": "url",
+    "url": "https://www.mercedesamgf1.com/careers"
+  },
+  "BENTLEY MOTORS LIMITED": {
+    "type": "url",
+    "url": "https://www.bentleycareers.com/"
+  },
+  "KIER LTD": {
+    "type": "url",
+    "url": "https://careers.kier.co.uk/"
+  },
+  "RAMBOLL UK LIMITED": {
+    "type": "url",
+    "url": "https://www.ramboll.com/careers"
+  },
+  "BURO HAPPOLD ENGINEERS LIMITED": {
+    "type": "url",
+    "url": "https://www.burohappold.com/careers/"
+  },
+  "LONZA BIOLOGICS PLC": {
+    "type": "url",
+    "url": "https://www.lonza.com/careers"
+  },
+  "VESTAS TECHNOLOGY UK LIMITED": {
+    "type": "url",
+    "url": "https://www.vestas.com/en/careers"
+  },
+  "SCORE GROUP LTD": {
+    "type": "url",
+    "url": "https://www.score-group.com/careers/"
+  },
+  "CAF RAIL UK LIMITED": {
+    "type": "url",
+    "url": "https://www.caf.net/en/empleo/index.php"
+  },
+  "BALFOUR BEATTY GROUP EMPLOYMENT LIMITED": {
+    "type": "url",
+    "url": "https://www.balfourbeatty.com/careers/"
+  },
+  "UNITED KINGDOM ATOMIC ENERGY AUTHORITY": {
+    "type": "url",
+    "url": "https://careers.ukaea.uk/"
+  },
+  "DEVONPORT ROYAL DOCKYARD LIMITED": {
+    "type": "url",
+    "url": "https://www.babcockinternational.com/careers/"
+  },
+  "SCHNEIDER ELECTRIC UK LTD": {
+    "type": "url",
+    "url": "https://www.se.com/uk/en/about-us/careers/"
+  },
+  "HILTI GT BRITAIN LIMITED": {
+    "type": "url",
+    "url": "https://careers.hilti.group/"
+  },
+  "ATKINSREALIS PPS LIMITED": {
+    "type": "url",
+    "url": "https://careers.atkinsrealis.com/"
+  },
+  "ARCADIS HUMAN RESOURCES LIMITED": {
+    "type": "url",
+    "url": "https://careers.arcadis.com/"
+  },
+  "UNILEVER UK LIMITED": {
+    "type": "url",
+    "url": "https://careers.unilever.com/"
+  },
+  "BRITISH AMERICAN TOBACCO PLC": {
+    "type": "url",
+    "url": "https://www.bat-careers.com/"
+  },
+  "J SAINSBURY PLC": {
+    "type": "url",
+    "url": "https://www.sainsburys.jobs/"
+  },
+  "TESCO STORES LIMITED": {
+    "type": "url",
+    "url": "https://www.tesco-careers.com/"
+  },
+  "ASDA STORES LTD": {
+    "type": "url",
+    "url": "https://www.asda.jobs/"
+  },
+  "LIDL GREAT BRITAIN LIMITED": {
+    "type": "url",
+    "url": "https://careers.lidl.co.uk/"
+  },
+  "DIAGEO PLC": {
+    "type": "url",
+    "url": "https://www.diageo.com/en/careers"
+  },
+  "NESTLE UK LIMITED": {
+    "type": "url",
+    "url": "https://www.nestle.co.uk/en-gb/jobs"
+  },
+  "RECKITT BENCKISER GROUP PLC": {
+    "type": "url",
+    "url": "https://careers.reckitt.com/"
+  },
+  "NOVARTIS PHARMACEUTICALS UK LTD": {
+    "type": "url",
+    "url": "https://www.novartis.com/careers"
+  },
+  "LINDT SPRUNGLI UK LTD": {
+    "type": "url",
+    "url": "https://www.lindt.co.uk/careers"
+  },
+  "KARRO FOOD LIMITED": {
+    "type": "url",
+    "url": "https://www.karro.com/careers"
+  },
+  "DISHOOM LIMITED TA DISHOOM": {
+    "type": "url",
+    "url": "https://www.dishoom.com/careers/"
+  },
+  "ALLEN OVERY SHEARMAN STERLING SERVICE COMPANY LIMITED": {
+    "type": "url",
+    "url": "https://www.aoshearman.com/en/careers"
+  },
+  "HERBERT SMITH FREEHILLS LLP": {
+    "type": "url",
+    "url": "https://careers.herbertsmithfreehills.com/"
+  },
+  "FRESHFIELDS SERVICE COMPANY": {
+    "type": "url",
+    "url": "https://careers.freshfields.com/"
+  },
+  "DLA PIPER UK LLP": {
+    "type": "url",
+    "url": "https://www.dlapiper.com/en-gb/careers"
+  },
+  "SKADDENARPSSLATEMEAGHER FLOM UK LLP": {
+    "type": "url",
+    "url": "https://www.skadden.com/careers"
+  },
+  "BUPA CARE SERVICES": {
+    "type": "url",
+    "url": "https://www.bupa.com/careers"
+  },
+  "NUFFIELD HEALTH HOSPITALS DIVISION": {
+    "type": "url",
+    "url": "https://www.nuffieldhealth.com/careers"
+  },
+  "SPIRE HEALTHCARE LTD": {
+    "type": "url",
+    "url": "https://www.spirecareers.com/"
+  },
+  "THE HARLEY STREET CLINIC": {
+    "type": "url",
+    "url": "https://www.hcahealthcare.co.uk/careers"
+  },
+  "THE WELLINGTON HOSPITAL": {
+    "type": "url",
+    "url": "https://www.hcahealthcare.co.uk/careers"
+  },
+  "ROYAL MENCAP SOCIETY": {
+    "type": "url",
+    "url": "https://jobs.mencap.org.uk/"
+  },
+  "DEPARTMENT FOR WORK AND PENSIONS": {
+    "type": "url",
+    "url": "https://www.civilservicejobs.service.gov.uk/"
+  },
+  "HM REVENUE CUSTOMS": {
+    "type": "url",
+    "url": "https://www.civilservicejobs.service.gov.uk/"
+  },
+  "GLASGOW CITY COUNCIL": {
+    "type": "url",
+    "url": "https://www.glasgow.gov.uk/jobs"
+  },
+  "THE CITY OF EDINBURGH COUNCIL": {
+    "type": "url",
+    "url": "https://www.myjobscotland.gov.uk/councils/city-edinburgh-council/jobs"
+  },
+  "WEST SUSSEX COUNTY COUNCIL": {
+    "type": "url",
+    "url": "https://www.westsussex.gov.uk/jobs"
+  },
+  "LIVERPOOL CITY COUNCIL": {
+    "type": "url",
+    "url": "https://careers.liverpool.gov.uk/"
+  },
+  "NORFOLK COUNTY COUNCIL": {
+    "type": "url",
+    "url": "https://www.norfolk.gov.uk/jobs-and-careers"
+  },
+  "LANCASHIRE COUNTY COUNCIL": {
+    "type": "url",
+    "url": "https://www.lancashire.gov.uk/jobs/"
+  },
+  "LONDON BOROUGH OF CAMDEN": {
+    "type": "url",
+    "url": "https://jobs.camden.gov.uk/"
+  },
+  "SANCTUARY HOUSING ASSOCIATION": {
+    "type": "url",
+    "url": "https://www.sanctuary.co.uk/careers"
+  },
+  "ANGLO BEEF PROCESSORS": {
+    "type": "url",
+    "url": "https://www.abpfoodgroup.com/careers/"
+  },
+  "HARRIS FEDERATION": {
+    "type": "url",
+    "url": "https://www.harriscareers.org.uk/"
+  },
+  "LIFT SCHOOLS": {
+    "type": "url",
+    "url": "https://www.liftschools.org.uk/careers"
+  },
+  "OCADO CENTRAL SERVICES LIMITED": {
+    "type": "url",
+    "url": "https://careers.ocadogroup.com/"
+  },
+  "ARAMCO OVERSEAS COMPANY UK LTD": {
+    "type": "url",
+    "url": "https://www.aramco.com/en/careers"
+  },
+  "ESSO PETROLEUM COMPANY LTD": {
+    "type": "url",
+    "url": "https://jobs.exxonmobil.com/"
+  },
+  "SIGNATURE SENIOR LIFESTYLE LTD": {
+    "type": "url",
+    "url": "https://www.signaturecareers.co.uk/"
+  },
+  "ASCENTI PHYSIO LIMITED": {
+    "type": "url",
+    "url": "https://www.ascenti.co.uk/careers"
+  },
+  "DAMIRA DENTAL STUDIOS LTD": {
+    "type": "url",
+    "url": "https://www.damiradental.co.uk/careers"
+  },
+  "MEDIABRANDS EMEA LTD": {
+    "type": "url",
+    "url": "https://www.ipgmediabrands.com/careers/"
+  },
+  "THE BETSI CADWALADR UNIVERSITY HEALTH BOARD": {
+    "type": "url",
+    "url": "https://bcuhb.nhs.wales/working-with-us/"
+  },
+  "SWANSEA BAY UNIVERSITY LOCAL HEALTH BOARD": {
+    "type": "url",
+    "url": "https://sbuhb.nhs.wales/work-for-us/"
+  }
+}

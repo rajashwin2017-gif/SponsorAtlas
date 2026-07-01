@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, Banknote, CheckCircle2, XCircle, Calculator, BadgeCheck, Clock } from "lucide-react";
+import { Search, Banknote, CheckCircle2, XCircle, Calculator, BadgeCheck, Building2, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SOC_CODES } from "@/lib/soc-data";
+import { SOC_CODES, SOC_DATA_SOURCES } from "@/lib/soc-data";
 import { formatGBP, cn } from "@/lib/utils";
 import type { SocCode } from "@/lib/types";
 
@@ -38,7 +38,18 @@ export function SocClient() {
       <div className="text-center">
         <h1 className="font-display text-3xl tracking-tight sm:text-4xl">SOC Code Intelligence</h1>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          Find your occupation code, 2026 salary thresholds and check eligibility in seconds.
+          Find your occupation code, the official Skilled Worker going rates and check eligibility in seconds.
+        </p>
+        <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground">
+          Official figures from{" "}
+          <a href={SOC_DATA_SOURCES.goingRatesUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 font-medium text-red-600 underline decoration-dotted underline-offset-2 hover:text-red-700">
+            gov.uk Appendix Skilled Worker going rates <ExternalLink className="size-3" />
+          </a>{" "}
+          (updated {SOC_DATA_SOURCES.goingRatesUpdated}) and the{" "}
+          <a href={SOC_DATA_SOURCES.islUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-red-600 underline decoration-dotted underline-offset-2 hover:text-red-700">
+            Immigration Salary List
+          </a>{" "}
+          ({SOC_DATA_SOURCES.islUpdated}). Indicative only — always verify your role on gov.uk.
         </p>
       </div>
 
@@ -66,7 +77,7 @@ export function SocClient() {
                     <p className="font-mono text-xs text-zinc-700">SOC {s.socCode} · {s.industryCategory}</p>
                   </div>
                   <span className="shrink-0 text-sm font-semibold tabular text-red-600">
-                    {formatGBP(s.goingRate2026)}
+                    {s.nationalPayScale ? "Pay scale" : formatGBP(s.goingRate2026)}
                   </span>
                 </button>
               </li>
@@ -84,27 +95,51 @@ export function SocClient() {
               <Badge variant="outline">{selected.skillLevel}</Badge>
               <Badge variant="default">{selected.industryCategory}</Badge>
               {selected.isOnIsl && <Badge variant="emerald"><BadgeCheck className="size-3.5" /> Immigration Salary List</Badge>}
-              {selected.isOnTsl && <Badge variant="amber"><Clock className="size-3.5" /> Temporary Salary List</Badge>}
+              {selected.nationalPayScale && <Badge variant="amber"><Building2 className="size-3.5" /> National pay scale</Badge>}
             </div>
             <h2 className="mt-3 font-heading text-2xl font-bold">{selected.occupationTitle}</h2>
             {selected.description && <p className="mt-2 text-sm text-muted-foreground">{selected.description}</p>}
           </div>
 
-          <div className="grid gap-px bg-border sm:grid-cols-2">
-            <div className="bg-card p-6">
-              <p className="eyebrow">2026 Going Rate</p>
-              <p className="mt-1 font-heading text-3xl font-bold gradient-text tabular">{formatGBP(selected.goingRate2026)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Standard threshold for experienced workers</p>
+          {selected.nationalPayScale ? (
+            <div className="border-b border-border p-6">
+              <p className="eyebrow">Going rate</p>
+              <p className="mt-1 font-heading text-2xl font-bold">National pay scale</p>
+              <p className="mt-2 max-w-prose text-sm text-muted-foreground">
+                This is a healthcare or education role, so the salary is set by the relevant national pay
+                scale (e.g. NHS Agenda for Change, or teacher pay scales) and varies by pay band and UK
+                region — there is no single going-rate figure. Check the band that applies to your role on{" "}
+                <a href={SOC_DATA_SOURCES.healthEduUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 font-medium text-red-600 underline decoration-dotted underline-offset-2 hover:text-red-700">
+                  gov.uk <ExternalLink className="size-3" />
+                </a>.
+              </p>
             </div>
-            <div className="bg-card p-6">
-              <p className="eyebrow">2026 Lower Rate</p>
-              <p className="mt-1 font-heading text-3xl font-bold tabular text-zinc-700">{formatGBP(selected.lowerRate2026)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">New entrant / eligible discount rate</p>
+          ) : (
+            <div className="grid gap-px bg-border sm:grid-cols-2">
+              <div className="bg-card p-6">
+                <p className="eyebrow">Standard going rate</p>
+                <p className="mt-1 font-heading text-3xl font-bold gradient-text tabular">{formatGBP(selected.goingRate2026)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Standard threshold for experienced workers (37.5h week)</p>
+              </div>
+              <div className="bg-card p-6">
+                <p className="eyebrow">Lower going rate</p>
+                <p className="mt-1 font-heading text-3xl font-bold tabular text-zinc-700">{formatGBP(selected.lowerRate2026)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">New entrant / tradeable discount rate</p>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Eligibility calculator */}
+          {/* Eligibility calculator — only meaningful for fixed going-rate roles */}
           <div className="border-t border-border p-6">
+            {selected.nationalPayScale ? (
+              <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                <Calculator className="mt-0.5 size-4 shrink-0 text-red-600" />
+                Salary eligibility for this role is set by the national pay scale, not a single going rate —
+                so a simple salary check doesn&apos;t apply. Confirm the correct pay band for your grade and
+                region on gov.uk.
+              </p>
+            ) : (
+            <>
             <p className="flex items-center gap-2 font-heading text-sm font-semibold">
               <Calculator className="size-4 text-red-600" /> Am I eligible?
             </p>
@@ -160,7 +195,7 @@ export function SocClient() {
                       <p className="font-semibold text-zinc-800">Below the salary threshold</p>
                       <p className="mt-0.5 text-muted-foreground">
                         {formatGBP(salaryNum)} is under the lower rate of {formatGBP(selected.lowerRate2026)}. You&apos;d
-                        need at least {formatGBP(selected.lowerRate2026 - salaryNum)} more, or a role on the ISL/TSL.
+                        need at least {formatGBP(selected.lowerRate2026 - salaryNum)} more, or a role on the Immigration Salary List.
                       </p>
                     </>
                   )}
@@ -170,6 +205,8 @@ export function SocClient() {
             <p className="mt-3 text-xs text-muted-foreground">
               Indicative only. Actual eligibility depends on the specific rules for your route, age and circumstances.
             </p>
+            </>
+            )}
           </div>
         </div>
       ) : (

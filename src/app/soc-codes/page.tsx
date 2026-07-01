@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "SOC Code Intelligence",
-  description: "Look up UK SOC occupation codes, 2026 going & lower salary rates, ISL/TSL status, and check visa salary eligibility.",
+  description: "Look up UK SOC occupation codes, official Skilled Worker going & lower salary rates and Immigration Salary List status, and check visa salary eligibility. Sourced from gov.uk.",
 };
 
 export default function SocCodesPage() {

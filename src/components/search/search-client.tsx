@@ -18,6 +18,10 @@ import type { Sponsor } from "@/lib/types";
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 12;
+// Auto-load this many pages on scroll, then require an explicit "Load more"
+// click. Stops the results column from growing forever so the footer stays
+// reachable (avoids the infinite-scroll footer dead zone).
+const AUTO_LOAD_PAGES = 5;
 
 const HIRING_ACTIVITIES = ["Very High", "High", "Medium", "Low"] as const;
 const TIERS = ["Platinum", "Gold", "Silver", "Bronze", "Active"] as const;
@@ -80,6 +84,10 @@ export function SearchClient({
   const [sort, setSort] = useState<SortKey>((params.get("sort") as SortKey) ?? "relevance");
   const [page, setPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Type-to-filter for the long option lists (avoids hunting via scroll).
+  const [citySearch, setCitySearch] = useState("");
+  const [routeSearch, setRouteSearch] = useState("");
 
   // ── Data state ────────────────────────────────────────────────────────── #
   const [results, setResults] = useState<Sponsor[]>([]);
@@ -199,9 +207,13 @@ export function SearchClient({
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinel.current;
-    if (!el || page >= totalPages) return;
+    // Stop auto-loading past the cap so the user can scroll to the footer;
+    // the manual "Load more" button takes over from there.
+    if (!el || page >= totalPages || page >= AUTO_LOAD_PAGES) return;
     const obs = new IntersectionObserver((e) => {
-      if (e[0].isIntersecting && !loading) setPage((p) => p + 1);
+      // Functional guard caps auto-load even if the observer fires in a burst
+      // before this effect re-runs and detaches. Manual "Load more" is separate.
+      if (e[0].isIntersecting && !loading) setPage((p) => (p < AUTO_LOAD_PAGES ? p + 1 : p));
     });
     obs.observe(el);
     return () => obs.disconnect();
@@ -292,37 +304,87 @@ export function SearchClient({
 
       {/* City */}
       <fieldset>
-        <legend className="eyebrow mb-2">City / Region</legend>
-        <div className="-mr-1 max-h-44 space-y-0.5 overflow-y-auto pr-1">
-          {cityList.map((city) => (
-            <label key={city} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition-colors hover:bg-muted">
-              <input
-                type="checkbox"
-                checked={cities.includes(city)}
-                onChange={() => toggleIn(cities, setCities, city)}
-                className="size-4 accent-red-600"
-              />
-              <span className={cn(cities.includes(city) ? "text-foreground" : "text-muted-foreground")}>{city}</span>
-            </label>
-          ))}
+        <legend className="eyebrow mb-2 flex items-center justify-between">
+          City / Region
+          {cities.length > 0 && <span className="tabular text-red-600">{cities.length}</span>}
+        </legend>
+        {cityList.length > 8 && (
+          <div className="relative mb-2">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={citySearch}
+              onChange={(e) => setCitySearch(e.target.value)}
+              placeholder="Filter cities…"
+              aria-label="Filter cities"
+              className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-7 text-xs outline-none transition focus:border-red-600/40"
+            />
+            {citySearch && (
+              <button onClick={() => setCitySearch("")} aria-label="Clear city filter" className="absolute right-1.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:text-foreground">
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
+        )}
+        <div className="space-y-0.5">
+          {(() => {
+            const q = citySearch.trim().toLowerCase();
+            const list = q ? cityList.filter((c) => c.toLowerCase().includes(q)) : cityList;
+            if (list.length === 0) return <p className="px-1.5 py-2 text-xs text-muted-foreground">No cities match &ldquo;{citySearch}&rdquo;.</p>;
+            return list.map((city) => (
+              <label key={city} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition-colors hover:bg-muted">
+                <input
+                  type="checkbox"
+                  checked={cities.includes(city)}
+                  onChange={() => toggleIn(cities, setCities, city)}
+                  className="size-4 accent-red-600"
+                />
+                <span className={cn(cities.includes(city) ? "text-foreground" : "text-muted-foreground")}>{city}</span>
+              </label>
+            ));
+          })()}
         </div>
       </fieldset>
 
       {/* Route */}
       <fieldset>
-        <legend className="eyebrow mb-2">Visa Route</legend>
-        <div className="max-h-44 space-y-0.5 overflow-y-auto">
-          {routeList.map((r) => (
-            <label key={r} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition-colors hover:bg-muted">
-              <input
-                type="checkbox"
-                checked={routes.includes(r)}
-                onChange={() => toggleIn(routes, setRoutes, r)}
-                className="size-4 accent-red-600"
-              />
-              <span className={cn("text-xs", routes.includes(r) ? "text-foreground" : "text-muted-foreground")}>{r}</span>
-            </label>
-          ))}
+        <legend className="eyebrow mb-2 flex items-center justify-between">
+          Visa Route
+          {routes.length > 0 && <span className="tabular text-red-600">{routes.length}</span>}
+        </legend>
+        {routeList.length > 8 && (
+          <div className="relative mb-2">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={routeSearch}
+              onChange={(e) => setRouteSearch(e.target.value)}
+              placeholder="Filter routes…"
+              aria-label="Filter visa routes"
+              className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-7 text-xs outline-none transition focus:border-red-600/40"
+            />
+            {routeSearch && (
+              <button onClick={() => setRouteSearch("")} aria-label="Clear route filter" className="absolute right-1.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:text-foreground">
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
+        )}
+        <div className="space-y-0.5">
+          {(() => {
+            const q = routeSearch.trim().toLowerCase();
+            const list = q ? routeList.filter((r) => r.toLowerCase().includes(q)) : routeList;
+            if (list.length === 0) return <p className="px-1.5 py-2 text-xs text-muted-foreground">No routes match &ldquo;{routeSearch}&rdquo;.</p>;
+            return list.map((r) => (
+              <label key={r} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition-colors hover:bg-muted">
+                <input
+                  type="checkbox"
+                  checked={routes.includes(r)}
+                  onChange={() => toggleIn(routes, setRoutes, r)}
+                  className="size-4 accent-red-600"
+                />
+                <span className={cn("text-xs", routes.includes(r) ? "text-foreground" : "text-muted-foreground")}>{r}</span>
+              </label>
+            ));
+          })()}
         </div>
       </fieldset>
 
@@ -400,10 +462,10 @@ export function SearchClient({
 
       {/* Body */}
       <div className="mt-12 grid gap-8 lg:grid-cols-[248px_1fr] lg:gap-10">
-        {/* Filter rail (desktop) */}
+        {/* Filter rail (desktop) — one self-contained scroll column, no nested scrollers */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24">
-            <div className="mb-5 flex items-center justify-between">
+          <div className="sticky top-24 flex max-h-[calc(100dvh-7rem)] flex-col">
+            <div className="mb-4 flex shrink-0 items-center justify-between">
               <h2 className="font-heading text-base font-semibold tracking-tight">Filters</h2>
               {activeFilterCount > 0 && (
                 <button onClick={clearAll} className="text-xs font-medium text-muted-foreground transition-colors hover:text-red-600">
@@ -411,7 +473,9 @@ export function SearchClient({
                 </button>
               )}
             </div>
-            {FiltersPanel}
+            <div className="filter-scroll -mr-3 min-h-0 flex-1 overflow-y-auto pb-2 pr-3">
+              {FiltersPanel}
+            </div>
           </div>
         </aside>
 

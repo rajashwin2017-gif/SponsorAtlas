@@ -11,3 +11,6 @@ prisma/dev.db
 # Large uncompressed data files — use .gz versions instead
 prisma/data/sponsors.json
 prisma/data/sponsors-slim.json
+
+# Local Netlify folder
+.netlify
