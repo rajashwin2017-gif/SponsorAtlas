@@ -69,8 +69,8 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
               TIER_BG[tier as SponsorTier] ?? "bg-zinc-50 text-zinc-500 border-zinc-200"
             )}
           >
-            <span className="text-[8px] leading-none" aria-hidden="true">{TIER_ICON[tier as SponsorTier]}</span>
-            {tier}
+            <span className={cn("text-[8px] leading-none", !isPro && "blur-[3px] select-none")} aria-hidden="true">{TIER_ICON[tier as SponsorTier]}</span>
+            <span className={cn(!isPro && "blur-[3px] select-none")}>{tier}</span>
           </span>
           {/* Rating */}
           {sponsor.rating === "A" ? (
@@ -105,8 +105,8 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
         <div>
           <p className="eyebrow">Activity</p>
           <p className="mt-1.5 flex items-center gap-2 text-sm font-semibold">
-            <span className={cn("size-2 rounded-full", dotClass)} aria-hidden="true" />
-            {activity}
+            <span className={cn("size-2 rounded-full", dotClass, !isPro && "blur-[2px]")} aria-hidden="true" />
+            <span className={cn(!isPro && "blur-[3px] select-none")}>{activity}</span>
           </p>
         </div>
         <div>

@@ -8,11 +8,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTier } from "@/hooks/use-tier";
 import type { JobsResponse, JobListing } from "@/app/api/jobs/[sponsorId]/route";
 
 interface LiveJobsProps {
   sponsorId: string;
   companyName: string;
+  /** Optional override — defaults to the user's actual subscription tier. */
   isPro?: boolean;
 }
 
@@ -145,7 +147,9 @@ function ProGate({ companyName }: { companyName: string }) {
   );
 }
 
-export function LiveJobs({ sponsorId, companyName, isPro = false }: LiveJobsProps) {
+export function LiveJobs({ sponsorId, companyName, isPro: isProOverride }: LiveJobsProps) {
+  const { isPro: tierIsPro } = useTier();
+  const isPro = isProOverride ?? tierIsPro;
   const [data, setData] = useState<JobsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);

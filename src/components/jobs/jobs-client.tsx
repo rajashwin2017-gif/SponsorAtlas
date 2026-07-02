@@ -6,13 +6,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search, SlidersHorizontal, X, Briefcase, MapPin, Clock, Building2,
   ChevronDown, SearchX, Sparkles, CheckCircle2, ExternalLink,
-  ShieldCheck, RefreshCw, Zap,
+  ShieldCheck, RefreshCw, Zap, Lock, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { LiveJob, JobFeedSource } from "@/lib/job-feed";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { useTier } from "@/hooks/use-tier";
+
+// Free users see this many real listings before hitting the paywall.
+const FREE_VISIBLE_JOBS = 3;
+const FREE_TEASER_JOBS = 3;
 
 const SORT_OPTIONS = [
   { key: "recent" as const, label: "Most recent" },
@@ -72,6 +77,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
   const router = useRouter();
   const params = useSearchParams();
   const { toast } = useToast();
+  const { isPro } = useTier();
 
   // Facets derived from the real data — never a hard-coded list.
   const { industryList, cityList, typeList, sourceCount } = useMemo(() => {
@@ -445,7 +451,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                   </Button>
                 )}
               </div>
-            ) : (
+            ) : isPro ? (
               <>
                 {results.slice(0, visible).map((job, i) => (
                   <JobCard
@@ -465,6 +471,24 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                       Showing {Math.min(visible, results.length)} of {results.length}
                     </p>
                   </div>
+                )}
+              </>
+            ) : (
+              <>
+                {results.slice(0, FREE_VISIBLE_JOBS).map((job, i) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    saved={savedJobs.includes(job.id)}
+                    onSave={() => toggleSave(job.id)}
+                    style={{ animationDelay: `${Math.min(i, 7) * 30}ms` }}
+                  />
+                ))}
+                {results.length > FREE_VISIBLE_JOBS && (
+                  <JobsPaywall
+                    teaser={results.slice(FREE_VISIBLE_JOBS, FREE_VISIBLE_JOBS + FREE_TEASER_JOBS)}
+                    remaining={results.length - FREE_VISIBLE_JOBS}
+                  />
                 )}
               </>
             )}
@@ -495,6 +519,34 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function JobsPaywall({ teaser, remaining }: { teaser: LiveJob[]; remaining: number }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      <div className="pointer-events-none select-none space-y-3 blur-[3px]" aria-hidden="true">
+        {teaser.map((job, i) => (
+          <JobCard key={job.id} job={job} saved={false} onSave={() => {}} style={{ animationDelay: `${i * 30}ms` }} />
+        ))}
+      </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-background/85 backdrop-blur-[2px]">
+        <div className="flex size-10 items-center justify-center rounded-full bg-red-50">
+          <Lock className="size-5 text-red-600" />
+        </div>
+        <div className="text-center">
+          <p className="font-semibold">{remaining} more live roles</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Upgrade to Pro to see every visa-sponsored job on the board.
+          </p>
+        </div>
+        <Link href="/pricing">
+          <Button size="sm" className="mt-1 bg-red-600 text-white hover:bg-red-700">
+            Upgrade to Pro <ChevronRight className="ml-1 size-4" />
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

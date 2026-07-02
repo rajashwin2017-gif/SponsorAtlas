@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  Trophy, TrendingUp, MapPin, ChevronRight, Lock, Building2,
+  Trophy, TrendingUp, MapPin, ChevronRight, Building2,
 } from "lucide-react";
 import { getSponsors } from "@/lib/sponsor-store";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { SponsorTier } from "@/lib/types";
 import { TIER_BG } from "@/lib/types";
+import { BlurGate } from "@/components/tier-gate";
+import { RankingHiddenRows } from "@/components/rankings-hidden-rows";
 
 export const metadata: Metadata = {
   title: "UK Visa Sponsor Rankings 2025 · The Sponsor Finder",
@@ -78,13 +80,15 @@ function RankingTable({
                     {s.organisationName}
                   </Link>
                   <div className="mt-1 flex items-center gap-1.5">
-                    <span className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-1.5 py-0 text-[10px] font-semibold",
-                      TIER_BG[s.sponsorTier as SponsorTier]
-                    )}>
-                      <span className="text-[8px]" aria-hidden="true">{TIER_ICON[s.sponsorTier as SponsorTier]}</span>
-                      {s.sponsorTier}
-                    </span>
+                    <BlurGate compact iconOnly className="rounded-full">
+                      <span className={cn(
+                        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0 text-[10px] font-semibold",
+                        TIER_BG[s.sponsorTier as SponsorTier]
+                      )}>
+                        <span className="text-[8px]" aria-hidden="true">{TIER_ICON[s.sponsorTier as SponsorTier]}</span>
+                        {s.sponsorTier}
+                      </span>
+                    </BlurGate>
                   </div>
                 </td>
                 <td className="hidden px-4 py-4 text-sm text-muted-foreground sm:table-cell">
@@ -113,36 +117,8 @@ function RankingTable({
           </tbody>
         </table>
 
-        {/* Paywall for ranks 11-100 */}
-        {hidden.length > 0 && (
-          <div className="relative border-t border-dashed border-border">
-            {/* blurred preview rows */}
-            <div className="pointer-events-none select-none blur-[3px]">
-              {hidden.slice(0, 5).map((s, i) => (
-                <div key={s.id} className="flex items-center justify-between border-b border-border px-4 py-3.5 last:border-0">
-                  <div className="flex items-center gap-4">
-                    <span className="w-8 text-sm font-bold text-muted-foreground tabular">{i + 11}</span>
-                    <span className="font-medium">{s.organisationName}</span>
-                  </div>
-                  <span className="font-bold tabular">{s.cos2025Total?.toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-            {/* Paywall overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/80 backdrop-blur-[2px]">
-              <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-sm">
-                <Lock className="size-4 text-red-600" />
-                <span className="text-sm font-medium">
-                  {hidden.length} more sponsors visible with{" "}
-                  <Link href="/pricing" className="font-semibold text-red-600 hover:underline">Pro</Link>
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Full Top 100 rankings, Strength & Opportunity scores
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Rows 11+ — full list for Pro, blurred teaser + paywall for Free */}
+        <RankingHiddenRows sponsors={hidden} />
       </div>
     </div>
   );

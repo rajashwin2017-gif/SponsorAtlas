@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn, formatGBP, timeAgo } from "@/lib/utils";
 import type { SponsorTier } from "@/lib/types";
 import { TIER_BG } from "@/lib/types";
+import { BlurGate } from "@/components/tier-gate";
 
 const TIER_ICON: Record<SponsorTier, string> = {
   Platinum: "◆", Gold: "▲", Silver: "■", Bronze: "●", Active: "●", Inactive: "○",
@@ -128,12 +129,14 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           <div className="pb-6 border-b border-border">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="cyan">{sponsor.industryCategory}</Badge>
-              <span className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-                TIER_BG[tier]
-              )}>
-                <span className="text-[8px]" aria-hidden="true">{TIER_ICON[tier]}</span> {tier} Tier
-              </span>
+              <BlurGate compact iconOnly className="rounded-full">
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                  TIER_BG[tier]
+                )}>
+                  <span className="text-[8px]" aria-hidden="true">{TIER_ICON[tier]}</span> {tier} Tier
+                </span>
+              </BlurGate>
               {sponsor.rating === "A" ? (
                 <Badge variant="emerald"><ShieldCheck className="size-3.5" /> A-rated</Badge>
               ) : (
@@ -154,10 +157,14 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
 
           {/* Key metrics */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <MetricCard label="Activity" value={activity} icon={<ActivityIcon className="size-4" />} hint="2025 hiring" valueColor={ACTIVITY_COLOR[activity]} />
+            <BlurGate blurClassName="blur-[5px]">
+              <MetricCard label="Activity" value={activity} icon={<ActivityIcon className="size-4" />} hint="2025 hiring" valueColor={ACTIVITY_COLOR[activity]} />
+            </BlurGate>
             <MetricCard label="CoS 2025" value={cosDisplay} icon={<TrendingUp className="size-4" />} hint="total issued" />
             <MetricCard label="Visa Routes" value={`${(sponsor.routes ?? []).length}`} icon={<Globe className="size-4" />} hint="licenced" />
-            <MetricCard label="Tier" value={tier} icon={<Trophy className="size-4" />} hint={sponsor.rating + "-rated"} />
+            <BlurGate blurClassName="blur-[5px]">
+              <MetricCard label="Tier" value={tier} icon={<Trophy className="size-4" />} hint={sponsor.rating + "-rated"} />
+            </BlurGate>
           </div>
 
           {/* Intelligence scores */}
@@ -224,7 +231,6 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
           <LiveJobs
             sponsorId={sponsor.id}
             companyName={sponsor.organisationName}
-            isPro={true}
           />
 
           {/* Visa routes held */}

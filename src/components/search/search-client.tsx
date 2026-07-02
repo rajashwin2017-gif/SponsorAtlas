@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { SponsorCard } from "@/components/sponsor-card";
 import { useToast } from "@/components/ui/toast";
 import { useTier } from "@/hooks/use-tier";
+import { BlurGate } from "@/components/tier-gate";
 import { cn } from "@/lib/utils";
 import type { Sponsor } from "@/lib/types";
 
@@ -237,48 +238,52 @@ export function SearchClient({
   const FiltersPanel = (
     <div className="space-y-7">
       {/* Tier */}
-      <fieldset>
-        <legend className="eyebrow mb-2.5">Sponsor Tier</legend>
-        <div className="flex flex-wrap gap-1.5">
-          {TIERS.map((t) => (
-            <button
-              key={t}
-              onClick={() => toggleIn(tiers, setTiers, t)}
-              aria-pressed={tiers.includes(t)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-xs transition-colors duration-200",
-                tiers.includes(t)
-                  ? "border-red-600/40 bg-red-600/10 text-red-600"
-                  : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-              )}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      <BlurGate message="Pro filter" className="rounded-lg">
+        <fieldset>
+          <legend className="eyebrow mb-2.5">Sponsor Tier</legend>
+          <div className="flex flex-wrap gap-1.5">
+            {TIERS.map((t) => (
+              <button
+                key={t}
+                onClick={() => toggleIn(tiers, setTiers, t)}
+                aria-pressed={tiers.includes(t)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs transition-colors duration-200",
+                  tiers.includes(t)
+                    ? "border-red-600/40 bg-red-600/10 text-red-600"
+                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                )}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </BlurGate>
 
       {/* Hiring activity */}
-      <fieldset>
-        <legend className="eyebrow mb-2">Hiring Activity</legend>
-        <div className="flex flex-wrap gap-1.5">
-          {HIRING_ACTIVITIES.map((a) => (
-            <button
-              key={a}
-              onClick={() => toggleIn(activities, setActivities, a)}
-              aria-pressed={activities.includes(a)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-xs transition-colors duration-200",
-                activities.includes(a)
-                  ? "border-red-600/40 bg-red-600/10 text-red-600"
-                  : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-              )}
-            >
-              {a}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      <BlurGate message="Pro filter" className="rounded-lg">
+        <fieldset>
+          <legend className="eyebrow mb-2">Hiring Activity</legend>
+          <div className="flex flex-wrap gap-1.5">
+            {HIRING_ACTIVITIES.map((a) => (
+              <button
+                key={a}
+                onClick={() => toggleIn(activities, setActivities, a)}
+                aria-pressed={activities.includes(a)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs transition-colors duration-200",
+                  activities.includes(a)
+                    ? "border-red-600/40 bg-red-600/10 text-red-600"
+                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                )}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </BlurGate>
 
       {/* Industry */}
       <fieldset>
@@ -407,21 +412,23 @@ export function SearchClient({
       </label>
 
       {/* Min CoS slider */}
-      <div>
-        <label htmlFor="cos-range" className="eyebrow mb-2 flex items-center justify-between">
-          Min CoS 2025 <span className="tabular text-red-600">{minCos}+</span>
-        </label>
-        <input
-          id="cos-range"
-          type="range"
-          min={0}
-          max={500}
-          step={10}
-          value={minCos}
-          onChange={(e) => setMinCos(Number(e.target.value))}
-          className="w-full accent-red-600"
-        />
-      </div>
+      <BlurGate message="Pro filter" className="rounded-lg">
+        <div>
+          <label htmlFor="cos-range" className="eyebrow mb-2 flex items-center justify-between">
+            Min CoS 2025 <span className="tabular text-red-600">{minCos}+</span>
+          </label>
+          <input
+            id="cos-range"
+            type="range"
+            min={0}
+            max={500}
+            step={10}
+            value={minCos}
+            onChange={(e) => setMinCos(Number(e.target.value))}
+            className="w-full accent-red-600"
+          />
+        </div>
+      </BlurGate>
     </div>
   );
 
