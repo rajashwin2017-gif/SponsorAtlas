@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Search, Filter, Target, BellRing, Rocket, ArrowRight, PlayCircle,
+  Search, Filter, Target, BellRing, Rocket, ArrowRight,
   ShieldCheck, FileCheck2, Ban, Building2, CalendarPlus,
 } from "lucide-react";
 import { StatCounter } from "@/components/stat-counter";
@@ -8,6 +8,7 @@ import { HeroBackground } from "@/components/hero-background";
 import { PricingCards } from "@/components/pricing-cards";
 import { IndustryBalls } from "@/components/industry-balls";
 import { PlatformDemo } from "@/components/platform-demo";
+import { WatchDemoButton } from "@/components/watch-demo-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -53,9 +54,7 @@ export default function LandingPage() {
               <Link href="/search" className={cn(buttonVariants({ variant: "gradient", size: "lg" }))}>
                 Start Free Search <ArrowRight className="size-4" />
               </Link>
-              <Link href="/pricing" className={cn(buttonVariants({ variant: "outline", size: "lg" }))}>
-                <PlayCircle className="size-4" /> Watch Demo
-              </Link>
+              <WatchDemoButton />
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-2">
@@ -128,7 +127,7 @@ export default function LandingPage() {
       <IndustryBalls />
 
       {/* ── Interactive platform demo ── */}
-      <section className="container pb-24">
+      <section id="demo" className="container scroll-mt-24 pb-24">
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <p className="eyebrow mb-3 text-red-600">Live demo</p>
           <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">See the search &amp; fit engine in action</h2>
