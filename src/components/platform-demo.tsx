@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Search, CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
+import { Search, CheckCircle2, Sparkles, ArrowRight, MousePointer2 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -35,12 +35,22 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+/** Simulated pointer position, relative to the demo's outer wrapper. */
+type CursorPos = { x: number; y: number };
+
 export function PlatformDemo() {
   const [scene, setScene] = useState(0);
   const [paused, setPaused] = useState(false);
   const [typed, setTyped] = useState("");
   const [fit, setFit] = useState(0);
   const reduced = usePrefersReducedMotion();
+
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [cursorPos, setCursorPos] = useState<CursorPos | null>(null);
+  const [cursorVisible, setCursorVisible] = useState(false);
+  const [clicking, setClicking] = useState(false);
 
   // Auto-cycle through scenes (paused on hover/focus).
   useEffect(() => {
@@ -71,16 +81,66 @@ export function PlatformDemo() {
     setFit(0);
   }, [scene, reduced]);
 
+  // Simulated cursor: clicks into the search box at the start of scene 0,
+  // then slides down to click the next walkthrough tab near the end of
+  // every scene — so the demo reads as a real user driving the product.
+  useEffect(() => {
+    if (paused || reduced) { setCursorVisible(false); return; }
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const pointTo = (el: HTMLElement | null, delay: number, withClick: boolean) => {
+      if (!el) return;
+      timers.push(setTimeout(() => {
+        const w = wrap.getBoundingClientRect();
+        const r = el.getBoundingClientRect();
+        setCursorPos({ x: r.left - w.left + r.width / 2, y: r.top - w.top + r.height / 2 });
+        setCursorVisible(true);
+        if (withClick) {
+          timers.push(setTimeout(() => setClicking(true), 550));
+          timers.push(setTimeout(() => setClicking(false), 760));
+        }
+      }, delay));
+    };
+
+    if (scene === 0) pointTo(searchBoxRef.current, 200, true);
+    pointTo(tabRefs.current[(scene + 1) % SCENES.length], SCENE_MS - 950, true);
+
+    return () => timers.forEach(clearTimeout);
+  }, [scene, paused, reduced]);
+
   const go = (i: number) => { setScene(i); setPaused(true); };
 
   return (
     <div
-      className="mx-auto max-w-4xl"
+      ref={wrapRef}
+      className="relative mx-auto max-w-4xl"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
+      {/* Simulated cursor — desktop only, decorative */}
+      {cursorPos && (
+        <div
+          className="pointer-events-none absolute -left-3 -top-3 z-30 hidden transition-[opacity,transform] duration-500 ease-out sm:block"
+          style={{
+            transform: `translate(${cursorPos.x}px, ${cursorPos.y}px) scale(${clicking ? 0.85 : 1})`,
+            opacity: cursorVisible ? 1 : 0,
+          }}
+          aria-hidden="true"
+        >
+          <span
+            className={cn(
+              "absolute -inset-2.5 rounded-full bg-red-600/30 transition-transform duration-300",
+              clicking ? "scale-100 opacity-100" : "scale-0 opacity-0"
+            )}
+          />
+          <MousePointer2 className="relative size-5 fill-white text-zinc-900 drop-shadow-[0_2px_5px_rgba(0,0,0,0.35)]" />
+        </div>
+      )}
+
       {/* Faux app window */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_60px_-30px_rgba(0,0,0,0.35)]">
         {/* Title bar */}
@@ -98,7 +158,7 @@ export function PlatformDemo() {
         {/* Stage */}
         <div className="relative min-h-[320px] p-5 sm:min-h-[360px] sm:p-8">
           {/* Search bar — present in every scene, fills after scene 0 */}
-          <div className="relative">
+          <div ref={searchBoxRef} className="relative">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <div className="flex h-11 w-full items-center rounded-xl border border-border bg-background pl-10 pr-3 text-sm">
               <span className="text-foreground">{typed}</span>
@@ -193,6 +253,7 @@ export function PlatformDemo() {
           {SCENES.map((label, i) => (
             <button
               key={label}
+              ref={(el) => { tabRefs.current[i] = el; }}
               role="tab"
               aria-selected={scene === i}
               aria-label={label}
