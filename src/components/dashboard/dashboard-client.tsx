@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   Search, Heart, Zap, BellRing, Settings, Sparkles, ArrowRight, Bookmark,
   TrendingUp, Activity, Plus, Trash2, Gauge, FlaskConical,
@@ -10,6 +11,7 @@ import { useSaved } from "@/hooks/use-saved";
 import { useTier, TIER_LABEL, type Tier } from "@/hooks/use-tier";
 import { SPONSORS } from "@/lib/mock-data";
 import { SponsorCard } from "@/components/sponsor-card";
+import { BillingPanel } from "@/components/dashboard/billing-panel";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
@@ -26,10 +28,8 @@ const NAV: { id: Tab; label: string; icon: typeof Search }[] = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-// Demo account — in production this comes from the authenticated session.
-const USER = { name: "Alex", checksUsed: 3, checksLimit: 5 };
-
 export function DashboardClient() {
+  const { data: session } = useSession();
   const [tab, setTab] = useState<Tab>("overview");
   const { saved } = useSaved();
   const { tier, setTier, isPro } = useTier();
@@ -37,6 +37,11 @@ export function DashboardClient() {
   const [alerts, setAlerts] = useState([
     { id: 1, industry: "Tech", city: "London", frequency: "weekly", active: true },
   ]);
+
+  const displayName = session?.user?.name ?? session?.user?.email?.split("@")[0] ?? "there";
+  // Free-tier search usage meter — not yet wired to real per-user tracking.
+  const checksUsed = 3;
+  const checksLimit = 5;
 
   const savedSponsors = useMemo(
     () => SPONSORS.filter((s) => saved.includes(s.id)),
@@ -51,10 +56,10 @@ export function DashboardClient() {
           <div className="surface-card p-5">
             <div className="flex items-center gap-3 border-b border-border pb-5">
               <span className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-red-600 to-zinc-900 font-heading text-lg font-bold text-white">
-                {USER.name[0]}
+                {displayName[0]?.toUpperCase()}
               </span>
               <div className="min-w-0">
-                <p className="truncate font-heading text-base font-semibold">{USER.name}</p>
+                <p className="truncate font-heading text-base font-semibold">{displayName}</p>
                 <Badge variant={isPro ? "emerald" : "outline"} className="mt-1">
                   {TIER_LABEL[tier]}
                 </Badge>
@@ -87,11 +92,11 @@ export function DashboardClient() {
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-red-600 to-zinc-900"
-                    style={{ width: `${(USER.checksUsed / USER.checksLimit) * 100}%` }}
+                    style={{ width: `${(checksUsed / checksLimit) * 100}%` }}
                   />
                 </div>
                 <p className="mt-1.5 text-xs tabular text-muted-foreground">
-                  {USER.checksUsed}/{USER.checksLimit} used this month
+                  {checksUsed}/{checksLimit} used this month
                 </p>
               </div>
             )}
@@ -130,7 +135,9 @@ export function DashboardClient() {
 
         {/* Main */}
         <div className="min-w-0 space-y-6">
-          {tab === "overview" && <Overview savedCount={savedSponsors.length} alerts={alerts.length} isPro={isPro} />}
+          {tab === "overview" && (
+            <Overview savedCount={savedSponsors.length} alerts={alerts.length} isPro={isPro} displayName={displayName} />
+          )}
 
           {tab === "saved" && (
             <Section title="Saved Sponsors" subtitle={`${savedSponsors.length} saved`}>
@@ -168,20 +175,7 @@ export function DashboardClient() {
 
           {tab === "settings" && (
             <Section title="Settings" subtitle="Account & subscription">
-              <div className="surface-card divide-y divide-border">
-                <Row label="Email" value="alex@example.com" />
-                <Row label="Plan" value={TIER_LABEL[tier]} />
-                <Row label="Alert frequency" value="Weekly" />
-                <div className="flex items-center justify-between p-5">
-                  <div>
-                    <p className="text-sm font-medium">Subscription</p>
-                    <p className="text-xs text-muted-foreground">Manage billing via Stripe customer portal</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => toast("Stripe customer portal would open (integration stub).", "info")}>
-                    Manage billing
-                  </Button>
-                </div>
-              </div>
+              <BillingPanel email={session?.user?.email ?? ""} />
             </Section>
           )}
         </div>
@@ -190,14 +184,14 @@ export function DashboardClient() {
   );
 }
 
-function Overview({ savedCount, alerts, isPro }: { savedCount: number; alerts: number; isPro: boolean }) {
+function Overview({ savedCount, alerts, isPro, displayName }: { savedCount: number; alerts: number; isPro: boolean; displayName: string }) {
   return (
     <>
       <div className="surface-card relative overflow-hidden px-7 py-8">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_100%_0%,hsl(0_72%_51%/0.12),transparent)]" aria-hidden="true" />
         <div className="relative">
           <p className="eyebrow mb-2">Dashboard</p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">Welcome back, {USER.name}</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Welcome back, {displayName}</h1>
           <p className="mt-2 text-base text-muted-foreground leading-relaxed">Here&apos;s your sponsorship search at a glance.</p>
         </div>
       </div>
@@ -321,15 +315,6 @@ function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string
     <div className="glass p-6 transition-transform duration-200 hover:-translate-y-0.5">
       <p className="eyebrow flex items-center gap-2">{icon} {label}</p>
       <p className="mt-3 font-display text-4xl tabular">{value}</p>
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium capitalize">{value}</p>
     </div>
   );
 }

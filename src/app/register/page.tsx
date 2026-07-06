@@ -26,8 +26,20 @@ export default function RegisterPage() {
       return;
     }
     setLoading(true);
-    // In production: POST to /api/auth/register to create the user, then sign in.
-    // In demo mode: go straight to signIn with credentials.
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Could not create account. Please try again.");
+      setLoading(false);
+      return;
+    }
+
     const result = await signIn("credentials", {
       redirect: false,
       email,
@@ -35,7 +47,8 @@ export default function RegisterPage() {
     });
     setLoading(false);
     if (result?.error) {
-      setError("Could not create account. Please try again.");
+      setError("Account created, but sign-in failed. Try signing in manually.");
+      router.push("/login");
     } else {
       router.push("/dashboard");
     }

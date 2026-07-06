@@ -1,45 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/session";
+import { stripe, priceIdFor, type PlanId } from "@/lib/stripe";
+import { handleApiError, ApiError } from "@/lib/api-error";
 
-const PLAN_PRICES: Record<string, string | undefined> = {
-  pro: process.env.STRIPE_PRICE_PRO,
-  pro_plus: process.env.STRIPE_PRICE_PRO_PLUS,
-};
+const schema = z.object({
+  plan: z.enum(["pro", "pro_plus"]),
+  yearly: z.boolean().default(false),
+});
 
 export async function POST(req: NextRequest) {
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-  if (!stripeSecretKey) {
-    return NextResponse.json(
-      { error: "Stripe is not configured. Add STRIPE_SECRET_KEY to your .env file." },
-      { status: 503 }
-    );
-  }
-
-  const { plan } = await req.json();
-  const priceId = PLAN_PRICES[plan];
-
-  if (!priceId) {
-    return NextResponse.json({ error: "Invalid plan or price not configured." }, { status: 400 });
-  }
-
   try {
-    const Stripe = (await import("stripe")).default;
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2026-05-27.dahlia" as any });
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe is not configured. Add STRIPE_SECRET_KEY to your .env file." },
+        { status: 503 }
+      );
+    }
 
-    const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const sessionUser = await requireUser();
 
-    const session = await stripe.checkout.sessions.create({
+    const body = await req.json().catch(() => null);
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      throw new ApiError("Invalid plan selection", 400);
+    }
+
+    const { plan, yearly } = parsed.data;
+    const priceId = priceIdFor(plan as PlanId, yearly);
+    if (!priceId) {
+      throw new ApiError("This plan is not configured yet", 400);
+    }
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: sessionUser.id } });
+
+    // Reuse an existing Stripe customer for this user instead of letting
+    // Checkout create a new one each time, so billing history stays unified.
+    let customerId = user.stripeCustomerId;
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.name ?? undefined,
+        metadata: { userId: user.id },
+      });
+      customerId = customer.id;
+      await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customerId } });
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+    const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
-      payment_method_types: ["card"],
+      customer: customerId,
+      client_reference_id: user.id,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${baseUrl}/dashboard?upgraded=1`,
       cancel_url: `${baseUrl}/pricing?cancelled=1`,
       allow_promotion_codes: true,
+      subscription_data: { metadata: { userId: user.id } },
     });
 
-    return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    console.error("Stripe checkout error:", err);
-    return NextResponse.json({ error: err.message ?? "Stripe error" }, { status: 500 });
+    return NextResponse.json({ url: checkoutSession.url });
+  } catch (err) {
+    return handleApiError(err);
   }
 }

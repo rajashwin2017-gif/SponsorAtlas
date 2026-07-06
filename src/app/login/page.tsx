@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Globe2, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { Globe2, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,19 @@ function LoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const verifyStatus = params.get("verify");
+  const resetStatus = params.get("reset");
+  const notice =
+    verifyStatus === "success"
+      ? "Email verified! You can now sign in."
+      : verifyStatus === "expired"
+      ? "That verification link has expired. Please register again or request a new one."
+      : verifyStatus === "invalid"
+      ? "That verification link is invalid."
+      : resetStatus === "success"
+      ? "Password updated. Sign in with your new password."
+      : null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -40,7 +53,7 @@ function LoginForm() {
     });
     setLoading(false);
     if (result?.error) {
-      setError("Invalid email or password. Try any email with a password of 6+ characters.");
+      setError("Invalid email or password.");
     } else {
       router.push(callbackUrl);
     }
@@ -93,6 +106,13 @@ function LoginForm() {
             <div className="flex-1 border-t border-border" />
           </div>
 
+          {notice && !error && (
+            <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+              {notice}
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               <AlertCircle className="mt-0.5 size-4 shrink-0" />
@@ -120,7 +140,7 @@ function LoginForm() {
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label htmlFor="password" className="text-sm font-medium">Password</label>
-                <Link href="#" className="text-xs text-red-600 hover:underline">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-xs text-red-600 hover:underline">Forgot password?</Link>
               </div>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -157,9 +177,6 @@ function LoginForm() {
           </p>
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Demo mode: sign in with any email + password (6+ chars).
-        </p>
       </div>
     </div>
   );

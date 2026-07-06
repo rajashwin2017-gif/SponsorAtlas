@@ -1,8 +1,10 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { SPONSORS } from "../src/lib/mock-data";
 import { SOC_CODES } from "../src/lib/soc-data";
 
 const prisma = new PrismaClient();
+const SEED_PASSWORD_HASH = bcrypt.hashSync("password123", 12);
 
 async function main() {
   console.log("🌱 Seeding SponsorAtlas…");
@@ -60,11 +62,13 @@ async function main() {
   }
   console.log(`  ✓ ${SPONSORS.length} sponsors`);
 
-  // ── Sample users (free / pro / pro_plus) ──
+  // ── Sample users (free / pro / pro_plus / admin) ──
+  // All seeded accounts share the password "password123" for local testing.
   const users = [
-    { email: "free@example.com", name: "Free User", subscriptionTier: "free", subscriptionStatus: "inactive", monthlyChecksLimit: 5 },
-    { email: "pro@example.com", name: "Pro User", subscriptionTier: "pro", subscriptionStatus: "active", monthlyChecksLimit: 9999 },
-    { email: "proplus@example.com", name: "Pro+ User", subscriptionTier: "pro_plus", subscriptionStatus: "active", monthlyChecksLimit: 9999 },
+    { email: "free@example.com", name: "Free User", subscriptionTier: "free", subscriptionStatus: "inactive", monthlyChecksLimit: 5, password: SEED_PASSWORD_HASH, emailVerified: new Date() },
+    { email: "pro@example.com", name: "Pro User", subscriptionTier: "pro", subscriptionStatus: "active", monthlyChecksLimit: 9999, password: SEED_PASSWORD_HASH, emailVerified: new Date() },
+    { email: "proplus@example.com", name: "Pro+ User", subscriptionTier: "pro_plus", subscriptionStatus: "active", monthlyChecksLimit: 9999, password: SEED_PASSWORD_HASH, emailVerified: new Date() },
+    { email: "admin@example.com", name: "Admin User", role: "ADMIN" as const, subscriptionTier: "pro_plus", subscriptionStatus: "active", monthlyChecksLimit: 9999, password: SEED_PASSWORD_HASH, emailVerified: new Date() },
   ];
   await prisma.user.deleteMany();
   const created = [];
@@ -99,7 +103,7 @@ async function main() {
   });
   console.log(`  ✓ Sample saved sponsors, fit check & alert for ${proUser.email}`);
 
-  console.log("✅ Seed complete.");
+  console.log("✅ Seed complete. Sign in with any seeded email above and password: password123");
 }
 
 main()
