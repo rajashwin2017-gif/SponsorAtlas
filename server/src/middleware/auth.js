@@ -11,7 +11,7 @@ const requireUser = asyncHandler(async (req, _res, next) => {
   const payload = token ? verifyToken(token) : null;
   if (!payload) throw new ApiError("Not authenticated", 401);
 
-  const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [payload.id]);
+  const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [payload.id]);
   const user = rows[0];
   if (!user || user.status === "suspended") throw new ApiError("Not authenticated", 401);
 

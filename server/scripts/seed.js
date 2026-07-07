@@ -21,8 +21,8 @@ async function main() {
   for (const u of users) {
     await pool.query(
       `INSERT INTO users (id, email, name, password, role, subscription_tier, subscription_status, email_verified)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, now())
-       ON CONFLICT (email) DO NOTHING`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+       ON DUPLICATE KEY UPDATE email = email`,
       [uuidv4(), u.email, u.name, passwordHash, u.role, u.tier, u.status]
     );
     console.log(`  - ${u.email}`);

@@ -18,8 +18,12 @@ export function SponsorActions({ sponsorId, name }: { sponsorId: string; name: s
       <Button
         variant={saved ? "outline" : "default"}
         className="w-full"
-        onClick={() => {
-          const now = toggle(sponsorId);
+        onClick={async () => {
+          const now = await toggle(sponsorId);
+          if (now === null) {
+            toast("Sign in to save sponsors", "info");
+            return;
+          }
           toast(now ? `Saved ${name}` : `Removed ${name}`, now ? "success" : "info");
         }}
         aria-pressed={saved}

@@ -42,37 +42,38 @@ router.post(
     const { name, password } = parsed.data;
     const email = parsed.data.email.toLowerCase();
 
-    const { rows: existingRows } = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+    const [existingRows] = await pool.execute("SELECT id FROM users WHERE email = ?", [email]);
     if (existingRows.length > 0) throw new ApiError("An account with this email already exists", 409);
 
     const passwordHash = await hashPassword(password);
     const userId = uuidv4();
 
-    const client = await pool.connect();
+    const conn = await pool.getConnection();
     try {
-      await client.query("BEGIN");
-      const { rows } = await client.query(
-        `INSERT INTO users (id, email, name, password) VALUES ($1, $2, $3, $4)
-         RETURNING *`,
+      await conn.beginTransaction();
+      await conn.execute(
+        "INSERT INTO users (id, email, name, password) VALUES (?, ?, ?, ?)",
         [userId, email, name, passwordHash]
       );
 
       const token = crypto.randomBytes(32).toString("hex");
-      await client.query(
-        "INSERT INTO verification_tokens (identifier, token, expires) VALUES ($1, $2, $3)",
+      await conn.execute(
+        "INSERT INTO verification_tokens (identifier, token, expires) VALUES (?, ?, ?)",
         [email, token, new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS)]
       );
-      await client.query("COMMIT");
+      await conn.commit();
+
+      const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [userId]);
 
       const verifyUrl = `${process.env.CLIENT_URL || "http://localhost:4000"}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
       await sendVerificationEmail(email, verifyUrl);
 
       res.status(201).json(mapUser(rows[0]));
     } catch (err) {
-      await client.query("ROLLBACK");
+      await conn.rollback();
       throw err;
     } finally {
-      client.release();
+      conn.release();
     }
   })
 );
@@ -93,7 +94,7 @@ router.post(
     if (!parsed.success) throw new ApiError(parsed.error.issues[0]?.message ?? "Invalid input", 400);
 
     const email = parsed.data.email.toLowerCase();
-    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
     const user = rows[0];
 
     if (!user || !user.password) throw new ApiError("Invalid email or password", 401);
@@ -127,30 +128,30 @@ router.get(
     if (!token || !email) return res.status(400).json({ error: "Invalid verification link" });
 
     const identifier = String(email).toLowerCase();
-    const { rows } = await pool.query(
-      "SELECT * FROM verification_tokens WHERE identifier = $1 AND token = $2",
+    const [rows] = await pool.execute(
+      "SELECT * FROM verification_tokens WHERE identifier = ? AND token = ?",
       [identifier, String(token)]
     );
     const record = rows[0];
 
-    if (!record || record.expires < new Date()) {
+    if (!record || new Date(record.expires) < new Date()) {
       if (record) {
-        await pool.query("DELETE FROM verification_tokens WHERE identifier = $1 AND token = $2", [identifier, String(token)]);
+        await pool.execute("DELETE FROM verification_tokens WHERE identifier = ? AND token = ?", [identifier, String(token)]);
       }
       return res.status(400).json({ error: "This verification link is invalid or has expired." });
     }
 
-    const client = await pool.connect();
+    const conn = await pool.getConnection();
     try {
-      await client.query("BEGIN");
-      await client.query("UPDATE users SET email_verified = now() WHERE email = $1", [identifier]);
-      await client.query("DELETE FROM verification_tokens WHERE identifier = $1 AND token = $2", [identifier, String(token)]);
-      await client.query("COMMIT");
+      await conn.beginTransaction();
+      await conn.execute("UPDATE users SET email_verified = NOW() WHERE email = ?", [identifier]);
+      await conn.execute("DELETE FROM verification_tokens WHERE identifier = ? AND token = ?", [identifier, String(token)]);
+      await conn.commit();
     } catch (err) {
-      await client.query("ROLLBACK");
+      await conn.rollback();
       throw err;
     } finally {
-      client.release();
+      conn.release();
     }
 
     res.json({ message: "Email verified. You can now sign in." });
@@ -170,15 +171,15 @@ router.post(
     if (!parsed.success) throw new ApiError("Enter a valid email address", 400);
 
     const email = parsed.data.email.toLowerCase();
-    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
     const user = rows[0];
 
     // Always respond the same way so this endpoint can't be used to
     // enumerate registered emails.
     if (user && user.password) {
       const token = crypto.randomBytes(32).toString("hex");
-      await pool.query(
-        "INSERT INTO password_reset_tokens (id, user_id, token, expires) VALUES ($1, $2, $3, $4)",
+      await pool.execute(
+        "INSERT INTO password_reset_tokens (id, user_id, token, expires) VALUES (?, ?, ?, ?)",
         [uuidv4(), user.id, token, new Date(Date.now() + RESET_TOKEN_TTL_MS)]
       );
       const resetUrl = `${process.env.CLIENT_URL || "http://localhost:4000"}/reset-password?token=${token}`;
@@ -202,26 +203,26 @@ router.post(
     if (!parsed.success) throw new ApiError(parsed.error.issues[0]?.message ?? "Invalid input", 400);
 
     const { token, password } = parsed.data;
-    const { rows } = await pool.query("SELECT * FROM password_reset_tokens WHERE token = $1", [token]);
+    const [rows] = await pool.execute("SELECT * FROM password_reset_tokens WHERE token = ?", [token]);
     const record = rows[0];
 
-    if (!record || record.expires < new Date()) {
-      if (record) await pool.query("DELETE FROM password_reset_tokens WHERE token = $1", [token]);
+    if (!record || new Date(record.expires) < new Date()) {
+      if (record) await pool.execute("DELETE FROM password_reset_tokens WHERE token = ?", [token]);
       throw new ApiError("This reset link is invalid or has expired.", 400);
     }
 
     const passwordHash = await hashPassword(password);
-    const client = await pool.connect();
+    const conn = await pool.getConnection();
     try {
-      await client.query("BEGIN");
-      await client.query("UPDATE users SET password = $1 WHERE id = $2", [passwordHash, record.user_id]);
-      await client.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [record.user_id]);
-      await client.query("COMMIT");
+      await conn.beginTransaction();
+      await conn.execute("UPDATE users SET password = ? WHERE id = ?", [passwordHash, record.user_id]);
+      await conn.execute("DELETE FROM password_reset_tokens WHERE user_id = ?", [record.user_id]);
+      await conn.commit();
     } catch (err) {
-      await client.query("ROLLBACK");
+      await conn.rollback();
       throw err;
     } finally {
-      client.release();
+      conn.release();
     }
 
     res.json({ message: "Password updated. You can now sign in." });

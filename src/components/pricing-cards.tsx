@@ -1,13 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check, Sparkles, Loader2 } from "lucide-react";
-import { PLANS } from "@/lib/pricing";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+interface ApiPlan {
+  planId: string;
+  name: string;
+  tagline: string | null;
+  badge: string | null;
+  highlighted: boolean;
+  monthlyPriceMinor: number;
+  yearlyPriceMinor: number;
+  features: string[];
+}
+
+const FREE_PLAN = {
+  planId: "free",
+  name: "Free",
+  badge: null as string | null,
+  highlighted: false,
+  monthlyPriceMinor: 0,
+  yearlyPriceMinor: 0,
+  features: [
+    "Sponsor licence holder directory",
+    "Basic company information",
+    "Industry & location filters",
+    "Basic search functionality",
+    "Limited vacancy views",
+    "Publicly available sponsor info",
+  ],
+};
+
+function formatGBP(minor: number): string {
+  return `£${(minor / 100).toFixed(2).replace(/\.00$/, "")}`;
+}
+
+function yearlySavingPct(monthlyMinor: number, yearlyMinor: number): number {
+  if (!monthlyMinor) return 0;
+  const equivalentYearly = monthlyMinor * 12;
+  if (!equivalentYearly) return 0;
+  return Math.max(0, Math.round((1 - yearlyMinor / equivalentYearly) * 100));
+}
 
 async function startCheckout(planId: string, yearly: boolean): Promise<string | null> {
   try {
@@ -26,8 +64,17 @@ async function startCheckout(planId: string, yearly: boolean): Promise<string | 
 
 export function PricingCards() {
   const { toast } = useToast();
+  const [plans, setPlans] = useState<ApiPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [yearly, setYearly] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/plans")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setPlans)
+      .finally(() => setLoading(false));
+  }, []);
 
   async function handleCta(planId: string) {
     if (planId === "free") {
@@ -40,12 +87,15 @@ export function PricingCards() {
     if (url) {
       window.location.href = url;
     } else {
-      toast(
-        "Stripe is not configured yet. Add STRIPE_SECRET_KEY and price IDs to your .env file to enable billing.",
-        "info"
-      );
+      toast("This plan isn't available for checkout yet. Please check back soon.", "info");
     }
   }
+
+  if (loading) {
+    return <p className="py-10 text-center text-sm text-muted-foreground">Loading plans…</p>;
+  }
+
+  const allPlans = [FREE_PLAN, ...plans];
 
   return (
     <div>
@@ -72,26 +122,24 @@ export function PricingCards() {
         </button>
         <span className={cn("text-sm font-medium", yearly && "text-foreground", !yearly && "text-muted-foreground")}>
           Annual
-          <span className="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-            Save 58%
-          </span>
         </span>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {PLANS.map((plan) => {
-          const displayPrice = yearly ? plan.yearlyPrice : plan.monthlyPrice;
-          const priceSuffix = plan.id === "free" ? "/mo" : yearly ? "/year" : "/mo";
+        {allPlans.map((plan) => {
+          const saving = yearlySavingPct(plan.monthlyPriceMinor, plan.yearlyPriceMinor);
+          const displayPrice = yearly ? formatGBP(plan.yearlyPriceMinor) : formatGBP(plan.monthlyPriceMinor);
+          const priceSuffix = plan.planId === "free" ? "/mo" : yearly ? "/year" : "/mo";
           const altLabel =
-            plan.id === "free"
+            plan.planId === "free"
               ? "or £0/year · Save 0%"
               : yearly
-              ? `or ${plan.monthlyPrice}/mo`
-              : `or ${plan.yearlyPrice}/year · Save ${plan.yearlySaving}`;
+              ? `or ${formatGBP(plan.monthlyPriceMinor)}/mo`
+              : `or ${formatGBP(plan.yearlyPriceMinor)}/year · Save ${saving}%`;
 
           return (
             <div
-              key={plan.id}
+              key={plan.planId}
               className={cn(
                 "relative flex flex-col rounded-2xl border p-6 transition-all duration-200",
                 plan.highlighted
@@ -118,23 +166,23 @@ export function PricingCards() {
                 <p className="mt-1 text-xs text-muted-foreground">{altLabel}</p>
               </div>
 
-              {plan.id === "free" ? (
+              {plan.planId === "free" ? (
                 <Link
                   href="/register"
                   className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
                 >
-                  {plan.cta}
+                  Start free
                 </Link>
               ) : (
                 <Button
                   variant={plan.highlighted ? "gradient" : "outline"}
                   className="mt-6 w-full"
-                  disabled={loadingPlan === plan.id}
-                  onClick={() => handleCta(plan.id)}
+                  disabled={loadingPlan === plan.planId}
+                  onClick={() => handleCta(plan.planId)}
                 >
-                  {loadingPlan === plan.id ? (
+                  {loadingPlan === plan.planId ? (
                     <><Loader2 className="size-4 animate-spin" /> Redirecting…</>
-                  ) : plan.cta}
+                  ) : `Upgrade to ${plan.name}`}
                 </Button>
               )}
 

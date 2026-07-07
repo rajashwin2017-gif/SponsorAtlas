@@ -35,7 +35,7 @@ router.post(
         metadata: { userId: req.user.id },
       });
       customerId = customer.id;
-      await pool.query("UPDATE users SET stripe_customer_id = $1 WHERE id = $2", [customerId, req.user.id]);
+      await pool.execute("UPDATE users SET stripe_customer_id = ? WHERE id = ?", [customerId, req.user.id]);
     }
 
     const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
@@ -126,7 +126,7 @@ router.post(
 );
 
 async function findUserByCustomerId(customerId) {
-  const { rows } = await pool.query("SELECT * FROM users WHERE stripe_customer_id = $1", [customerId]);
+  const [rows] = await pool.execute("SELECT * FROM users WHERE stripe_customer_id = ?", [customerId]);
   return rows[0];
 }
 
@@ -135,7 +135,7 @@ async function syncSubscription(subscription) {
   const userIdFromMetadata = subscription.metadata?.userId;
   let user;
   if (userIdFromMetadata) {
-    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [userIdFromMetadata]);
+    const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [userIdFromMetadata]);
     user = rows[0];
   } else {
     user = await findUserByCustomerId(customerId);
@@ -148,24 +148,23 @@ async function syncSubscription(subscription) {
   const interval = mapped?.interval || "month";
   const periodEnd = subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null;
 
-  await pool.query(
-    `INSERT INTO subscriptions (id, user_id, stripe_subscription_id, stripe_price_id, plan, interval, status, current_period_end, cancel_at_period_end)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     ON CONFLICT (stripe_subscription_id) DO UPDATE SET
-       stripe_price_id = EXCLUDED.stripe_price_id,
-       plan = EXCLUDED.plan,
-       interval = EXCLUDED.interval,
-       status = EXCLUDED.status,
-       current_period_end = EXCLUDED.current_period_end,
-       cancel_at_period_end = EXCLUDED.cancel_at_period_end,
-       updated_at = now()`,
-    [uuidv4(), user.id, subscription.id, priceId || "", plan, interval, subscription.status, periodEnd, subscription.cancel_at_period_end]
+  await pool.execute(
+    `INSERT INTO subscriptions (id, user_id, stripe_subscription_id, stripe_price_id, plan, \`interval\`, status, current_period_end, cancel_at_period_end)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       stripe_price_id = VALUES(stripe_price_id),
+       plan = VALUES(plan),
+       \`interval\` = VALUES(\`interval\`),
+       status = VALUES(status),
+       current_period_end = VALUES(current_period_end),
+       cancel_at_period_end = VALUES(cancel_at_period_end)`,
+    [uuidv4(), user.id, subscription.id, priceId || "", plan, interval, subscription.status, periodEnd, subscription.cancel_at_period_end ? 1 : 0]
   );
 
   const isActive = subscription.status === "active" || subscription.status === "trialing";
-  await pool.query(
-    `UPDATE users SET subscription_tier = $1, subscription_status = $2, stripe_customer_id = $3, stripe_subscription_id = $4, updated_at = now()
-     WHERE id = $5`,
+  await pool.execute(
+    `UPDATE users SET subscription_tier = ?, subscription_status = ?, stripe_customer_id = ?, stripe_subscription_id = ?
+     WHERE id = ?`,
     [isActive ? plan : "free", subscription.status, customerId, subscription.id, user.id]
   );
 }
@@ -174,13 +173,10 @@ async function markSubscriptionCanceled(subscription) {
   const user = await findUserByCustomerId(subscription.customer);
   if (!user) return;
 
-  await pool.query("UPDATE subscriptions SET status = 'canceled', updated_at = now() WHERE stripe_subscription_id = $1", [
-    subscription.id,
+  await pool.execute("UPDATE subscriptions SET status = 'canceled' WHERE stripe_subscription_id = ?", [subscription.id]);
+  await pool.execute("UPDATE users SET subscription_tier = 'free', subscription_status = 'canceled' WHERE id = ?", [
+    user.id,
   ]);
-  await pool.query(
-    "UPDATE users SET subscription_tier = 'free', subscription_status = 'canceled', updated_at = now() WHERE id = $1",
-    [user.id]
-  );
 }
 
 async function recordInvoiceAndPayment(invoice, outcome) {
@@ -190,25 +186,25 @@ async function recordInvoiceAndPayment(invoice, outcome) {
   const amount = invoice.amount_paid || invoice.amount_due;
   const status = invoice.status || (outcome === "paid" ? "paid" : "open");
 
-  await pool.query(
+  await pool.execute(
     `INSERT INTO invoices (id, user_id, stripe_invoice_id, amount, currency, status, hosted_invoice_url, pdf_url)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     ON CONFLICT (stripe_invoice_id) DO UPDATE SET
-       amount = EXCLUDED.amount,
-       status = EXCLUDED.status,
-       hosted_invoice_url = EXCLUDED.hosted_invoice_url,
-       pdf_url = EXCLUDED.pdf_url`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       amount = VALUES(amount),
+       status = VALUES(status),
+       hosted_invoice_url = VALUES(hosted_invoice_url),
+       pdf_url = VALUES(pdf_url)`,
     [uuidv4(), user.id, invoice.id, amount, invoice.currency, status, invoice.hosted_invoice_url || null, invoice.invoice_pdf || null]
   );
 
   // Webhooks can be redelivered by Stripe; skip creating a duplicate Payment
   // row for an invoice we've already recorded a payment against.
-  const { rows: existing } = await pool.query("SELECT id FROM payments WHERE stripe_invoice_id = $1", [invoice.id]);
+  const [existing] = await pool.execute("SELECT id FROM payments WHERE stripe_invoice_id = ?", [invoice.id]);
   if (existing.length === 0) {
     const paymentIntentId = invoice.payment_intent;
-    await pool.query(
+    await pool.execute(
       `INSERT INTO payments (id, user_id, stripe_payment_intent_id, stripe_invoice_id, amount, currency, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         uuidv4(),
         user.id,
@@ -222,7 +218,7 @@ async function recordInvoiceAndPayment(invoice, outcome) {
   }
 
   if (outcome === "failed") {
-    await pool.query("UPDATE users SET subscription_status = 'past_due', updated_at = now() WHERE id = $1", [user.id]);
+    await pool.execute("UPDATE users SET subscription_status = 'past_due' WHERE id = ?", [user.id]);
   }
 }
 

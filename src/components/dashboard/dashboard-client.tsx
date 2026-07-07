@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import {
   Search, Heart, Zap, BellRing, Settings, Sparkles, ArrowRight, Bookmark,
-  TrendingUp, Activity, Plus, Trash2, Gauge, FlaskConical,
+  TrendingUp, Activity, Plus, Trash2, Gauge,
 } from "lucide-react";
 import { useSaved } from "@/hooks/use-saved";
-import { useTier, TIER_LABEL, type Tier } from "@/hooks/use-tier";
+import { useTier, TIER_LABEL } from "@/hooks/use-tier";
+import { useProfile } from "@/hooks/use-profile";
 import { SPONSORS } from "@/lib/mock-data";
 import { SponsorCard } from "@/components/sponsor-card";
 import { BillingPanel } from "@/components/dashboard/billing-panel";
@@ -32,16 +33,16 @@ export function DashboardClient() {
   const { data: session } = useSession();
   const [tab, setTab] = useState<Tab>("overview");
   const { saved } = useSaved();
-  const { tier, setTier, isPro } = useTier();
+  const { tier, isPro } = useTier();
+  const { profile } = useProfile();
   const { toast } = useToast();
   const [alerts, setAlerts] = useState([
     { id: 1, industry: "Tech", city: "London", frequency: "weekly", active: true },
   ]);
 
   const displayName = session?.user?.name ?? session?.user?.email?.split("@")[0] ?? "there";
-  // Free-tier search usage meter — not yet wired to real per-user tracking.
-  const checksUsed = 3;
-  const checksLimit = 5;
+  const checksUsed = profile?.monthlyChecksUsed ?? 0;
+  const checksLimit = profile?.monthlyChecksLimit ?? 5;
 
   const savedSponsors = useMemo(
     () => SPONSORS.filter((s) => saved.includes(s.id)),
@@ -101,35 +102,6 @@ export function DashboardClient() {
               </div>
             )}
 
-            {/* Testing-only: preview the dashboard & sponsor cards as each plan */}
-            <div className="mt-4 rounded-lg border border-dashed border-red-600/40 bg-red-600/[0.03] p-3">
-              <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <FlaskConical className="size-3.5 text-red-600" /> Preview as
-                <span className="ml-auto rounded bg-red-600/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-red-600">
-                  Testing
-                </span>
-              </p>
-              <div className="mt-2 grid grid-cols-3 gap-1" role="group" aria-label="Preview plan tier">
-                {(["free", "pro", "pro_plus"] as Tier[]).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => {
-                      setTier(t);
-                      toast(`Previewing ${TIER_LABEL[t]} plan`, "info");
-                    }}
-                    aria-pressed={tier === t}
-                    className={cn(
-                      "rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
-                      tier === t
-                        ? "bg-gradient-to-r from-red-600 to-zinc-900 text-white shadow-sm"
-                        : "bg-muted text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {TIER_LABEL[t]}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </aside>
 

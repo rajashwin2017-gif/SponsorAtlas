@@ -31,7 +31,7 @@ function mapSubscription(row) {
     interval: row.interval,
     status: row.status,
     currentPeriodEnd: row.current_period_end,
-    cancelAtPeriodEnd: row.cancel_at_period_end,
+    cancelAtPeriodEnd: Boolean(row.cancel_at_period_end),
     createdAt: row.created_at,
     user: row.user_name !== undefined ? { id: row.user_id, name: row.user_name, email: row.user_email } : undefined,
   };

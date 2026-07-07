@@ -4,30 +4,39 @@
  */
 const fs = require("fs");
 const path = require("path");
-const { Client } = require("pg");
+const mysql = require("mysql2/promise");
 
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 
 async function main() {
-  const client = new Client({
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT || 5432),
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "sponsoratlas",
-  });
-
   const sqlPath = path.join(__dirname, "..", "schema.sql");
   const sql = fs.readFileSync(sqlPath, "utf8");
+  const dbName = process.env.DB_NAME || "sponsoratlas";
 
-  await client.connect();
+  const baseConfig = {
+    host: process.env.DB_HOST || "localhost",
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "",
+    multipleStatements: true, // schema.sql has many ;-separated CREATE TABLE statements
+  };
+
+  // Connect without selecting a database first, since MySQL rejects the
+  // connection outright if the target database doesn't exist yet.
+  const bootstrapConn = await mysql.createConnection(baseConfig);
   try {
-    // node-postgres supports multiple ;-separated statements in one query
-    // call, unlike mysql2 (no special multipleStatements flag needed).
-    await client.query(sql);
+    await bootstrapConn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+    console.log(`Database ready: ${dbName}`);
+  } finally {
+    await bootstrapConn.end();
+  }
+
+  const conn = await mysql.createConnection({ ...baseConfig, database: dbName });
+  try {
+    await conn.query(sql);
     console.log("Schema applied:", sqlPath);
   } finally {
-    await client.end();
+    await conn.end();
   }
 }
 

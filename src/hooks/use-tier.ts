@@ -1,11 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export type Tier = "free" | "pro" | "pro_plus";
-
-const KEY = "sponsoratlas:tier";
-const DEFAULT: Tier = "free";
 
 export const TIER_LABEL: Record<Tier, string> = {
   free: "Free",
@@ -13,36 +10,14 @@ export const TIER_LABEL: Record<Tier, string> = {
   pro_plus: "Pro+",
 };
 
-// Testing-only tier override. This build ships with mock data and no auth, so
-// the active plan is kept in localStorage and can be switched from the
-// dashboard "Preview as" control. In production the tier comes from the
-// authenticated session / Stripe subscription instead.
-function read(): Tier {
-  if (typeof window === "undefined") return DEFAULT;
-  const v = localStorage.getItem(KEY);
-  return v === "free" || v === "pro" || v === "pro_plus" ? v : DEFAULT;
+function normalize(raw: string | undefined): Tier {
+  return raw === "pro" || raw === "pro_plus" ? raw : "free";
 }
 
-const listeners = new Set<() => void>();
-
+// Reads the real subscription tier from the authenticated session (set by
+// the Stripe webhook sync — see src/lib/auth.ts / src/app/api/stripe/webhook).
 export function useTier() {
-  const [tier, setTierState] = useState<Tier>(DEFAULT);
-
-  useEffect(() => {
-    setTierState(read());
-    const sync = () => setTierState(read());
-    listeners.add(sync);
-    window.addEventListener("storage", sync); // cross-tab
-    return () => {
-      listeners.delete(sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
-
-  const setTier = useCallback((next: Tier) => {
-    localStorage.setItem(KEY, next);
-    listeners.forEach((l) => l()); // same-tab subscribers (dashboard + search)
-  }, []);
-
-  return { tier, setTier, isPro: tier !== "free", isProPlus: tier === "pro_plus" };
+  const { data: session } = useSession();
+  const tier = normalize(session?.user?.subscriptionTier);
+  return { tier, isPro: tier !== "free", isProPlus: tier === "pro_plus" };
 }

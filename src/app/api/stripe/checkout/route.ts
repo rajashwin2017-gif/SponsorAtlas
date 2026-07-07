@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { stripe, priceIdFor, type PlanId } from "@/lib/stripe";
+import { stripe, getPlanPriceId } from "@/lib/stripe";
 import { handleApiError, ApiError } from "@/lib/api-error";
 
 const schema = z.object({
-  plan: z.enum(["pro", "pro_plus"]),
+  plan: z.string().min(1, "Plan is required"),
   yearly: z.boolean().default(false),
 });
 
@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
     }
 
     const { plan, yearly } = parsed.data;
-    const priceId = priceIdFor(plan as PlanId, yearly);
+    const priceId = await getPlanPriceId(plan, yearly);
     if (!priceId) {
-      throw new ApiError("This plan is not configured yet", 400);
+      throw new ApiError("This plan isn't available for checkout yet", 400);
     }
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: sessionUser.id } });

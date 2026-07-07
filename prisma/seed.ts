@@ -103,6 +103,56 @@ async function main() {
   });
   console.log(`  ✓ Sample saved sponsors, fit check & alert for ${proUser.email}`);
 
+  // ── Pricing plans (managed from /admin/plans; stripeProductId etc. stay
+  // null until an admin saves the plan with STRIPE_SECRET_KEY configured) ──
+  const plans = [
+    {
+      planId: "pro",
+      name: "Pro",
+      badge: "Most Popular",
+      highlighted: true,
+      displayOrder: 1,
+      monthlyPriceMinor: 1999,
+      yearlyPriceMinor: 9999,
+      features: [
+        "Everything in Free",
+        "Active sponsorship vacancies",
+        "Direct employer application links",
+        "Unlimited searches",
+        "Advanced filtering",
+        "Save favourite employers & jobs",
+        "Email alerts & notifications",
+        "Sponsorship insights",
+        "Employer activity updates",
+      ],
+    },
+    {
+      planId: "pro_plus",
+      name: "Pro Plus",
+      badge: null,
+      highlighted: false,
+      displayOrder: 2,
+      monthlyPriceMinor: 2999,
+      yearlyPriceMinor: 14999,
+      features: [
+        "Everything in Pro",
+        "Premium candidate profile",
+        "CV review tools",
+        "AI CV matching",
+        "Interview preparation resources",
+        "Priority job alerts",
+        "Employer recommendations",
+        "Application tracking tools",
+        "Priority customer support",
+        "Early access to new features",
+      ],
+    },
+  ];
+  for (const p of plans) {
+    await prisma.plan.upsert({ where: { planId: p.planId }, create: p, update: {} });
+  }
+  console.log(`  ✓ ${plans.length} pricing plans (draft — sync from /admin/plans once Stripe is configured)`);
+
   console.log("✅ Seed complete. Sign in with any seeded email above and password: password123");
 }
 

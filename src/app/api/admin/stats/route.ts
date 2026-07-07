@@ -2,18 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
 import { handleApiError } from "@/lib/api-error";
-import { PLANS } from "@/lib/pricing";
-
-function priceToNumber(price: string): number {
-  return parseFloat(price.replace(/[^0-9.]/g, "")) || 0;
-}
-
-const MONTHLY_PRICE: Record<string, number> = {};
-const YEARLY_PRICE: Record<string, number> = {};
-for (const plan of PLANS) {
-  MONTHLY_PRICE[plan.id] = priceToNumber(plan.monthlyPrice);
-  YEARLY_PRICE[plan.id] = priceToNumber(plan.yearlyPrice);
-}
 
 export async function GET() {
   try {
@@ -28,6 +16,7 @@ export async function GET() {
       trialSubscriptions,
       recentRegistrations,
       recentPayments,
+      plans,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { subscriptionStatus: "active" } }),
@@ -45,7 +34,15 @@ export async function GET() {
         take: 10,
         include: { user: { select: { name: true, email: true } } },
       }),
+      prisma.plan.findMany({ select: { planId: true, monthlyPriceMinor: true, yearlyPriceMinor: true } }),
     ]);
+
+    const MONTHLY_PRICE: Record<string, number> = {};
+    const YEARLY_PRICE: Record<string, number> = {};
+    for (const plan of plans) {
+      MONTHLY_PRICE[plan.planId] = plan.monthlyPriceMinor / 100;
+      YEARLY_PRICE[plan.planId] = plan.yearlyPriceMinor / 100;
+    }
 
     const mrr =
       monthlySubscriptions.reduce((sum, s) => sum + (MONTHLY_PRICE[s.plan] ?? 0), 0) +

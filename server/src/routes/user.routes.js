@@ -27,20 +27,19 @@ router.patch(
     const fields = [];
     const values = [];
     if (parsed.data.name !== undefined) {
+      fields.push("name = ?");
       values.push(parsed.data.name);
-      fields.push(`name = $${values.length}`);
     }
     if (parsed.data.alertFrequency !== undefined) {
+      fields.push("alert_frequency = ?");
       values.push(parsed.data.alertFrequency);
-      fields.push(`alert_frequency = $${values.length}`);
     }
     if (fields.length === 0) return res.json(mapUser(req.user));
 
     values.push(req.user.id);
-    const { rows } = await pool.query(
-      `UPDATE users SET ${fields.join(", ")}, updated_at = now() WHERE id = $${values.length} RETURNING *`,
-      values
-    );
+    await pool.execute(`UPDATE users SET ${fields.join(", ")} WHERE id = ?`, values);
+
+    const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [req.user.id]);
     res.json(mapUser(rows[0]));
   })
 );
@@ -48,8 +47,8 @@ router.patch(
 router.get(
   "/subscription",
   asyncHandler(async (req, res) => {
-    const { rows } = await pool.query(
-      "SELECT * FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1",
+    const [rows] = await pool.execute(
+      "SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1",
       [req.user.id]
     );
     const subscription = rows[0];
@@ -61,7 +60,7 @@ router.get(
       plan: subscription?.plan ?? null,
       interval: subscription?.interval ?? null,
       currentPeriodEnd: subscription?.current_period_end ?? null,
-      cancelAtPeriodEnd: subscription?.cancel_at_period_end ?? false,
+      cancelAtPeriodEnd: Boolean(subscription?.cancel_at_period_end),
     });
   })
 );
@@ -95,10 +94,9 @@ router.post(
 router.get(
   "/invoices",
   asyncHandler(async (req, res) => {
-    const { rows } = await pool.query(
-      "SELECT * FROM invoices WHERE user_id = $1 ORDER BY created_at DESC",
-      [req.user.id]
-    );
+    const [rows] = await pool.execute("SELECT * FROM invoices WHERE user_id = ? ORDER BY created_at DESC", [
+      req.user.id,
+    ]);
     res.json(rows.map(mapInvoice));
   })
 );

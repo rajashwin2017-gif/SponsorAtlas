@@ -1,15 +1,13 @@
 // SponsorAtlas — Prisma schema
-// PostgreSQL with pg_trgm for fuzzy full-text sponsor search.
+// MySQL.
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [pg_trgm]
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model Sponsor {
@@ -49,13 +47,12 @@ model Sponsor {
   // Legacy / live signals
   liveJobsCount     Int       @default(0)
   lastJobPostedAt   DateTime?
-  suggestedSocCodes String[]
+  suggestedSocCodes Json      @default("[]") // MySQL has no native scalar array type — stored as a JSON array of SOC codes
 
   // Relationships
-  routes  SponsorRoute[]
-  savedBy SavedSponsor[]
-  alerts  OpportunityAlert[]
-  jobs    Job[]
+  routes SponsorRoute[]
+  alerts OpportunityAlert[]
+  jobs   Job[]
 
   @@index([normalisedName])
   @@index([townNormalised])
@@ -120,7 +117,7 @@ model CommunityPost {
   category   String   @default("question")
   title      String
   content    String
-  tags       String[]
+  tags       Json     @default("[]") // MySQL has no native scalar array type — stored as a JSON array of tags
   upvotes    Int      @default(0)
   replies    Int      @default(0)
   isVerified Boolean  @default(false)
@@ -194,6 +191,32 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+model Plan {
+  id     String @id @default(uuid())
+  planId String @unique // stable slug referenced by checkout/webhook, e.g. "pro"
+
+  name         String
+  tagline      String?
+  badge        String?
+  highlighted  Boolean @default(false)
+  active       Boolean @default(true) // soft-hide from public pricing page; never hard-delete (subscribers may reference it)
+  displayOrder Int     @default(0)
+
+  monthlyPriceMinor Int // pence
+  yearlyPriceMinor  Int // pence
+  features          Json // string[]
+
+  // Null until the plan has been saved at least once with Stripe configured.
+  stripeProductId      String?
+  stripeMonthlyPriceId String? @unique
+  stripeYearlyPriceId  String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("plans")
 }
 
 model Subscription {
@@ -272,14 +295,17 @@ model AuditLog {
 model SavedSponsor {
   id        String   @id @default(uuid())
   userId    String
+  // No DB-level FK to Sponsor: the live site's sponsor IDs come from the
+  // 126k+ real dataset (not yet imported into this table — see Phase 5 of
+  // the static->dynamic migration). Revisit once that import lands.
   sponsorId String
   notes     String?
   createdAt DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sponsor Sponsor @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, sponsorId])
+  @@index([sponsorId])
   @@map("saved_sponsors")
 }
 
@@ -304,7 +330,7 @@ model FitCheck {
   userId         String
   sponsorId      String
   score          Int // 0-100
-  suggestedRoles String[] // Array of SOC codes
+  suggestedRoles Json     @default("[]") // MySQL has no native scalar array type — stored as a JSON array of SOC codes
   salaryMatch    Boolean
   gapAnalysis    String?
   createdAt      DateTime @default(now())

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Globe2, Menu, X, User, LogIn } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Globe2, Menu, X, User, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -21,6 +22,8 @@ function isActive(pathname: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated" && Boolean(session?.user);
 
   return (
     <header className="sticky top-0 z-50">
@@ -61,18 +64,29 @@ The Sponsor<span className="gradient-text"> Finder</span>
             })}
           </nav>
 
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:bg-muted"
-          >
-            <User className="size-4" /> Dashboard
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700"
-          >
-            <LogIn className="size-4" /> Sign in
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:bg-muted"
+              >
+                <User className="size-4" /> Dashboard
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700"
+              >
+                <LogOut className="size-4" /> Sign out
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700"
+            >
+              <LogIn className="size-4" /> Sign in
+            </Link>
+          )}
         </div>
 
         {/* Mobile: hamburger inside a pill */}
@@ -117,13 +131,25 @@ The Sponsor<span className="gradient-text"> Finder</span>
               >
                 Dashboard
               </Link>
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="rounded-full bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
-              >
-                Sign in
-              </Link>
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                  className="rounded-full bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
+                >
+                  Sign out
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white"
+                >
+                  Sign in
+                </Link>
+              )}
             </div>
           </nav>
         </div>

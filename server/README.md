@@ -2,10 +2,10 @@
 
 A standalone Express/Node.js backend for SponsorAtlas: authentication, user
 profile/billing, admin dashboard, and Stripe subscriptions. Plain JavaScript,
-plain SQL — no ORM, no build step, no framework beyond Express.
+plain SQL (MySQL) — no ORM, no build step, no framework beyond Express.
 
 - **`schema.sql`** — the raw `CREATE TABLE` statements. This *is* the source of truth for the database structure (open it and read it — no generated client hiding what's there).
-- **`src/db/pool.js`** — a `pg` connection pool. Every route queries it directly with parameterized SQL (`pool.query("SELECT * FROM users WHERE id = $1", [id])`).
+- **`src/db/pool.js`** — a `mysql2` connection pool. Every route queries it directly with parameterized SQL (`pool.execute("SELECT * FROM users WHERE id = ?", [id])`).
 - **`scripts/runMigration.js`** — applies `schema.sql` to your database.
 - **`scripts/seed.js`** — inserts demo users.
 
@@ -18,8 +18,7 @@ cp .env.example .env
 ```
 
 Edit `.env` — at minimum set `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD`/`DB_NAME`
-(a Postgres database, can be the same one the Next.js app uses) and `JWT_SECRET`
-(generate with `openssl rand -base64 32`).
+(your MySQL database) and `JWT_SECRET` (generate with `openssl rand -base64 32`).
 
 ```bash
 npm run migrate   # applies schema.sql — creates all tables

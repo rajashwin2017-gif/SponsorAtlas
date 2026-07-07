@@ -40,8 +40,12 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
   const activity = sponsor.hiringActivity ?? "Inactive";
   const dotClass = ACTIVITY_DOT[activity as keyof typeof ACTIVITY_DOT] ?? "bg-zinc-300";
 
-  const handleSave = () => {
-    const nowSaved = toggle(sponsor.id);
+  const handleSave = async () => {
+    const nowSaved = await toggle(sponsor.id);
+    if (nowSaved === null) {
+      toast("Sign in to save sponsors", "info");
+      return;
+    }
     toast(
       nowSaved ? `Saved ${sponsor.organisationName}` : `Removed ${sponsor.organisationName}`,
       nowSaved ? "success" : "info"

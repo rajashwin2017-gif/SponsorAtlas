@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { stripe, planFromPriceId } from "@/lib/stripe";
+import { stripe, getPlanFromPriceId } from "@/lib/stripe";
 
 async function findUserByCustomerId(customerId: string) {
   return prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
@@ -16,7 +16,7 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   if (!user) return;
 
   const priceId = subscription.items.data[0]?.price.id;
-  const mapped = priceId ? planFromPriceId(priceId) : undefined;
+  const mapped = priceId ? await getPlanFromPriceId(priceId) : undefined;
   const plan = mapped?.plan ?? "pro";
   const interval = mapped?.interval ?? "month";
   const periodEnd = (subscription as any).current_period_end
