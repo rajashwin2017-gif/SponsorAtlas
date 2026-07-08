@@ -49,7 +49,7 @@ export function AdminNav({ userName }: { userName: string }) {
         </nav>
 
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => signOut({ callbackUrl: "/admin-login" })}
           className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <LogOut className="size-4 shrink-0" /> Sign out

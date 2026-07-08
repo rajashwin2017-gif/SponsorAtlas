@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await getSession();
 
   if (!session?.user) {
-    redirect("/login?callbackUrl=/admin");
+    redirect("/admin-login?callbackUrl=/admin");
   }
   if (session.user.role !== "ADMIN") {
     redirect("/dashboard");

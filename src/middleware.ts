@@ -7,7 +7,7 @@ const secret = process.env.NEXTAUTH_SECRET ?? "dev-secret-change-in-production";
 // /admin/* rewrite below — otherwise an unauthenticated visit to
 // admin.<domain>/login gets rewritten to /admin/login, fails the auth
 // check, and redirects back to /login on the same host, looping forever.
-const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
+const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/admin-login"];
 
 export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
@@ -22,20 +22,27 @@ export async function middleware(req: NextRequest) {
     url.pathname = `/admin${url.pathname === "/" ? "" : url.pathname}`;
   }
 
-  const isAdminRoute = url.pathname.startsWith("/admin");
-  const isDashboardRoute = url.pathname.startsWith("/dashboard");
+  // Precise prefix match (not a bare startsWith) — "/admin-login" starts
+  // with the string "/admin" too, which previously made this true for it
+  // and required auth on the page meant to grant it, looping forever.
+  const isAdminRoute = !isAuthPath && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"));
+  const isDashboardRoute = url.pathname === "/dashboard" || url.pathname.startsWith("/dashboard/");
 
   if (isAdminRoute || isDashboardRoute) {
     const token = await getToken({ req, secret });
 
     if (!token) {
-      const loginUrl = new URL("/login", req.url);
+      const loginUrl = new URL(isAdminRoute ? "/admin-login" : "/login", req.url);
       loginUrl.searchParams.set("callbackUrl", url.pathname);
       return NextResponse.redirect(loginUrl);
     }
 
     if (isAdminRoute && token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      // A same-host relative redirect would itself get swept into the
+      // /admin/* rewrite above (admin.<domain>/dashboard -> /admin/dashboard,
+      // a 404) — send non-admins to the real dashboard on the main domain.
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      return NextResponse.redirect(isAdminHost ? new URL("/dashboard", appUrl) : new URL("/dashboard", req.url));
     }
   }
 
