@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -28,6 +28,27 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const authError = params.get("error");
+
+  useEffect(() => {
+    if (authError) {
+      const errorMap: Record<string, string> = {
+        Configuration: "There is a server-side authentication configuration issue.",
+        AccessDenied: "Access was denied. Your account might be suspended or restricted.",
+        Verification: "The verification link has expired or is invalid.",
+        OAuthSignin: "Could not start Google sign in. Please try again.",
+        OAuthCallback: "Could not complete Google sign in. Please try again.",
+        OAuthCreateAccount: "Could not create user account in the database.",
+        EmailCreateAccount: "Could not create user account in the database.",
+        Callback: "An error occurred during authentication callback.",
+        OAuthAccountNotLinked: "This email is already registered using a password. Please sign in with email and password.",
+        EmailNotVerified: "Please verify your email address before signing in. Check your inbox for the verification link.",
+        Default: "An error occurred during sign in. Please try again.",
+      };
+      setError(errorMap[authError] ?? errorMap.Default);
+    }
+  }, [authError]);
 
   const verifyStatus = params.get("verify");
   const resetStatus = params.get("reset");

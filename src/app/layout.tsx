@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, EB_Garamond } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { CustomCursor } from "@/components/custom-cursor";
 import { AuthSessionProvider } from "@/components/session-provider";
 import { DevTierUnlock } from "@/components/dev-tier-unlock";
@@ -55,11 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthSessionProvider>
           <ToastProvider>
             <CustomCursor />
-            <div className="flex min-h-dvh flex-col">
-              <SiteHeader />
-              <main className="flex-1">{children}</main>
-              <SiteFooter />
-            </div>
+            {children}
           </ToastProvider>
         </AuthSessionProvider>
       </body>

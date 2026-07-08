@@ -15,11 +15,18 @@ export async function middleware(req: NextRequest) {
   const isAdminHost = hostname.startsWith("admin.");
   const isAuthPath = AUTH_PATHS.some((p) => url.pathname === p || url.pathname.startsWith(`${p}/`));
 
-  // admin.localhost:3000 / admin.mydomain.com transparently serve the
-  // src/app/admin route tree, keeping the admin UI on its own subdomain
-  // without needing a separate deployment.
-  if (isAdminHost && !isAuthPath && !url.pathname.startsWith("/admin")) {
-    url.pathname = `/admin${url.pathname === "/" ? "" : url.pathname}`;
+  // Redirect admin subdomain requests to the canonical subpath on the main domain
+  if (isAdminHost) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    let targetPath = url.pathname;
+
+    if (!isAuthPath && !targetPath.startsWith("/admin")) {
+      targetPath = `/admin${targetPath === "/" ? "" : targetPath}`;
+    }
+
+    const redirectUrl = new URL(targetPath, appUrl);
+    redirectUrl.search = url.search;
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Precise prefix match (not a bare startsWith) — "/admin-login" starts
@@ -38,11 +45,7 @@ export async function middleware(req: NextRequest) {
     }
 
     if (isAdminRoute && token.role !== "ADMIN") {
-      // A same-host relative redirect would itself get swept into the
-      // /admin/* rewrite above (admin.<domain>/dashboard -> /admin/dashboard,
-      // a 404) — send non-admins to the real dashboard on the main domain.
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-      return NextResponse.redirect(isAdminHost ? new URL("/dashboard", appUrl) : new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }
 

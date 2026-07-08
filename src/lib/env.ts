@@ -32,7 +32,7 @@ const envSchema = z.object({
   ADZUNA_APP_KEY: z.string().optional(),
 
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_ADMIN_URL: z.string().url().default("http://admin.localhost:3000"),
+  NEXT_PUBLIC_ADMIN_URL: z.string().url().optional().or(z.literal("")),
 
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),

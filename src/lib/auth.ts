@@ -85,16 +85,35 @@ export const authOptions: NextAuthOptions = {
 
       if (user.status === "suspended") return false;
 
+      if (account?.provider === "credentials" && !user.emailVerified) {
+        throw new Error("EmailNotVerified");
+      }
+
       return true;
     },
 
     async jwt({ token, user, trigger }) {
       if (user) {
-        token.id = user.id!;
-        token.role = user.role!;
-        token.status = user.status!;
-        token.subscriptionTier = user.subscriptionTier!;
-        token.emailVerified = user.emailVerified ? new Date(user.emailVerified).toISOString() : null;
+        // OAuth logins pass the provider's profile data. We must look up the
+        // user in the database by email to resolve the correct database User UUID
+        // and associated role/tier rather than using the raw provider profile ID.
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email!.toLowerCase().trim() },
+        });
+
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+          token.status = dbUser.status;
+          token.subscriptionTier = dbUser.subscriptionTier;
+          token.emailVerified = dbUser.emailVerified ? dbUser.emailVerified.toISOString() : null;
+        } else {
+          token.id = user.id!;
+          token.role = user.role!;
+          token.status = user.status!;
+          token.subscriptionTier = user.subscriptionTier!;
+          token.emailVerified = user.emailVerified ? new Date(user.emailVerified).toISOString() : null;
+        }
       }
 
       // Re-sync from DB on explicit session refresh (e.g. after profile/plan

@@ -47,7 +47,7 @@ function yearlySavingPct(monthlyMinor: number, yearlyMinor: number): number {
   return Math.max(0, Math.round((1 - yearlyMinor / equivalentYearly) * 100));
 }
 
-async function startCheckout(planId: string, yearly: boolean): Promise<string | null> {
+async function startCheckout(planId: string, yearly: boolean): Promise<{ url?: string; error?: string; status?: number }> {
   try {
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
@@ -55,10 +55,9 @@ async function startCheckout(planId: string, yearly: boolean): Promise<string | 
       body: JSON.stringify({ plan: planId, yearly }),
     });
     const data = await res.json();
-    if (data.url) return data.url;
-    return null;
+    return { url: data.url, error: data.error, status: res.status };
   } catch {
-    return null;
+    return { error: "Network error" };
   }
 }
 
@@ -82,12 +81,16 @@ export function PricingCards() {
       return;
     }
     setLoadingPlan(planId);
-    const url = await startCheckout(planId, yearly);
+    const result = await startCheckout(planId, yearly);
     setLoadingPlan(null);
-    if (url) {
-      window.location.href = url;
+
+    if (result.url) {
+      window.location.href = result.url;
+    } else if (result.status === 401) {
+      toast("Please sign in or register to upgrade.", "info");
+      window.location.href = "/login?callbackUrl=/pricing";
     } else {
-      toast("This plan isn't available for checkout yet. Please check back soon.", "info");
+      toast(result.error ?? "This plan isn't available for checkout yet. Please check back soon.", "info");
     }
   }
 

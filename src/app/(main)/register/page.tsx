@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,18 +41,8 @@ export default function RegisterPage() {
       return;
     }
 
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
     setLoading(false);
-    if (result?.error) {
-      setError("Account created, but sign-in failed. Try signing in manually.");
-      router.push("/login");
-    } else {
-      router.push("/dashboard");
-    }
+    setSuccess(true);
   }
 
   async function handleGoogle() {
@@ -60,6 +51,38 @@ export default function RegisterPage() {
   }
 
   const passwordStrength = password.length === 0 ? null : password.length < 6 ? "weak" : password.length < 10 ? "fair" : "strong";
+
+  if (success) {
+    return (
+      <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <Link href="/" className="mb-8 flex items-center justify-center gap-2 font-heading text-lg font-bold">
+            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-red-600 to-zinc-900 text-white">
+              <Globe2 className="size-5" />
+            </span>
+            Sponsor<span className="gradient-text">Atlas</span>
+          </Link>
+
+          <div className="surface-card p-7 text-center">
+            <div className="mx-auto mb-4 grid size-12 place-items-center rounded-full bg-red-600/10 text-red-600">
+              <Mail className="size-6" />
+            </div>
+            <h1 className="font-display text-2xl tracking-tight">Check your email</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              We've sent a verification link to <span className="font-medium text-foreground">{email}</span>.
+              Please click the link in the email to activate your account.
+            </p>
+            <Link href="/login" className="block mt-6">
+              <Button type="button" className="w-full" variant="outline">
+                Go to sign in
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-12">

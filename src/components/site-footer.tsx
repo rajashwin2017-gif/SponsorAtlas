@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Globe2, ShieldCheck, Linkedin, Twitter, Instagram, MapPin, Mail } from "lucide-react";
 import { FooterBackToTop } from "@/components/footer-back-to-top";
 
-const ADMIN_LOGIN_URL = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://admin.localhost:3000"}/admin-login`;
+const ADMIN_LOGIN_URL = "/admin-login";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
