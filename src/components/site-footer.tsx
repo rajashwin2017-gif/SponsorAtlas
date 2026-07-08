@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Globe2, ShieldCheck, Linkedin, Twitter, Instagram, MapPin, Mail } from "lucide-react";
 import { FooterBackToTop } from "@/components/footer-back-to-top";
 
+const ADMIN_LOGIN_URL = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://admin.localhost:3000"}/login`;
+
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/search", label: "Sponsor Search" },
@@ -127,6 +129,9 @@ export function SiteFooter() {
                 {l.label}
               </Link>
             ))}
+            <a href={ADMIN_LOGIN_URL} className="flex items-center gap-1.5 transition-colors hover:text-white">
+              <ShieldCheck className="size-3.5" /> Admin Login
+            </a>
           </nav>
         </div>
       </div>
