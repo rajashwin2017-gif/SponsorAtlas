@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTier } from "@/hooks/use-tier";
 
 interface ApiPlan {
   planId: string;
@@ -63,6 +64,7 @@ async function startCheckout(planId: string, yearly: boolean): Promise<{ url?: s
 
 export function PricingCards() {
   const { toast } = useToast();
+  const { tier } = useTier();
   const [plans, setPlans] = useState<ApiPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
@@ -140,6 +142,8 @@ export function PricingCards() {
               ? `or ${formatGBP(plan.monthlyPriceMinor)}/mo`
               : `or ${formatGBP(plan.yearlyPriceMinor)}/year · Save ${saving}%`;
 
+          const isCurrentPlan = tier === plan.planId;
+
           return (
             <div
               key={plan.planId}
@@ -170,23 +174,35 @@ export function PricingCards() {
               </div>
 
               {plan.planId === "free" ? (
-                <Link
-                  href="/register"
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
-                >
-                  Start free
-                </Link>
+                isCurrentPlan ? (
+                  <Button variant="outline" className="mt-6 w-full" disabled>
+                    Current plan
+                  </Button>
+                ) : (
+                  <Link
+                    href="/register"
+                    className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+                  >
+                    Start free
+                  </Link>
+                )
               ) : (
-                <Button
-                  variant={plan.highlighted ? "gradient" : "outline"}
-                  className="mt-6 w-full"
-                  disabled={loadingPlan === plan.planId}
-                  onClick={() => handleCta(plan.planId)}
-                >
-                  {loadingPlan === plan.planId ? (
-                    <><Loader2 className="size-4 animate-spin" /> Redirecting…</>
-                  ) : `Upgrade to ${plan.name}`}
-                </Button>
+                isCurrentPlan ? (
+                  <Button variant="outline" className="mt-6 w-full" disabled>
+                    Current plan
+                  </Button>
+                ) : (
+                  <Button
+                    variant={plan.highlighted ? "gradient" : "outline"}
+                    className="mt-6 w-full"
+                    disabled={loadingPlan === plan.planId}
+                    onClick={() => handleCta(plan.planId)}
+                  >
+                    {loadingPlan === plan.planId ? (
+                      <><Loader2 className="size-4 animate-spin" /> Redirecting…</>
+                    ) : `Upgrade to ${plan.name}`}
+                  </Button>
+                )
               )}
 
               <ul className="mt-6 space-y-3">

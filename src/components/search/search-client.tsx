@@ -38,6 +38,7 @@ const SORTS = [
   { key: "az",          label: "A–Z" },
 ] as const;
 type SortKey = (typeof SORTS)[number]["key"];
+const EMPTY_ARRAY: string[] = [];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -106,7 +107,7 @@ export function SearchClient({
 
   // City/Region filter is Pro-only — ignore any selection (including a
   // shared URL with ?city=) once we know the user isn't Pro.
-  const effectiveCities = isPro ? cities : [];
+  const effectiveCities = isPro ? cities : EMPTY_ARRAY;
 
   // ── Sync filters → URL ────────────────────────────────────────────────── #
   useEffect(() => {
