@@ -103,6 +103,89 @@ async function main() {
   });
   console.log(`  ✓ Sample saved sponsors, fit check & alert for ${proUser.email}`);
 
+  // ── Test subscriptions & payments ──────────────────────────────────────────
+  // Realistic-looking Stripe test IDs so admin panels have data to display.
+  const proUser2     = created[2]; // pro_plus
+  const adminUser    = created[3];
+
+  const now = new Date();
+  const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000);
+  const periodEnd   = new Date(now.getTime() + 30 * 86_400_000); // 30 days ahead
+
+  await prisma.subscription.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.invoice.deleteMany();
+
+  const subscriptions = [
+    {
+      userId: proUser.id,
+      stripeSubscriptionId: "sub_test_pro_monthly_001",
+      stripePriceId:        "price_test_pro_monthly",
+      plan:                 "pro",
+      interval:             "month",
+      status:               "active",
+      currentPeriodEnd:     periodEnd,
+      cancelAtPeriodEnd:    false,
+      createdAt:            daysAgo(62),
+    },
+    {
+      userId: proUser2.id,
+      stripeSubscriptionId: "sub_test_proplus_yearly_001",
+      stripePriceId:        "price_test_proplus_yearly",
+      plan:                 "pro_plus",
+      interval:             "year",
+      status:               "active",
+      currentPeriodEnd:     new Date(now.getTime() + 290 * 86_400_000),
+      cancelAtPeriodEnd:    false,
+      createdAt:            daysAgo(75),
+    },
+    {
+      userId: adminUser.id,
+      stripeSubscriptionId: "sub_test_admin_proplus_001",
+      stripePriceId:        "price_test_proplus_monthly",
+      plan:                 "pro_plus",
+      interval:             "month",
+      status:               "active",
+      currentPeriodEnd:     periodEnd,
+      cancelAtPeriodEnd:    false,
+      createdAt:            daysAgo(10),
+    },
+  ];
+
+  for (const s of subscriptions) {
+    await prisma.subscription.create({ data: s });
+  }
+  console.log(`  ✓ ${subscriptions.length} test subscriptions`);
+
+  const payments = [
+    // Pro user — 2 monthly renewals
+    { userId: proUser.id,  stripePaymentIntentId: "pi_test_001", stripeInvoiceId: "in_test_001", amount: 1999, currency: "gbp", status: "succeeded", createdAt: daysAgo(62) },
+    { userId: proUser.id,  stripePaymentIntentId: "pi_test_002", stripeInvoiceId: "in_test_002", amount: 1999, currency: "gbp", status: "succeeded", createdAt: daysAgo(32) },
+    // Pro+ user — yearly (1 payment)
+    { userId: proUser2.id, stripePaymentIntentId: "pi_test_003", stripeInvoiceId: "in_test_003", amount: 14999, currency: "gbp", status: "succeeded", createdAt: daysAgo(75) },
+    // Admin — 1 successful, 1 earlier failed attempt
+    { userId: adminUser.id, stripePaymentIntentId: "pi_test_004", stripeInvoiceId: "in_test_004", amount: 2999, currency: "gbp", status: "succeeded", createdAt: daysAgo(10) },
+    { userId: adminUser.id, stripePaymentIntentId: "pi_test_005", stripeInvoiceId: "in_test_005", amount: 2999, currency: "gbp", status: "failed",    createdAt: daysAgo(11) },
+  ];
+
+  for (const p of payments) {
+    await prisma.payment.create({ data: p });
+  }
+  console.log(`  ✓ ${payments.length} test payments`);
+
+  const invoices = [
+    { userId: proUser.id,  stripeInvoiceId: "in_test_001", amount: 1999,  currency: "gbp", status: "paid", createdAt: daysAgo(62) },
+    { userId: proUser.id,  stripeInvoiceId: "in_test_002", amount: 1999,  currency: "gbp", status: "paid", createdAt: daysAgo(32) },
+    { userId: proUser2.id, stripeInvoiceId: "in_test_003", amount: 14999, currency: "gbp", status: "paid", createdAt: daysAgo(75) },
+    { userId: adminUser.id, stripeInvoiceId: "in_test_004", amount: 2999,  currency: "gbp", status: "paid", createdAt: daysAgo(10) },
+    { userId: adminUser.id, stripeInvoiceId: "in_test_005", amount: 2999,  currency: "gbp", status: "void", createdAt: daysAgo(11) },
+  ];
+
+  for (const inv of invoices) {
+    await prisma.invoice.create({ data: inv });
+  }
+  console.log(`  ✓ ${invoices.length} test invoices`);
+
   // ── Pricing plans (managed from /admin/plans; stripeProductId etc. stay
   // null until an admin saves the plan with STRIPE_SECRET_KEY configured) ──
   const plans = [
