@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Search, Heart, Zap, BellRing, Settings, Sparkles, ArrowRight, Bookmark,
@@ -30,12 +31,27 @@ const NAV: { id: Tab; label: string; icon: typeof Search }[] = [
 ];
 
 export function DashboardClient() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("overview");
+  const { toast } = useToast();
+
+  // After Stripe redirects here with ?upgraded=1, wait briefly for the
+  // webhook to land then force a JWT re-sync so the tier badge updates
+  // immediately without requiring a sign-out / sign-in cycle.
+  useEffect(() => {
+    if (searchParams.get("upgraded") !== "1") return;
+    const timer = setTimeout(async () => {
+      await update();
+      router.replace("/dashboard");
+      toast("Your account has been upgraded! Welcome to Pro.", "success");
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
   const { saved } = useSaved();
   const { tier, isPro } = useTier();
   const { profile } = useProfile();
-  const { toast } = useToast();
   const [alerts, setAlerts] = useState([
     { id: 1, industry: "Tech", city: "London", frequency: "weekly", active: true },
   ]);
