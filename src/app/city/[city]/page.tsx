@@ -3,14 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, TrendingUp, Building2, ArrowLeft, ArrowRight } from "lucide-react";
 import { getCityStats, getSponsors } from "@/lib/sponsor-store";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import type { SponsorTier } from "@/lib/types";
-import { TIER_BG } from "@/lib/types";
-
-const TIER_EMOJI: Record<SponsorTier, string> = {
-  Platinum: "🏆", Gold: "🥇", Silver: "🥈", Bronze: "🥉", Active: "●", Inactive: "○",
-};
+import { CityTableRows } from "@/components/city-table-rows";
 
 export async function generateStaticParams() {
   // Generate pages for the top 200 cities by sponsor count
@@ -118,28 +111,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {topSponsors.map((s, i) => (
-                  <tr key={s.id} className="group transition-colors hover:bg-muted/30">
-                    <td className="px-4 py-3 text-sm font-bold text-muted-foreground tabular">{i + 1}</td>
-                    <td className="px-4 py-3">
-                      <Link href={`/sponsors/${s.id}`} className="font-medium hover:text-red-600">
-                        {s.organisationName}
-                      </Link>
-                      <div className="mt-0.5">
-                        <span className={cn(
-                          "inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0 text-[10px] font-semibold",
-                          TIER_BG[s.sponsorTier as SponsorTier]
-                        )}>
-                          {TIER_EMOJI[s.sponsorTier as SponsorTier]} {s.sponsorTier}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">{s.industryCategory}</td>
-                    <td className="px-4 py-3 text-right font-bold tabular">
-                      {s.cos2025Total?.toLocaleString() ?? "< 5"}
-                    </td>
-                  </tr>
-                ))}
+                <CityTableRows sponsors={topSponsors} />
               </tbody>
             </table>
           </div>

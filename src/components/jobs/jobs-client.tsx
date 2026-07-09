@@ -14,6 +14,7 @@ import type { LiveJob, JobFeedSource } from "@/lib/job-feed";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { useTier } from "@/hooks/use-tier";
+import { BlurGate } from "@/components/tier-gate";
 
 // Free users see this many real listings before hitting the paywall.
 const FREE_VISIBLE_JOBS = 3;
@@ -114,21 +115,25 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
 
   const debouncedQ = useDebounced(q);
 
+  // Location filter is Pro-only — ignore any selection (including a shared
+  // URL with ?city=) once we know the user isn't Pro.
+  const effectiveCities = isPro ? cities : [];
+
   useEffect(() => {
     const sp = new URLSearchParams();
     if (debouncedQ) sp.set("q", debouncedQ);
     industries.forEach((i) => sp.append("industry", i));
-    cities.forEach((c) => sp.append("city", c));
+    effectiveCities.forEach((c) => sp.append("city", c));
     jobTypes.forEach((t) => sp.append("type", t));
     router.replace(`/jobs${sp.toString() ? `?${sp}` : ""}`, { scroll: false });
     setVisible(PAGE_SIZE);
-  }, [debouncedQ, industries, cities, jobTypes, router]);
+  }, [debouncedQ, industries, effectiveCities, jobTypes, router]);
 
   const results = useMemo(() => {
     const n = debouncedQ.trim().toLowerCase();
     let out = jobs.filter((j) => {
       if (industries.length && !industries.includes(j.sponsorIndustry)) return false;
-      if (cities.length && !cities.includes(j.location.split(",")[0].trim())) return false;
+      if (effectiveCities.length && !effectiveCities.includes(j.location.split(",")[0].trim())) return false;
       if (jobTypes.length && !(j.employmentType && jobTypes.includes(j.employmentType))) return false;
       if (n) {
         return (
@@ -151,7 +156,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
       // "recent" keeps the server's most-recent-first ordering
     }
     return out;
-  }, [jobs, debouncedQ, industries, cities, jobTypes, sort]);
+  }, [jobs, debouncedQ, industries, effectiveCities, jobTypes, sort]);
 
   const toggleIn = (list: string[], setList: (v: string[]) => void, val: string) =>
     setList(list.includes(val) ? list.filter((x) => x !== val) : [...list, val]);
@@ -166,7 +171,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
     toast(next.includes(id) ? "Job saved" : "Job removed", next.includes(id) ? "success" : "info");
   };
 
-  const activeFilterCount = industries.length + cities.length + jobTypes.length;
+  const activeFilterCount = industries.length + effectiveCities.length + jobTypes.length;
   const sponsorCount = useMemo(() => new Set(jobs.map((j) => j.sponsorId)).size, [jobs]);
 
   const sentinel = useRef<HTMLDivElement>(null);
@@ -206,13 +211,14 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
         </fieldset>
       )}
 
-      {/* City */}
+      {/* City — Pro only, blocked entirely for Free */}
       {cityList.length > 0 && (
         <fieldset>
           <legend className="eyebrow mb-2 flex items-center justify-between">
             Location
-            {cities.length > 0 && <span className="tabular text-red-600">{cities.length}</span>}
+            {effectiveCities.length > 0 && <span className="tabular text-red-600">{effectiveCities.length}</span>}
           </legend>
+          <BlurGate message="Pro filter" className="rounded-xl">
           {cityList.length > 8 && (
             <div className="relative mb-2">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -221,6 +227,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                 onChange={(e) => setCitySearch(e.target.value)}
                 placeholder="Filter locations…"
                 aria-label="Filter locations"
+                disabled={!isPro}
                 className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-7 text-xs outline-none transition focus:border-red-600/40"
               />
               {citySearch && (
@@ -241,6 +248,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                     type="checkbox"
                     checked={cities.includes(city)}
                     onChange={() => toggleIn(cities, setCities, city)}
+                    disabled={!isPro}
                     className="size-4 accent-red-600"
                   />
                   <span className={cn(cities.includes(city) ? "text-foreground" : "text-muted-foreground")}>{city}</span>
@@ -248,6 +256,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
               ));
             })()}
           </div>
+          </BlurGate>
         </fieldset>
       )}
 
@@ -414,7 +423,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
           {activeFilterCount > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {[...industries.map((v) => ["industry", v] as const),
-                ...cities.map((v) => ["city", v] as const),
+                ...effectiveCities.map((v) => ["city", v] as const),
                 ...jobTypes.map((v) => ["type", v] as const)].map(([kind, val]) => (
                 <button
                   key={`${kind}:${val}`}

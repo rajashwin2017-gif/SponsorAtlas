@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -23,6 +23,9 @@ const PAGE_SIZE = 12;
 // click. Stops the results column from growing forever so the footer stays
 // reachable (avoids the infinite-scroll footer dead zone).
 const AUTO_LOAD_PAGES = 5;
+
+// Free-tier preview: one fully-unlocked sponsor per industry, everything else locked.
+const FREE_PREVIEW_INDUSTRIES = ["Healthcare", "Technology", "Finance"] as const;
 
 const HIRING_ACTIVITIES = ["Very High", "High", "Medium", "Low"] as const;
 const TIERS = ["Platinum", "Gold", "Silver", "Bronze", "Active"] as const;
@@ -101,12 +104,16 @@ export function SearchClient({
 
   const debouncedQ = useDebounced(q, 350);
 
+  // City/Region filter is Pro-only — ignore any selection (including a
+  // shared URL with ?city=) once we know the user isn't Pro.
+  const effectiveCities = isPro ? cities : [];
+
   // ── Sync filters → URL ────────────────────────────────────────────────── #
   useEffect(() => {
     const qs = buildQS({
       q: debouncedQ || undefined,
       industry: industries,
-      city: cities,
+      city: effectiveCities,
       route: routes,
       tier: tiers,
       activity: activities,
@@ -115,12 +122,12 @@ export function SearchClient({
       sort: sort !== "relevance" ? sort : undefined,
     });
     router.replace(`/search${qs ? `?${qs}` : ""}`, { scroll: false });
-  }, [debouncedQ, industries, cities, routes, tiers, activities, aRatedOnly, minCos, sort, router]);
+  }, [debouncedQ, industries, effectiveCities, routes, tiers, activities, aRatedOnly, minCos, sort, router]);
 
   // ── Fetch results ─────────────────────────────────────────────────────── #
   useEffect(() => {
     setPage(1);
-  }, [debouncedQ, industries, cities, routes, tiers, activities, aRatedOnly, minCos, sort]);
+  }, [debouncedQ, industries, effectiveCities, routes, tiers, activities, aRatedOnly, minCos, sort]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,7 +136,7 @@ export function SearchClient({
     const qs = buildQS({
       q: debouncedQ || undefined,
       industry: industries,
-      city: cities,
+      city: effectiveCities,
       route: routes,
       tier: tiers,
       activity: activities,
@@ -154,7 +161,55 @@ export function SearchClient({
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [debouncedQ, industries, cities, routes, tiers, activities, aRatedOnly, minCos, sort, page]);
+  }, [debouncedQ, industries, effectiveCities, routes, tiers, activities, aRatedOnly, minCos, sort, page]);
+
+  // Free-tier preview: fetch one sponsor per target industry directly, so the
+  // unlock isn't dependent on those industries happening to appear on the
+  // currently-loaded page of results (e.g. Healthcare may rank low by relevance).
+  const [previewSponsors, setPreviewSponsors] = useState<Sponsor[]>([]);
+
+  useEffect(() => {
+    if (isPro) { setPreviewSponsors([]); return; }
+    let cancelled = false;
+
+    const targets = FREE_PREVIEW_INDUSTRIES.filter(
+      (industry) => industries.length === 0 || industries.includes(industry)
+    );
+
+    Promise.all(
+      targets.map((industry) => {
+        const qs = buildQS({
+          q: debouncedQ || undefined,
+          industry,
+          city: effectiveCities,
+          route: routes,
+          tier: tiers,
+          activity: activities,
+          aRated: aRatedOnly ? "1" : undefined,
+          minCos: minCos > 0 ? minCos : undefined,
+          pageSize: 1,
+        });
+        return fetch(`/api/sponsors?${qs}`).then((r) => r.json());
+      })
+    ).then((jsons) => {
+      if (cancelled) return;
+      setPreviewSponsors(jsons.map((j) => j.data?.[0]).filter(Boolean));
+    });
+
+    return () => { cancelled = true; };
+  }, [isPro, debouncedQ, industries, effectiveCities, routes, tiers, activities, aRatedOnly, minCos]);
+
+  const freePreviewIds = useMemo(() => {
+    if (isPro) return null;
+    return new Set(previewSponsors.map((s) => s.id));
+  }, [isPro, previewSponsors]);
+
+  // Free-tier users see the unlocked preview sponsors pinned to the front of the grid.
+  const displayResults = useMemo(() => {
+    if (!freePreviewIds || freePreviewIds.size === 0) return results;
+    const rest = results.filter((s) => !freePreviewIds.has(s.id));
+    return [...previewSponsors, ...rest];
+  }, [results, previewSponsors, freePreviewIds]);
 
   // ── Helpers ───────────────────────────────────────────────────────────── #
   const toggleIn = (list: string[], setList: (v: string[]) => void, val: string) =>
@@ -175,7 +230,7 @@ export function SearchClient({
     const qs = buildQS({
       q: debouncedQ || undefined,
       industry: industries,
-      city: cities,
+      city: effectiveCities,
       route: routes,
       tier: tiers,
       activity: activities,
@@ -202,7 +257,7 @@ export function SearchClient({
     a.click();
     URL.revokeObjectURL(url);
     toast(`Exported ${all.length} sponsors to CSV`, "success");
-  }, [isProPlus, debouncedQ, industries, cities, routes, tiers, activities, aRatedOnly, minCos, sort, toast]);
+  }, [isProPlus, debouncedQ, industries, effectiveCities, routes, tiers, activities, aRatedOnly, minCos, sort, toast]);
 
   // ── Infinite scroll ───────────────────────────────────────────────────── #
   const sentinel = useRef<HTMLDivElement>(null);
@@ -307,47 +362,51 @@ export function SearchClient({
         </div>
       </fieldset>
 
-      {/* City */}
+      {/* City — Pro only, blocked entirely for Free */}
       <fieldset>
         <legend className="eyebrow mb-2 flex items-center justify-between">
           City / Region
           {cities.length > 0 && <span className="tabular text-red-600">{cities.length}</span>}
         </legend>
-        {cityList.length > 8 && (
-          <div className="relative mb-2">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={citySearch}
-              onChange={(e) => setCitySearch(e.target.value)}
-              placeholder="Filter cities…"
-              aria-label="Filter cities"
-              className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-7 text-xs outline-none transition focus:border-red-600/40"
-            />
-            {citySearch && (
-              <button onClick={() => setCitySearch("")} aria-label="Clear city filter" className="absolute right-1.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:text-foreground">
-                <X className="size-3" />
-              </button>
-            )}
+        <BlurGate message="Pro filter" className="rounded-xl">
+          {cityList.length > 8 && (
+            <div className="relative mb-2">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={citySearch}
+                onChange={(e) => setCitySearch(e.target.value)}
+                placeholder="Filter cities…"
+                aria-label="Filter cities"
+                disabled={!isPro}
+                className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-7 text-xs outline-none transition focus:border-red-600/40"
+              />
+              {citySearch && (
+                <button onClick={() => setCitySearch("")} aria-label="Clear city filter" className="absolute right-1.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:text-foreground">
+                  <X className="size-3" />
+                </button>
+              )}
+            </div>
+          )}
+          <div className="space-y-0.5">
+            {(() => {
+              const q = citySearch.trim().toLowerCase();
+              const list = q ? cityList.filter((c) => c.toLowerCase().includes(q)) : cityList;
+              if (list.length === 0) return <p className="px-1.5 py-2 text-xs text-muted-foreground">No cities match &ldquo;{citySearch}&rdquo;.</p>;
+              return list.map((city) => (
+                <label key={city} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition-colors hover:bg-muted">
+                  <input
+                    type="checkbox"
+                    checked={cities.includes(city)}
+                    onChange={() => toggleIn(cities, setCities, city)}
+                    disabled={!isPro}
+                    className="size-4 accent-red-600"
+                  />
+                  <span className={cn(cities.includes(city) ? "text-foreground" : "text-muted-foreground")}>{city}</span>
+                </label>
+              ));
+            })()}
           </div>
-        )}
-        <div className="space-y-0.5">
-          {(() => {
-            const q = citySearch.trim().toLowerCase();
-            const list = q ? cityList.filter((c) => c.toLowerCase().includes(q)) : cityList;
-            if (list.length === 0) return <p className="px-1.5 py-2 text-xs text-muted-foreground">No cities match &ldquo;{citySearch}&rdquo;.</p>;
-            return list.map((city) => (
-              <label key={city} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition-colors hover:bg-muted">
-                <input
-                  type="checkbox"
-                  checked={cities.includes(city)}
-                  onChange={() => toggleIn(cities, setCities, city)}
-                  className="size-4 accent-red-600"
-                />
-                <span className={cn(cities.includes(city) ? "text-foreground" : "text-muted-foreground")}>{city}</span>
-              </label>
-            ));
-          })()}
-        </div>
+        </BlurGate>
       </fieldset>
 
       {/* Route */}
@@ -572,13 +631,17 @@ export function SearchClient({
             ) : (
               <>
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {results.map((s, i) => (
+                  {displayResults.map((s, i) => (
                     <div
                       key={s.id}
                       style={{ animationDelay: `${Math.min(i % PAGE_SIZE, 7) * 40}ms` }}
                       className="motion-safe:animate-[fade-up_0.45s_ease-out_both]"
                     >
-                      <SponsorCard sponsor={s} isPro={isPro} />
+                      <SponsorCard
+                        sponsor={s}
+                        isPro={isPro || (freePreviewIds?.has(s.id) ?? false)}
+                        locked={!isPro && !(freePreviewIds?.has(s.id) ?? false)}
+                      />
                     </div>
                   ))}
                 </div>
