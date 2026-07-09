@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Free, Pro (£19.99/mo) and Pro Plus (£29.99/mo) plans for UK visa sponsorship intelligence.",
+  description: "Free, Pro (£17.99/mo) and Pro Plus (£19.99/mo) plans for UK visa sponsorship intelligence.",
 };
 
 const FAQS = [

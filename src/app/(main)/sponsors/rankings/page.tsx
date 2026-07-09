@@ -1,27 +1,14 @@
 import type { Metadata } from "next";
+import { Trophy, TrendingUp, Building2 } from "lucide-react";
 import Link from "next/link";
-import {
-  Trophy, TrendingUp, MapPin, ChevronRight, Building2,
-} from "lucide-react";
 import { getSponsors } from "@/lib/sponsor-store";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import type { SponsorTier } from "@/lib/types";
-import { TIER_BG } from "@/lib/types";
-import { BlurGate } from "@/components/tier-gate";
-import { RankingHiddenRows } from "@/components/rankings-hidden-rows";
+import { RankingTableRows } from "@/components/rankings-table-rows";
 
 export const metadata: Metadata = {
   title: "UK Visa Sponsor Rankings 2025 · The Sponsor Finder",
   description:
     "The top UK companies by visa sponsorship volume in 2025. Ranked by Certificates of Sponsorship issued — NHS trusts, tech giants, consultancies and more.",
 };
-
-const TIER_ICON: Record<SponsorTier, string> = {
-  Platinum: "◆", Gold: "▲", Silver: "■", Bronze: "●", Active: "●", Inactive: "○",
-};
-
-const RANK_MEDALS = ["#1", "#2", "#3"] as const;
 
 const CATEGORIES = [
   { key: "all",          label: "All Sectors",    filter: () => true },
@@ -36,15 +23,10 @@ const CATEGORIES = [
 function RankingTable({
   title,
   sponsors,
-  showAll = false,
 }: {
   title: string;
   sponsors: ReturnType<typeof getSponsors>;
-  showAll?: boolean;
 }) {
-  const displayed = showAll ? sponsors : sponsors.slice(0, 10);
-  const hidden = sponsors.slice(10, 100);
-
   return (
     <div>
       <h2 className="mb-5 font-display text-2xl font-semibold tracking-tight">{title}</h2>
@@ -61,64 +43,9 @@ function RankingTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {displayed.map((s, i) => (
-              <tr key={s.id} className="group cursor-pointer transition-colors hover:bg-muted/30">
-                <td className="px-4 py-4 tabular">
-                  {i < 3 ? (
-                    <span className={cn(
-                      "inline-flex size-7 items-center justify-center rounded-full text-xs font-bold",
-                      i === 0 && "bg-amber-100 text-amber-700",
-                      i === 1 && "bg-zinc-100 text-zinc-600",
-                      i === 2 && "bg-orange-100 text-orange-700",
-                    )}>{RANK_MEDALS[i]}</span>
-                  ) : (
-                    <span className="text-sm font-medium text-muted-foreground">{i + 1}</span>
-                  )}
-                </td>
-                <td className="px-4 py-4">
-                  <Link href={`/sponsors/${s.id}`} className="font-heading text-sm font-semibold leading-snug transition-colors hover:text-red-600">
-                    {s.organisationName}
-                  </Link>
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <BlurGate compact iconOnly className="rounded-full">
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0 text-[10px] font-semibold",
-                        TIER_BG[s.sponsorTier as SponsorTier]
-                      )}>
-                        <span className="text-[8px]" aria-hidden="true">{TIER_ICON[s.sponsorTier as SponsorTier]}</span>
-                        {s.sponsorTier}
-                      </span>
-                    </BlurGate>
-                  </div>
-                </td>
-                <td className="hidden px-4 py-4 text-sm text-muted-foreground sm:table-cell">
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="size-3 shrink-0" /> {s.town}
-                  </span>
-                </td>
-                <td className="hidden px-4 py-4 text-sm text-muted-foreground md:table-cell">
-                  {s.industryCategory}
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <span className="font-bold tabular text-foreground">
-                    {s.cos2025Total?.toLocaleString() ?? (s.cos2025SwSuppressed ? "< 5" : "—")}
-                  </span>
-                  {s.cos2025Gbm && s.cos2025Gbm > 0 && (
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      +{s.cos2025Gbm.toLocaleString()}
-                    </span>
-                  )}
-                </td>
-                <td className="px-2 py-4">
-                  <ChevronRight className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                </td>
-              </tr>
-            ))}
+            <RankingTableRows sponsors={sponsors} />
           </tbody>
         </table>
-
-        {/* Rows 11+ — full list for Pro, blurred teaser + paywall for Free */}
-        <RankingHiddenRows sponsors={hidden} />
       </div>
     </div>
   );
@@ -154,8 +81,7 @@ export default function RankingsPage() {
           UK Visa Sponsor Rankings
         </h1>
         <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
-          Ranked by Certificates of Sponsorship issued in 2025. Source: Home Office FOI
-          data — the most authoritative hiring signal available.
+          Ranked by Certificates of Sponsorship issued in 2025.
         </p>
 
         {/* Headline stats */}
@@ -193,7 +119,6 @@ export default function RankingsPage() {
             <RankingTable
               title={`Top ${cat.label} Sponsors by 2025 CoS`}
               sponsors={cat.sponsors}
-              showAll={true}
             />
           </section>
         ))}

@@ -31,7 +31,7 @@ function formatCos(sponsor: Sponsor): string {
   return total!.toLocaleString();
 }
 
-export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPro?: boolean }) {
+export function SponsorCard({ sponsor, isPro = false, locked = false }: { sponsor: Sponsor; isPro?: boolean; locked?: boolean }) {
   const { isSaved, toggle } = useSaved();
   const { toast } = useToast();
   const saved = isSaved(sponsor.id);
@@ -51,6 +51,53 @@ export function SponsorCard({ sponsor, isPro = false }: { sponsor: Sponsor; isPr
       nowSaved ? "success" : "info"
     );
   };
+
+  if (locked) {
+    return (
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-5">
+        <div aria-hidden="true" className="pointer-events-none select-none blur-[7px]">
+          <div className="flex items-center justify-between gap-2">
+            <span className="eyebrow truncate">{sponsor.industryCategory}</span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-semibold text-zinc-500">
+              {TIER_ICON[tier as SponsorTier]} {tier}
+            </span>
+          </div>
+          <div className="mt-3">
+            <p className="font-heading text-base font-semibold leading-snug tracking-tight">
+              {sponsor.organisationName}
+            </p>
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="size-3.5 shrink-0" />
+              {sponsor.town}{sponsor.county ? `, ${sponsor.county}` : ""}
+            </p>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border pt-4">
+            <div>
+              <p className="eyebrow">Activity</p>
+              <p className="mt-1.5 text-sm font-semibold">{activity}</p>
+            </div>
+            <div>
+              <p className="eyebrow">CoS 2025</p>
+              <p className="mt-1.5 text-sm font-semibold tabular">{formatCos(sponsor)}</p>
+            </div>
+          </div>
+          <div className="mt-auto flex items-center gap-2 pt-8">
+            <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}>View details</span>
+          </div>
+        </div>
+        <Link
+          href="/pricing"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-transparent to-card/80 text-center"
+        >
+          <span className="grid size-9 place-items-center rounded-full border border-red-600/30 bg-red-600/10 text-red-600">
+            <Lock className="size-4" />
+          </span>
+          <span className="text-xs font-semibold text-foreground">Upgrade to unlock this sponsor</span>
+          <Badge variant="emerald" className="px-1.5 py-0 text-[10px]">Pro</Badge>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="group relative flex h-full flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-[0_18px_44px_-24px_rgba(0,0,0,0.45)]">
