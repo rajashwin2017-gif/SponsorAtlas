@@ -20,14 +20,11 @@ interface ApiPlan {
   features: string[];
 }
 
-const FREE_PLAN = {
-  planId: "free",
-  name: "Free",
-  badge: null as string | null,
-  highlighted: false,
-  monthlyPriceMinor: 0,
-  yearlyPriceMinor: 0,
-  features: [
+// Feature lists are fixed product decisions — hardcoded here so they are
+// always correct regardless of DB state. Prices still come from the API
+// so the admin can update them without a redeploy.
+const STATIC_FEATURES: Record<string, string[]> = {
+  free: [
     "Sponsor licence holder directory",
     "Basic company information",
     "Industry & location filters",
@@ -35,6 +32,39 @@ const FREE_PLAN = {
     "Limited vacancy views",
     "Publicly available sponsor info",
   ],
+  pro: [
+    "Everything in Free",
+    "Active sponsorship vacancies",
+    "Direct employer application links",
+    "Unlimited searches",
+    "Advanced filtering",
+    "Save favourite employers & jobs",
+    "Email alerts & notifications",
+    "Sponsorship insights",
+    "Employer activity updates",
+  ],
+  pro_plus: [
+    "Everything in Pro",
+    "Premium candidate profile",
+    "CV review tools",
+    "AI CV matching",
+    "Interview preparation resources",
+    "Priority job alerts",
+    "Employer recommendations",
+    "Application tracking tools",
+    "Priority customer support",
+    "Early access to new features",
+  ],
+};
+
+const FREE_PLAN = {
+  planId: "free",
+  name: "Free",
+  badge: null as string | null,
+  highlighted: false,
+  monthlyPriceMinor: 0,
+  yearlyPriceMinor: 0,
+  features: STATIC_FEATURES.free,
 };
 
 function formatGBP(minor: number): string {
@@ -73,7 +103,10 @@ export function PricingCards() {
   useEffect(() => {
     fetch("/api/plans")
       .then((r) => (r.ok ? r.json() : []))
-      .then(setPlans)
+      .then((data: ApiPlan[]) =>
+        // Override DB features with static hardcoded lists — prices stay dynamic
+        setPlans(data.map((p) => ({ ...p, features: STATIC_FEATURES[p.planId] ?? p.features })))
+      )
       .finally(() => setLoading(false));
   }, []);
 
