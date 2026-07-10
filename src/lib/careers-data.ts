@@ -1768,7 +1768,7 @@ const CAREERS_TABLE: Record<string, CareersEntry> = {
   "COALITION DEVELOPMENT": { type: "url", url: "https://www.coalitiondevelopment.com/careers" },
   "COASTAL CATERING UK": { type: "url", url: "https://www.coastalcateringflorida.com/careers" },
   "COATE WATER CARE CHURCH VIEW NURSING HOME": { type: "url", url: "https://www.coatewatercare.co.uk/careers-in-care/" },
-  "COCKROACH LABS UK": { type: "greenhouse", token: "embed" },
+  "COCKROACH LABS UK": { type: "greenhouse", token: "cockroachlabs" },
   "CODE EXPERTS": { type: "url", url: "https://www.codeexperts.co.uk/jobs" },
   "CODE IT SOLUTIONS": { type: "url", url: "http://www.code-it.com/careers" },
   "CODEFLEX": { type: "url", url: "https://codeflex.co.uk/work-with-us" },
@@ -3068,7 +3068,7 @@ const CAREERS_TABLE: Record<string, CareersEntry> = {
   "GRUNENTHAL": { type: "url", url: "https://www.grunenthal.com/careers" },
   "GS HOTELS": { type: "url", url: "https://www.gshotels.com/jobs" },
   "GS1 SECURITY SERVICES": { type: "url", url: "http://www.gs1-security.com/careers" },
-  "GSA CAPITAL SERVICES": { type: "greenhouse", token: "embed" },
+  "GSA CAPITAL SERVICES": { type: "greenhouse", token: "gsacapital" },
   "GSK": { type: "url", url: "https://www.gsk.com/en-gb/careers" },
   "GUARANTY TRUST BANK UK": { type: "url", url: "https://www.guarantytrustbank.com/careers" },
   "GUARDIAN LIVEIN CARE": { type: "url", url: "https://guardianliveincare.co.uk/jobs/" },
@@ -3702,7 +3702,7 @@ const CAREERS_TABLE: Record<string, CareersEntry> = {
   "JUBILEE HAIR": { type: "url", url: "https://www.jubileehairsalon.co.uk/work-with-us" },
   "JUDGEME": { type: "url", url: "http://www.judgeme.org/careers" },
   "JULIUS BAER INTERNATIONAL": { type: "url", url: "https://www.juliusbaer.com/en/careers/" },
-  "JUMP TRADING INTERNATIONAL": { type: "greenhouse", token: "talent_community" },
+  "JUMP TRADING INTERNATIONAL": { type: "greenhouse", token: "jumptrading" },
   "JUNCTION MOTORS": { type: "url", url: "https://www.junctionmotors.com/careers" },
   "JUNEYAO AIRLINES CO UK BRANCH": { type: "url", url: "http://www.juneyaoair.com/careers" },
   "JUNGLEES": { type: "url", url: "https://www.junglees.com/gb/careers" },
@@ -4995,7 +4995,7 @@ const CAREERS_TABLE: Record<string, CareersEntry> = {
   "OKTA UK": { type: "url", url: "https://www.okta.com/company/careers/" },
   "OLAM EUROPE": { type: "url", url: "https://www.olamgroup.com/careers.html" },
   "OLD FRIENDS CARE": { type: "url", url: "https://www.oldfriendscare.co.uk/vacancies/" },
-  "OLD MISSION EUROPE": { type: "greenhouse", token: "embed" },
+  "OLD MISSION EUROPE": { type: "greenhouse", token: "oldmissioncapital" },
   "OLD RECTORY CARE": { type: "url", url: "https://www.oldrectorycare.com/careers" },
   "OLIVE CARE SOLUTIONS": { type: "url", url: "http://www.olivecare.co.uk/careers" },
   "OLIVE TECHNOLOGIES": { type: "url", url: "https://jobs.olivegarden.com/" },
@@ -5179,7 +5179,7 @@ const CAREERS_TABLE: Record<string, CareersEntry> = {
   "PAROUSIA": { type: "url", url: "https://www.parousia.org/careers" },
   "PARTNERS 4 CARE": { type: "url", url: "https://partners4care.co.uk/work-with-us/" },
   "PARTNERS CAPITAL": { type: "url", url: "https://partners-cap.com/about-us/careers/" },
-  "PARTNERS GROUP UK": { type: "greenhouse", token: "partnerstack" },
+  "PARTNERS GROUP UK": { type: "url", url: "https://www.partnersgroup.com/en/careers/open-positions" },
   "PARTNERS IN PERFORMANCE UK": { type: "url", url: "https://pip.global/en/careers/" },
   "PASS A PIZZA": { type: "url", url: "http://www.passapizza.com/jobs" },
   "PASS A PIZZA UK": { type: "url", url: "http://www.passapizza.com/jobs" },
@@ -6212,7 +6212,7 @@ const CAREERS_TABLE: Record<string, CareersEntry> = {
   "SO CHIC": { type: "url", url: "https://www.sochic.co.uk/work-with-us" },
   "SOCIAL CARE ACADEMY": { type: "url", url: "https://www.socialcareacademy.net/jobs" },
   "SOCIAL CARE ALBA": { type: "url", url: "https://www.social-care.org/careers" },
-  "SOCIAL FINANCE": { type: "greenhouse", token: "embed" },
+  "SOCIAL FINANCE": { type: "greenhouse", token: "socialfinance" },
   "SOCIAL PANTRY": { type: "url", url: "https://socialpantry.co.uk/work-with-us/" },
   "SOCIAL VALUE PORTAL": { type: "url", url: "https://www.socialvalueportal.com/careers" },
   "SOCIALLY POWERFUL MEDIA": { type: "url", url: "https://www.sociallypowerfulmedia.com/careers" },
@@ -7695,6 +7695,47 @@ export function lookupCareers(organisationName: string): CareersEntry | null {
   }
 
   return null;
+}
+
+// ── Link verification ────────────────────────────────────────────────────────
+// The static "url" entries above (unlike the ATS-backed ones, which are
+// implicitly re-verified every time their job list is fetched) can go stale —
+// a domain expires, a company rebrands, a page moves. Before handing one of
+// these out as the definitive careers link, confirm it actually resolves.
+// Cached via Next's fetch cache (revalidate) so this only costs real latency
+// once per URL per day, not on every request.
+
+const URL_CHECK_TIMEOUT_MS = 6000;
+const URL_CHECK_REVALIDATE_S = 86_400; // 24h
+
+// Only 404/410 are treated as conclusively dead. Everything else — 403, 429,
+// 5xx, timeouts, network errors — is ambiguous: plenty of legitimate sites
+// (large enterprises especially) block scripted requests with exactly these
+// codes via bot protection (Cloudflare etc.) that no plain fetch can pass.
+// Treating those as "dead" would replace a perfectly good link with a generic
+// search fallback for a huge share of real companies — a regression, not a
+// fix — so an inconclusive result defaults to "assume alive".
+// DNS/connection failures mean the domain genuinely doesn't respond at the
+// network level — a much stronger "this is dead" signal than a timeout
+// (which just means slow, or a bot-protection tarpit).
+const DEAD_DOMAIN_ERROR = /ENOTFOUND|ECONNREFUSED|EAI_AGAIN|ERR_NAME_NOT_RESOLVED/;
+
+export async function isUrlAlive(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: AbortSignal.timeout(URL_CHECK_TIMEOUT_MS),
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; SponsorAtlasLinkCheck/1.0)" },
+      next: { revalidate: URL_CHECK_REVALIDATE_S },
+    });
+    return res.status !== 404 && res.status !== 410;
+  } catch (err) {
+    // Node's fetch wraps the real DNS/connection error in `cause`, not the
+    // top-level message (e.g. "fetch failed" with cause "ENOTFOUND ...").
+    const detail = `${err} ${(err as { cause?: unknown })?.cause ?? ""}`;
+    return !DEAD_DOMAIN_ERROR.test(detail);
+  }
 }
 
 // ── Live-feed sources ─────────────────────────────────────────────────────────

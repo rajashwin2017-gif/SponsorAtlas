@@ -88,12 +88,12 @@ async function fetchGreenhouse(token: string): Promise<RawJob[]> {
         Array.isArray(j.departments) && (j.departments as Record<string, unknown>[])[0]
           ? String((j.departments as Record<string, unknown>[])[0].name ?? "")
           : undefined,
-      // Canonical Greenhouse job URL — deep-links to the exact role even when the
-      // employer uses an embedded board (e.g. absolute_url points at a careers
-      // list with ?gh_jid=). Greenhouse redirects this to the exact branded page.
-      applyUrl: j.id
-        ? `https://job-boards.greenhouse.io/${token}/jobs/${j.id}`
-        : String(j.absolute_url ?? `https://boards.greenhouse.io/${token}`),
+      // absolute_url is Greenhouse's own authoritative link for this posting —
+      // it already resolves correctly whether the employer uses a standard
+      // hosted board, an embedded widget on their own domain, or an EU-region
+      // board. Guessing our own job-boards.greenhouse.io URL 404s for
+      // embedded-widget employers (e.g. GSA Capital, Form3), so don't do that.
+      applyUrl: String(j.absolute_url ?? `https://job-boards.greenhouse.io/${token}`),
       postedAt: j.updated_at ? String(j.updated_at) : undefined,
     }));
   } catch {
@@ -201,6 +201,44 @@ function resolveSponsor(key: string): RichSponsor | undefined {
   return undefined;
 }
 
+// ── Live-link verification ──────────────────────────────────────────────────────
+// The ATS list APIs can lag behind an employer's own site (a role closes there
+// before it drops out of the feed), so before showing a job we confirm its
+// apply link actually resolves — anything that 404s/errors is dropped rather
+// than risk showing a dead "Apply" button.
+
+const VERIFY_TIMEOUT_MS = 10_000;
+const VERIFY_CONCURRENCY = 15;
+
+async function isLinkAlive(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; SponsorAtlasLinkCheck/1.0)" },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function filterToLiveLinks(jobs: LiveJob[]): Promise<LiveJob[]> {
+  const alive: boolean[] = new Array(jobs.length);
+  let i = 0;
+  async function worker() {
+    while (i < jobs.length) {
+      const idx = i++;
+      alive[idx] = await isLinkAlive(jobs[idx].applyUrl);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(VERIFY_CONCURRENCY, jobs.length) }, worker)
+  );
+  return jobs.filter((_, idx) => alive[idx]);
+}
+
 // ── Public aggregator ───────────────────────────────────────────────────────────
 
 let _cache: { at: number; jobs: LiveJob[] } | null = null;
@@ -235,7 +273,10 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
     })
   );
 
-  const jobs = results.flat().sort((a, b) => {
+  const candidates = results.flat();
+  const verified = await filterToLiveLinks(candidates);
+
+  const jobs = verified.sort((a, b) => {
     // Most-recent first; undefined dates sink to the bottom.
     const at = a.postedAt ? new Date(a.postedAt).getTime() : 0;
     const bt = b.postedAt ? new Date(b.postedAt).getTime() : 0;
