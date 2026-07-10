@@ -7,21 +7,21 @@
     color-scheme: light;
     /* SponsorAtlas — 60 / 30 / 10 palette: white (60%) · black (30%) · red (10%) */
     --background: 0 0% 100%;          /* white — dominant 60% */
-    --foreground: 0 0% 9%;            /* near-black text — 30% */
+    --foreground: 0 0% 6.67%;            /* near-black text — 30% */
     --surface: 0 0% 98%;             /* #fafafa subtle sections */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 0 0% 6.67%;
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --primary: 0 72% 51%;            /* red #dc2626 — accent 10% */
+    --primary: 356.5 95% 45.7%;            /* brand red #E30613 — accent 10% */
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 9%;            /* black — secondary 30% */
+    --secondary: 0 0% 6.67%;            /* black — secondary 30% */
     --secondary-foreground: 0 0% 100%;
     --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    --ring: 0 72% 51%;               /* red focus ring */
+    --accent-foreground: 0 0% 6.67%;
+    --ring: 356.5 95% 45.7%;               /* red focus ring */
     --radius: 0.75rem;
   }
 
@@ -149,7 +149,7 @@
 
   /* Accent glow for highlighted surfaces */
   .glow-accent {
-    box-shadow: 0 0 0 1px hsl(0 72% 51% / 0.2), 0 12px 40px -16px hsl(0 72% 51% / 0.35);
+    box-shadow: 0 0 0 1px hsl(356.5 95% 45.7% / 0.2), 0 12px 40px -16px hsl(356.5 95% 45.7% / 0.35);
   }
 
   /* ── Custom cursor: a small red plane that noses toward movement ── */

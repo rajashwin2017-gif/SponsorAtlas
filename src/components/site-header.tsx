@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Globe2, Menu, X, User, LogIn, LogOut } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -31,9 +32,7 @@ export function SiteHeader() {
       <div className="container flex items-center justify-between gap-3 py-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-red-600 to-zinc-900 text-white">
-            <Globe2 className="size-5" />
-          </span>
+          <Image src="/logo-mark.png" alt="The Sponsor Finder" width={32} height={30} className="size-8 w-auto" priority />
           <span>
 The Sponsor<span className="gradient-text"> Finder</span>
           </span>

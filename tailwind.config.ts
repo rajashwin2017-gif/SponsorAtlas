@@ -21,6 +21,21 @@ const config: Config = {
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
+        // Brand red (#E30613) as the 600 shade, with a full scale derived around
+        // it — every `red-*` utility across the app inherits the brand colour
+        // from here instead of Tailwind's stock red.
+        red: {
+          50: "#FED9DB",
+          100: "#FEC9CC",
+          200: "#FDB2B6",
+          300: "#FC8C93",
+          400: "#FB555F",
+          500: "#F9212E",
+          600: "#E30613",
+          700: "#B7050F",
+          800: "#97040D",
+          900: "#80030B",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

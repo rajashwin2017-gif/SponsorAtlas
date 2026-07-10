@@ -176,7 +176,7 @@ function Overview({ savedCount, alerts, isPro, displayName }: { savedCount: numb
   return (
     <>
       <div className="surface-card relative overflow-hidden px-7 py-8">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_100%_0%,hsl(0_72%_51%/0.12),transparent)]" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_100%_0%,hsl(356.5_95%_45.7%/0.12),transparent)]" aria-hidden="true" />
         <div className="relative">
           <p className="eyebrow mb-2">Dashboard</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Welcome back, {displayName}</h1>

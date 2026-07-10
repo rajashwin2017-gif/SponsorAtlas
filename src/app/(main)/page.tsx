@@ -1,10 +1,10 @@
 import Link from "next/link";
 import {
-  Search, Filter, Target, BellRing, Rocket, ArrowRight,
-  ShieldCheck, FileCheck2, Ban, Building2, CalendarPlus,
+  ArrowRight, ShieldCheck, FileCheck2, Ban, Building2, CalendarPlus,
 } from "lucide-react";
 import { StatCounter } from "@/components/stat-counter";
 import { HeroBackground } from "@/components/hero-background";
+import { HowItWorks } from "@/components/how-it-works";
 import { PricingCards } from "@/components/pricing-cards";
 import { IndustryBalls } from "@/components/industry-balls";
 import { PlatformDemo } from "@/components/platform-demo";
@@ -12,14 +12,6 @@ import { WatchDemoButton } from "@/components/watch-demo-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const STEPS = [
-  { icon: Search, title: "Search", desc: "Query 126k+ indexed sponsors by name, city or industry." },
-  { icon: Filter, title: "Filter", desc: "Narrow by rating, route, CoS activity and hiring likelihood." },
-  { icon: Target, title: "Assess fit", desc: "Run AI Sponsorship Fit against your salary and SOC code." },
-  { icon: BellRing, title: "Set alerts", desc: "Get notified when matching sponsors start hiring." },
-  { icon: Rocket, title: "Apply smart", desc: "Target employers with proven, active sponsorship history." },
-];
 
 const TRUST = [
   { icon: Building2, label: "UK Registered" },
@@ -33,7 +25,7 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 grid-bg animate-grid-pan" aria-hidden="true" />
-        <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(0_72%_51%/0.12),transparent)]" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(356.5_95%_45.7%/0.12),transparent)]" aria-hidden="true" />
         <HeroBackground />
 
         <div className="container relative pb-20 pt-8 sm:pb-28 sm:pt-12">
@@ -85,43 +77,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="container py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="eyebrow mb-3 text-red-600">Process</p>
-          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">How it works</h2>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            From blind applications to a targeted sponsorship strategy in five steps.
-          </p>
-        </div>
-
-        <ol className="stagger relative mt-16 grid gap-4 md:grid-cols-5">
-          {/* connecting flow line — shows the progression between steps (desktop) */}
-          <div
-            className="pointer-events-none absolute inset-x-8 top-12 hidden h-0.5 bg-[repeating-linear-gradient(90deg,hsl(0_72%_51%/0.35)_0_8px,transparent_8px_16px)] md:block"
-            aria-hidden="true"
-          />
-          {STEPS.map((step, i) => (
-            <li key={step.title} className="group relative">
-              <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-red-600/40 hover:shadow-[0_18px_44px_-20px_rgba(220,38,38,0.45)]">
-                {/* oversized ghost numeral */}
-                <span
-                  className="pointer-events-none absolute -right-1 -top-4 select-none font-display text-8xl font-bold leading-none text-red-600/[0.07] transition-all duration-300 group-hover:scale-110 group-hover:text-red-600/[0.14]"
-                  aria-hidden="true"
-                >
-                  {i + 1}
-                </span>
-                {/* punchy gradient icon tile */}
-                <span className="relative grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_6px_16px_-6px_rgba(220,38,38,0.6)] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
-                  <step.icon className="size-5" />
-                </span>
-                <p className="mt-5 font-mono text-[11px] font-bold tracking-[0.18em] text-red-600">STEP 0{i + 1}</p>
-                <h3 className="mt-1 font-heading text-base font-semibold leading-snug">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <HowItWorks />
 
       {/* ── Industry balls ── */}
       <IndustryBalls />
@@ -162,7 +118,7 @@ export default function LandingPage() {
       {/* ── Final CTA ── */}
       <section className="container pb-28">
         <div className="surface-card relative overflow-hidden p-12 text-center sm:p-20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,hsl(0_72%_51%/0.15),transparent)]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,hsl(356.5_95%_45.7%/0.15),transparent)]" aria-hidden="true" />
           <div className="relative">
             <p className="eyebrow mb-4 text-red-600">Get started</p>
             <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">

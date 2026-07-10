@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Globe2, ShieldCheck, Linkedin, Twitter, Instagram, MapPin, Mail } from "lucide-react";
+import Image from "next/image";
+import { ShieldCheck, Instagram, Facebook, MapPin, Mail } from "lucide-react";
 import { FooterBackToTop } from "@/components/footer-back-to-top";
 
 const ADMIN_LOGIN_URL = "/admin-login";
@@ -13,9 +14,8 @@ const QUICK_LINKS = [
 ];
 
 const SOCIAL = [
-  { href: "#", label: "LinkedIn", icon: Linkedin },
-  { href: "#", label: "X (Twitter)", icon: Twitter },
-  { href: "#", label: "Instagram", icon: Instagram },
+  { href: "https://www.instagram.com/thesponsorfinder?igsh=bzl0dms0dWY1eDUx&utm_source=qr", label: "Instagram", icon: Instagram },
+  { href: "https://www.facebook.com/people/The-Sponsor-Finder/61591567151804/?mibextid=wwXIfr&rdid=VerZBJVfsneaFJNX&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1AqS1q1Wj4%2F%3Fmibextid%3DwwXIfr%26ref%3D1", label: "Facebook", icon: Facebook },
 ];
 
 const LEGAL = [
@@ -35,9 +35,7 @@ export function SiteFooter() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 font-heading text-lg font-bold text-white">
-              <span className="grid size-8 place-items-center rounded-lg bg-red-600 text-white">
-                <Globe2 className="size-5" />
-              </span>
+              <Image src="/logo-mark.png" alt="The Sponsor Finder" width={32} height={30} className="size-8 w-auto" />
               The Sponsor<span className="text-red-500"> Finder</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-400">

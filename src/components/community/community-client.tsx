@@ -92,7 +92,7 @@ export function CommunityClient() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search posts…"
-              className="h-10 w-full rounded-xl border border-border bg-card pl-10 pr-4 text-sm outline-none transition focus:border-red-600/40 focus:shadow-[0_0_0_4px_hsl(0_72%_51%/0.08)]"
+              className="h-10 w-full rounded-xl border border-border bg-card pl-10 pr-4 text-sm outline-none transition focus:border-red-600/40 focus:shadow-[0_0_0_4px_hsl(356.5_95%_45.7%/0.08)]"
             />
           </div>
 

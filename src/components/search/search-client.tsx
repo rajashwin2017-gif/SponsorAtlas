@@ -513,7 +513,7 @@ export function SearchClient({
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search company, city or industry…"
             autoComplete="off"
-            className="h-14 w-full rounded-2xl border border-border bg-card pl-12 pr-12 text-base text-foreground shadow-sm outline-none transition duration-200 placeholder:text-muted-foreground focus:border-red-600/40 focus:shadow-[0_0_0_4px_hsl(0_72%_51%/0.08)]"
+            className="h-14 w-full rounded-2xl border border-border bg-card pl-12 pr-12 text-base text-foreground shadow-sm outline-none transition duration-200 placeholder:text-muted-foreground focus:border-red-600/40 focus:shadow-[0_0_0_4px_hsl(356.5_95%_45.7%/0.08)]"
           />
           {q && (
             <button
