@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Pencil, Archive, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Archive, CheckCircle2, AlertTriangle, Lock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,42 @@ interface Plan {
   stripeYearlyPriceId: string | null;
 }
 
+// Features are hardcoded in src/components/pricing-cards.tsx — editing
+// them here has no effect on the public pricing page.
+const STATIC_FEATURES: Record<string, string[]> = {
+  free: [
+    "Sponsor licence holder directory",
+    "Basic company information",
+    "Industry & location filters",
+    "Basic search functionality",
+    "Limited vacancy views",
+    "Publicly available sponsor info",
+  ],
+  pro: [
+    "Everything in Free",
+    "Active sponsorship vacancies",
+    "Direct employer application links",
+    "Unlimited searches",
+    "Advanced filtering",
+    "Save favourite employers & jobs",
+    "Email alerts & notifications",
+    "Sponsorship insights",
+    "Employer activity updates",
+  ],
+  pro_plus: [
+    "Everything in Pro",
+    "Premium candidate profile",
+    "CV review tools",
+    "AI CV matching",
+    "Interview preparation resources",
+    "Priority job alerts",
+    "Employer recommendations",
+    "Application tracking tools",
+    "Priority customer support",
+    "Early access to new features",
+  ],
+};
+
 const emptyForm = {
   planId: "",
   name: "",
@@ -31,7 +67,6 @@ const emptyForm = {
   displayOrder: 0,
   monthlyPrice: "",
   yearlyPrice: "",
-  features: "",
 };
 
 export default function AdminPlansPage() {
@@ -79,7 +114,6 @@ export default function AdminPlansPage() {
       displayOrder: plan.displayOrder,
       monthlyPrice: (plan.monthlyPriceMinor / 100).toString(),
       yearlyPrice: (plan.yearlyPriceMinor / 100).toString(),
-      features: plan.features.join("\n"),
     });
     setFormError("");
     setShowForm(true);
@@ -99,7 +133,7 @@ export default function AdminPlansPage() {
       displayOrder: Number(form.displayOrder) || 0,
       monthlyPriceMinor: Math.round(Number(form.monthlyPrice) * 100),
       yearlyPriceMinor: Math.round(Number(form.yearlyPrice) * 100),
-      features: form.features.split("\n").map((f) => f.trim()).filter(Boolean),
+      features: STATIC_FEATURES[form.planId] ?? [],
     };
 
     const res = await fetch(editingId ? `/api/admin/plans/${editingId}` : "/api/admin/plans", {
@@ -205,13 +239,30 @@ export default function AdminPlansPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Features (one per line)</label>
-            <textarea
-              value={form.features}
-              onChange={(e) => setForm({ ...form, features: e.target.value })}
-              rows={5}
-              className="w-full rounded-lg border border-border bg-surface/60 px-3 py-2 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
-            />
+            <div className="mb-1.5 flex items-center gap-2">
+              <span className="text-sm font-medium">Features</span>
+              <span className="flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+                <Lock className="size-3" /> Fixed — managed in code
+              </span>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+              {(STATIC_FEATURES[form.planId] ?? []).length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">
+                  Save the plan first, then features will appear here based on the Plan ID.
+                </p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {(STATIC_FEATURES[form.planId] ?? []).map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="size-3.5 shrink-0 text-emerald-500" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              To change features, edit <code className="rounded bg-muted px-1">src/components/pricing-cards.tsx</code>.
+            </p>
           </div>
 
           <label className="flex items-center gap-2 text-sm">
