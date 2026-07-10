@@ -26,5 +26,6 @@ export async function getPlanFromPriceId(priceId: string) {
 }
 
 export function checksLimitForPlan(planId: string): number {
-  return planId === "pro_plus" ? 999_999 : 100;
+  if (planId === "pro" || planId === "pro_plus") return 9999;
+  return 5; // free
 }

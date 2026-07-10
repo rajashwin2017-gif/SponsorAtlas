@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { stripe, getPlanFromPriceId } from "@/lib/stripe";
+import { stripe, getPlanFromPriceId, checksLimitForPlan } from "@/lib/stripe";
 
 async function findUserByCustomerId(customerId: string) {
   return prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
@@ -46,13 +46,16 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   });
 
   const isActive = subscription.status === "active" || subscription.status === "trialing";
+  const effectivePlan = isActive ? plan : "free";
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      subscriptionTier: isActive ? plan : "free",
+      subscriptionTier: effectivePlan,
       subscriptionStatus: subscription.status,
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscription.id,
+      monthlyChecksLimit: checksLimitForPlan(effectivePlan),
     },
   });
 }
@@ -67,7 +70,11 @@ async function markSubscriptionCanceled(subscription: Stripe.Subscription) {
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { subscriptionTier: "free", subscriptionStatus: "canceled" },
+    data: {
+      subscriptionTier: "free",
+      subscriptionStatus: "canceled",
+      monthlyChecksLimit: checksLimitForPlan("free"),
+    },
   });
 }
 
@@ -96,13 +103,9 @@ async function recordInvoiceAndPayment(invoice: Stripe.Invoice, outcome: "paid" 
     },
   });
 
-  // Webhooks can be redelivered by Stripe; skip creating a duplicate Payment
-  // row for an invoice we've already recorded a payment against.
+  // Webhooks can be redelivered; skip duplicate Payment rows.
   const existingPayment = await prisma.payment.findFirst({ where: { stripeInvoiceId: invoice.id } });
   if (!existingPayment) {
-    // `payment_intent` was removed from the top-level Invoice type in recent
-    // Stripe API versions (moved to the expandable `payments` list); read it
-    // defensively so this keeps working across API version differences.
     const paymentIntentId = (invoice as any).payment_intent;
     await prisma.payment.create({
       data: {
@@ -118,6 +121,40 @@ async function recordInvoiceAndPayment(invoice: Stripe.Invoice, outcome: "paid" 
 
   if (outcome === "failed") {
     await prisma.user.update({ where: { id: user.id }, data: { subscriptionStatus: "past_due" } });
+  }
+}
+
+async function syncInvoiceStatus(invoice: Stripe.Invoice) {
+  if (!invoice.status) return;
+  await prisma.invoice
+    .updateMany({
+      where: { stripeInvoiceId: invoice.id },
+      data: { status: invoice.status },
+    })
+    .catch(() => {});
+}
+
+async function syncRefund(charge: Stripe.Charge) {
+  const piId = typeof charge.payment_intent === "string" ? charge.payment_intent : null;
+  if (!piId) return;
+
+  await prisma.payment
+    .updateMany({
+      where: { stripePaymentIntentId: piId },
+      data: { status: "refunded" },
+    })
+    .catch(() => {});
+
+  // charge.invoice is present in the Stripe API response but not in older
+  // type definitions — read it defensively via the any cast.
+  const invoiceId = (charge as any).invoice;
+  if (typeof invoiceId === "string") {
+    await prisma.invoice
+      .updateMany({
+        where: { stripeInvoiceId: invoiceId },
+        data: { status: "void" },
+      })
+      .catch(() => {});
   }
 }
 
@@ -149,23 +186,41 @@ export async function POST(req: NextRequest) {
         }
         break;
       }
+
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         await syncSubscription(event.data.object as Stripe.Subscription);
         break;
       }
+
       case "customer.subscription.deleted": {
         await markSubscriptionCanceled(event.data.object as Stripe.Subscription);
         break;
       }
+
       case "invoice.paid": {
         await recordInvoiceAndPayment(event.data.object as Stripe.Invoice, "paid");
         break;
       }
+
       case "invoice.payment_failed": {
         await recordInvoiceAndPayment(event.data.object as Stripe.Invoice, "failed");
         break;
       }
+
+      // Keep invoice status in sync with Stripe Dashboard actions.
+      case "invoice.voided":
+      case "invoice.marked_uncollectible": {
+        await syncInvoiceStatus(event.data.object as Stripe.Invoice);
+        break;
+      }
+
+      // Sync refunds issued via Stripe Dashboard or disputes.
+      case "charge.refunded": {
+        await syncRefund(event.data.object as Stripe.Charge);
+        break;
+      }
+
       default:
         break;
     }

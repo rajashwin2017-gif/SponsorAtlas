@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 
 interface AdminPayment {
   id: string;
@@ -21,6 +22,7 @@ const STATUS_VARIANT: Record<string, "emerald" | "outline" | "rose" | "amber"> =
 };
 
 export default function AdminPaymentsPage() {
+  const { toast } = useToast();
   const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
@@ -44,8 +46,13 @@ export default function AdminPaymentsPage() {
   async function refund(id: string) {
     if (!confirm("Refund this payment via Stripe?")) return;
     const res = await fetch(`/api/admin/payments/${id}/refund`, { method: "POST" });
-    if (res.ok) load();
-    else alert((await res.json()).error ?? "Refund failed");
+    if (res.ok) {
+      toast("Refund issued successfully.", "success");
+      load();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      toast(data.error ?? "Refund failed.", "error");
+    }
   }
 
   return (

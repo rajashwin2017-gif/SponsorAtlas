@@ -12,10 +12,23 @@ export async function GET() {
         where: { id: sessionUser.id },
         select: { subscriptionTier: true, subscriptionStatus: true, stripeCustomerId: true },
       }),
-      prisma.subscription.findFirst({
-        where: { userId: sessionUser.id },
-        orderBy: { createdAt: "desc" },
-      }),
+      // Prefer the active/trialing/past_due subscription; fall back to most recent.
+      prisma.subscription
+        .findFirst({
+          where: {
+            userId: sessionUser.id,
+            status: { in: ["active", "trialing", "past_due"] },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+        .then(
+          (found) =>
+            found ??
+            prisma.subscription.findFirst({
+              where: { userId: sessionUser.id },
+              orderBy: { createdAt: "desc" },
+            })
+        ),
     ]);
 
     return NextResponse.json({

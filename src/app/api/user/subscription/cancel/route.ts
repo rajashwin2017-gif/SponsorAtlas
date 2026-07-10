@@ -4,9 +4,9 @@ import { requireUser } from "@/lib/session";
 import { stripe } from "@/lib/stripe";
 import { handleApiError, ApiError } from "@/lib/api-error";
 
-// Cancels at the end of the current billing period rather than immediately,
-// so the member keeps access they've already paid for. The DB is updated by
-// the customer.subscription.updated webhook once Stripe confirms the change.
+// Cancels at the end of the current billing period so the member keeps
+// access they've already paid for. DB is updated by the
+// customer.subscription.updated webhook once Stripe confirms the change.
 export async function POST() {
   try {
     if (!stripe) {
@@ -14,13 +14,23 @@ export async function POST() {
     }
 
     const sessionUser = await requireUser();
-    const user = await prisma.user.findUniqueOrThrow({ where: { id: sessionUser.id } });
 
-    if (!user.stripeSubscriptionId) {
+    // Look up the active subscription row rather than relying on
+    // user.stripeSubscriptionId, which can point to a stale/old sub
+    // for returning subscribers who re-subscribed.
+    const activeSub = await prisma.subscription.findFirst({
+      where: {
+        userId: sessionUser.id,
+        status: { in: ["active", "trialing"] },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!activeSub) {
       throw new ApiError("No active subscription to cancel", 400);
     }
 
-    const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+    const subscription = await stripe.subscriptions.update(activeSub.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
 

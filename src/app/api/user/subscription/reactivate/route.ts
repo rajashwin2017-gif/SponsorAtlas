@@ -11,13 +11,22 @@ export async function POST() {
     }
 
     const sessionUser = await requireUser();
-    const user = await prisma.user.findUniqueOrThrow({ where: { id: sessionUser.id } });
 
-    if (!user.stripeSubscriptionId) {
-      throw new ApiError("No subscription to reactivate", 400);
+    // Find the subscription pending cancellation (active but cancel_at_period_end=true).
+    const pendingCancelSub = await prisma.subscription.findFirst({
+      where: {
+        userId: sessionUser.id,
+        status: { in: ["active", "trialing"] },
+        cancelAtPeriodEnd: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!pendingCancelSub) {
+      throw new ApiError("No subscription pending cancellation to reactivate", 400);
     }
 
-    const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+    const subscription = await stripe.subscriptions.update(pendingCancelSub.stripeSubscriptionId, {
       cancel_at_period_end: false,
     });
 

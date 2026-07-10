@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Check, Sparkles, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
@@ -18,6 +20,11 @@ interface ApiPlan {
   monthlyPriceMinor: number;
   yearlyPriceMinor: number;
   features: string[];
+}
+
+interface SubInfo {
+  status: string; // "active" | "trialing" | "past_due" | "canceled" | "inactive"
+  cancelAtPeriodEnd: boolean;
 }
 
 // Feature lists are fixed product decisions — hardcoded here so they are
@@ -78,7 +85,10 @@ function yearlySavingPct(monthlyMinor: number, yearlyMinor: number): number {
   return Math.max(0, Math.round((1 - yearlyMinor / equivalentYearly) * 100));
 }
 
-async function startCheckout(planId: string, yearly: boolean): Promise<{ url?: string; error?: string; status?: number }> {
+async function startCheckout(
+  planId: string,
+  yearly: boolean
+): Promise<{ url?: string; error?: string; status?: number }> {
   try {
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
@@ -95,7 +105,10 @@ async function startCheckout(planId: string, yearly: boolean): Promise<{ url?: s
 export function PricingCards() {
   const { toast } = useToast();
   const { tier } = useTier();
+  const { update } = useSession();
+  const router = useRouter();
   const [plans, setPlans] = useState<ApiPlan[]>([]);
+  const [subInfo, setSubInfo] = useState<SubInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [yearly, setYearly] = useState(false);
@@ -104,18 +117,57 @@ export function PricingCards() {
     fetch("/api/plans")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: ApiPlan[]) =>
-        // Override DB features with static hardcoded lists — prices stay dynamic
         setPlans(data.map((p) => ({ ...p, features: STATIC_FEATURES[p.planId] ?? p.features })))
       )
       .finally(() => setLoading(false));
+
+    // Fetch subscription status so we can show upgrade vs switch CTA.
+    fetch("/api/user/subscription")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setSubInfo({ status: data.status, cancelAtPeriodEnd: data.cancelAtPeriodEnd }))
+      .catch(() => {});
   }, []);
+
+  const hasActiveSub =
+    subInfo?.status === "active" ||
+    subInfo?.status === "trialing" ||
+    subInfo?.status === "past_due";
 
   async function handleCta(planId: string) {
     if (planId === "free") {
       toast("You're on the Free plan. Start searching!", "success");
       return;
     }
+
     setLoadingPlan(planId);
+
+    // Existing active subscriber → switch plan in-place to avoid double billing.
+    if (hasActiveSub && tier !== "free") {
+      const res = await fetch("/api/stripe/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planId, yearly }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setLoadingPlan(null);
+
+      if (res.ok) {
+        await update(); // refresh JWT so tier badge updates immediately
+        toast(
+          `Switched to ${data.plan ?? planId}. Your billing has been updated.`,
+          "success"
+        );
+        router.push("/dashboard");
+      } else if (res.status === 401) {
+        toast("Please sign in to change your plan.", "info");
+        router.push("/login?callbackUrl=/pricing");
+      } else {
+        toast(data.error ?? "Could not switch plan. Please try again.", "error");
+      }
+      return;
+    }
+
+    // New subscriber → standard Stripe Checkout flow.
     const result = await startCheckout(planId, yearly);
     setLoadingPlan(null);
 
@@ -125,7 +177,10 @@ export function PricingCards() {
       toast("Please sign in or register to upgrade.", "info");
       window.location.href = "/login?callbackUrl=/pricing";
     } else {
-      toast(result.error ?? "This plan isn't available for checkout yet. Please check back soon.", "info");
+      toast(
+        result.error ?? "This plan isn't available for checkout yet. Please check back soon.",
+        "info"
+      );
     }
   }
 
@@ -139,7 +194,13 @@ export function PricingCards() {
     <div>
       {/* Billing toggle */}
       <div className="mb-10 flex items-center justify-center gap-3">
-        <span className={cn("text-sm font-medium", !yearly && "text-foreground", yearly && "text-muted-foreground")}>
+        <span
+          className={cn(
+            "text-sm font-medium",
+            !yearly && "text-foreground",
+            yearly && "text-muted-foreground"
+          )}
+        >
           Monthly
         </span>
         <button
@@ -158,7 +219,13 @@ export function PricingCards() {
             )}
           />
         </button>
-        <span className={cn("text-sm font-medium", yearly && "text-foreground", !yearly && "text-muted-foreground")}>
+        <span
+          className={cn(
+            "text-sm font-medium",
+            yearly && "text-foreground",
+            !yearly && "text-muted-foreground"
+          )}
+        >
           Annual
         </span>
       </div>
@@ -166,8 +233,11 @@ export function PricingCards() {
       <div className="grid gap-6 lg:grid-cols-3">
         {allPlans.map((plan) => {
           const saving = yearlySavingPct(plan.monthlyPriceMinor, plan.yearlyPriceMinor);
-          const displayPrice = yearly ? formatGBP(plan.yearlyPriceMinor) : formatGBP(plan.monthlyPriceMinor);
-          const priceSuffix = plan.planId === "free" ? "/mo" : yearly ? "/year" : "/mo";
+          const displayPrice = yearly
+            ? formatGBP(plan.yearlyPriceMinor)
+            : formatGBP(plan.monthlyPriceMinor);
+          const priceSuffix =
+            plan.planId === "free" ? "/mo" : yearly ? "/year" : "/mo";
           const altLabel =
             plan.planId === "free"
               ? "or £0/year · Save 0%"
@@ -176,6 +246,16 @@ export function PricingCards() {
               : `or ${formatGBP(plan.yearlyPriceMinor)}/year · Save ${saving}%`;
 
           const isCurrentPlan = tier === plan.planId;
+          const isBusy = loadingPlan === plan.planId;
+
+          // CTA label: "Current plan" | "Switch to X" (existing sub) | "Upgrade to X"
+          let ctaLabel = `Upgrade to ${plan.name}`;
+          if (isCurrentPlan) {
+            ctaLabel = "Current plan";
+          } else if (hasActiveSub && tier !== "free" && plan.planId !== "free") {
+            const isUpgrade = plan.planId === "pro_plus" && tier === "pro";
+            ctaLabel = isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`;
+          }
 
           return (
             <div
@@ -219,23 +299,25 @@ export function PricingCards() {
                     Start free
                   </Link>
                 )
+              ) : isCurrentPlan ? (
+                <Button variant="outline" className="mt-6 w-full" disabled>
+                  Current plan
+                </Button>
               ) : (
-                isCurrentPlan ? (
-                  <Button variant="outline" className="mt-6 w-full" disabled>
-                    Current plan
-                  </Button>
-                ) : (
-                  <Button
-                    variant={plan.highlighted ? "gradient" : "outline"}
-                    className="mt-6 w-full"
-                    disabled={loadingPlan === plan.planId}
-                    onClick={() => handleCta(plan.planId)}
-                  >
-                    {loadingPlan === plan.planId ? (
-                      <><Loader2 className="size-4 animate-spin" /> Redirecting…</>
-                    ) : `Upgrade to ${plan.name}`}
-                  </Button>
-                )
+                <Button
+                  variant={plan.highlighted ? "gradient" : "outline"}
+                  className="mt-6 w-full"
+                  disabled={isBusy}
+                  onClick={() => handleCta(plan.planId)}
+                >
+                  {isBusy ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Processing…
+                    </>
+                  ) : (
+                    ctaLabel
+                  )}
+                </Button>
               )}
 
               <ul className="mt-6 space-y-3">
