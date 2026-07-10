@@ -1,18 +1,28 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM = process.env.EMAIL_FROM ?? "The Sponsor Finder <noreply@thesponsorfinder.com>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://thesponsorfinder.com";
 const BRAND = "The Sponsor Finder";
+const FROM = process.env.EMAIL_FROM ?? `${BRAND} <${process.env.GMAIL_USER ?? "noreply@thesponsorfinder.com"}>`;
 
-// Without a RESEND_API_KEY (local dev / demo mode) we log the email instead
-// of sending, so auth + subscription flows are fully testable offline.
+function createTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) return null;
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+  });
+}
+
+// Without GMAIL_USER + GMAIL_APP_PASSWORD (local dev / demo mode) we log the
+// email instead of sending, so auth + subscription flows are testable offline.
 async function send(to: string, subject: string, html: string, logLabel: string) {
-  if (!resend) {
+  const transporter = createTransporter();
+  if (!transporter) {
     console.log(`[email:${logLabel}] → ${to} | ${subject}`);
     return;
   }
-  await resend.emails.send({ from: FROM, to, subject, html });
+  await transporter.sendMail({ from: FROM, to, subject, html });
 }
 
 // ─── Shared HTML shell ───────────────────────────────────────────────────────
