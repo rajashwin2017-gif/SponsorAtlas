@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { stripe, getPlanFromPriceId, checksLimitForPlan } from "@/lib/stripe";
+import { sendSubscriptionEmail } from "@/lib/email";
 
 async function findUserByCustomerId(customerId: string) {
   return prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
@@ -181,8 +182,41 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (typeof session.subscription === "string") {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription);
+          const subscription = await stripe.subscriptions.retrieve(session.subscription, {
+            expand: ["items.data.price"],
+          });
           await syncSubscription(subscription);
+
+          // Send a thank-you email after the first successful checkout.
+          const userId = subscription.metadata?.userId;
+          const user = userId
+            ? await prisma.user.findUnique({ where: { id: userId } })
+            : session.customer_email
+            ? await prisma.user.findUnique({ where: { email: session.customer_email } })
+            : null;
+
+          if (user?.email) {
+            const priceId = subscription.items.data[0]?.price.id;
+            const mapped = priceId ? await getPlanFromPriceId(priceId) : undefined;
+            const plan = mapped?.plan ?? "pro";
+            const interval = mapped?.interval ?? "month";
+            const amountMinor =
+              subscription.items.data[0]?.price.unit_amount ??
+              (interval === "year"
+                ? (session as any).amount_total
+                : (session as any).amount_subtotal) ??
+              0;
+
+            await sendSubscriptionEmail(user.email, {
+              name: user.name,
+              plan,
+              interval,
+              amountMinor,
+              currency: subscription.currency ?? "gbp",
+            }).catch((err) =>
+              console.error("Failed to send subscription email:", err)
+            );
+          }
         }
         break;
       }

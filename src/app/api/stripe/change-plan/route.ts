@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { stripe, getPlanPriceId, checksLimitForPlan } from "@/lib/stripe";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { sendPlanChangedEmail } from "@/lib/email";
 
 const schema = z.object({
   plan: z.string().min(1, "Plan is required"),
@@ -97,6 +98,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: sessionUser.id } });
+    const oldPlan = activeSub.plan;
+
     await prisma.user.update({
       where: { id: sessionUser.id },
       data: {
@@ -105,6 +109,14 @@ export async function POST(req: NextRequest) {
         monthlyChecksLimit: checksLimitForPlan(plan),
       },
     });
+
+    // Send plan-change confirmation email (fire-and-forget — don't block the response).
+    sendPlanChangedEmail(user.email, {
+      name: user.name,
+      oldPlan,
+      newPlan: plan,
+      interval: yearly ? "year" : "month",
+    }).catch((err) => console.error("Failed to send plan-changed email:", err));
 
     return NextResponse.json({ success: true, plan, interval: yearly ? "year" : "month" });
   } catch (err) {

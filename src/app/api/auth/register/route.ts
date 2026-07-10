@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   });
 
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
-  await sendVerificationEmail(email, verifyUrl);
+  await sendVerificationEmail(email, verifyUrl, name);
 
   return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
 }
