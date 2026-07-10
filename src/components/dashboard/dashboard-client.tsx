@@ -43,9 +43,11 @@ export function DashboardClient() {
   useEffect(() => {
     if (searchParams.get("upgraded") !== "1") return;
     const timer = setTimeout(async () => {
-      await update();
+      const newSession = await update();
       router.replace("/dashboard");
-      toast("Your account has been upgraded! Welcome to Pro.", "success");
+      const tier = newSession?.user?.subscriptionTier;
+      const planLabel = tier === "pro_plus" ? "Pro Plus" : tier === "pro" ? "Pro" : "your new plan";
+      toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
     }, 2500);
     return () => clearTimeout(timer);
   }, []);

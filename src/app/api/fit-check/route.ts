@@ -1,20 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { computeFit, type FitInput } from "@/lib/fit";
+import { requireUser } from "@/lib/session";
+import { handleApiError, ApiError } from "@/lib/api-error";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
-/**
- * POST /api/fit-check
- *
- * Body: FitInput { sponsorId, jobTitle, yearsExperience, desiredSalary, location?, industry? }
- * Returns: FitResult
- *
- * Currently uses the local heuristic scorer (src/lib/fit.ts). To switch to
- * OpenAI, set OPENAI_API_KEY and replace the computeFit() call with a chat
- * completion that returns the same FitResult shape (validate with zod).
- *
- * In production this would also: verify the user's session, enforce the
- * per-tier monthly fit-check quota, and persist the result to the FitCheck table.
- */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Require sign-in — prevents anonymous abuse and enables quota enforcement.
+  let user: Awaited<ReturnType<typeof requireUser>>;
+  try {
+    user = await requireUser();
+  } catch {
+    return NextResponse.json({ error: "Sign in to run a fit check." }, { status: 401 });
+  }
+
+  // Per-user rate limit: 30 fit checks per hour.
+  const limited = rateLimit(`fit-check:${user.id}`, 30, 60 * 60 * 1000);
+  if (!limited.success) {
+    return NextResponse.json(
+      { error: "Too many fit checks. Please wait before trying again." },
+      { status: 429 }
+    );
+  }
+
+  // Secondary IP-level limit to protect against credential stuffing / shared accounts.
+  const ipLimit = rateLimit(`fit-check-ip:${getClientIp(req)}`, 60, 60 * 60 * 1000);
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many requests from your network. Try again later." },
+      { status: 429 }
+    );
+  }
+
   let body: Partial<FitInput>;
   try {
     body = await req.json();
@@ -40,7 +56,10 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Fit check failed";
-    return NextResponse.json({ error: message }, { status: 404 });
+    return handleApiError(
+      err instanceof Error && err.message.includes("not found")
+        ? new ApiError(err.message, 404)
+        : err
+    );
   }
 }

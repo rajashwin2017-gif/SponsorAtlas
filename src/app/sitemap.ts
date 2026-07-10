@@ -1,17 +1,17 @@
 import type { MetadataRoute } from "next";
-import { SPONSORS } from "@/lib/mock-data";
+import { getSponsors } from "@/lib/sponsor-store";
 
-const BASE = "https://sponsoratlas.app";
+const BASE = "https://thesponsorfinder.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = ["", "/search", "/soc-codes", "/pricing", "/dashboard"].map((path) => ({
+  const staticRoutes = ["", "/search", "/soc-codes", "/pricing"].map((path) => ({
     url: `${BASE}${path}`,
     lastModified: new Date(),
     changeFrequency: "daily" as const,
     priority: path === "" ? 1 : 0.8,
   }));
 
-  const sponsorRoutes = SPONSORS.map((s) => ({
+  const sponsorRoutes = getSponsors().map((s) => ({
     url: `${BASE}/sponsors/${s.id}`,
     lastModified: new Date(s.lastUpdated),
     changeFrequency: "weekly" as const,

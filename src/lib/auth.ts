@@ -141,5 +141,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  secret: process.env.NEXTAUTH_SECRET ?? "dev-secret-change-in-production",
+  secret: (() => {
+    const s = process.env.NEXTAUTH_SECRET;
+    if (!s && process.env.NODE_ENV === "production") {
+      throw new Error("NEXTAUTH_SECRET must be set in production — generate one with: openssl rand -hex 32");
+    }
+    return s ?? "dev-secret-change-in-production";
+  })(),
 };

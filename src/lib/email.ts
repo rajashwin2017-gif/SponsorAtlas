@@ -4,20 +4,24 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://thesponsorfinder.com
 const BRAND = "The Sponsor Finder";
 const FROM = process.env.EMAIL_FROM ?? `${BRAND} <${process.env.GMAIL_USER ?? "noreply@thesponsorfinder.com"}>`;
 
-function createTransporter() {
+// Module-level singleton — one TCP connection pool for the lifetime of the
+// process rather than a fresh connection per email.
+let _transporter: ReturnType<typeof nodemailer.createTransport> | null | undefined;
+
+function getTransporter() {
+  if (_transporter !== undefined) return _transporter;
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) return null;
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: { user, pass },
-  });
+  _transporter = user && pass
+    ? nodemailer.createTransport({ service: "gmail", auth: { user, pass } })
+    : null;
+  return _transporter;
 }
 
 // Without GMAIL_USER + GMAIL_APP_PASSWORD (local dev / demo mode) we log the
 // email instead of sending, so auth + subscription flows are testable offline.
 async function send(to: string, subject: string, html: string, logLabel: string) {
-  const transporter = createTransporter();
+  const transporter = getTransporter();
   if (!transporter) {
     console.log(`[email:${logLabel}] → ${to} | ${subject}`);
     return;

@@ -23,7 +23,8 @@ const envSchema = z.object({
   STRIPE_PRICE_PRO_PLUS_MONTHLY: z.string().optional(),
   STRIPE_PRICE_PRO_PLUS_YEARLY: z.string().optional(),
 
-  RESEND_API_KEY: z.string().optional(),
+  GMAIL_USER: z.string().email().optional(),
+  GMAIL_APP_PASSWORD: z.string().optional(),
   EMAIL_FROM: z.string().optional(),
   ALERT_FROM_EMAIL: z.string().optional(),
 

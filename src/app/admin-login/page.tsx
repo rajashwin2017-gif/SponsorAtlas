@@ -18,7 +18,8 @@ export default function AdminLoginPage() {
 function AdminLoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") ?? "/admin";
+  const rawCallback = params.get("callbackUrl") ?? "/admin";
+  const callbackUrl = rawCallback.startsWith("/") && !rawCallback.startsWith("//") ? rawCallback : "/admin";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
