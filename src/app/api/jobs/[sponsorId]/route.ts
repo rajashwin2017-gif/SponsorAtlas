@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSponsorById } from "@/lib/sponsor-store";
-import { lookupCareers } from "@/lib/careers-data";
+import { lookupCareers, isUrlAlive } from "@/lib/careers-data";
 
 export interface JobListing {
   id: string;
@@ -391,6 +391,14 @@ export async function GET(
       careersUrl = `https://mycareer.hsbc.com/en_GB/external/SearchJobs/${encodeURIComponent(keyword)}`;
     }
   }
+  // Static table URLs (unlike ATS-backed ones) can go stale between our
+  // periodic audits — a domain expires, a company rebrands. Confirm this one
+  // still resolves before handing it out; if it doesn't, fall through to the
+  // guaranteed search link below rather than send someone to a dead page.
+  if (careersUrl && !(await isUrlAlive(careersUrl))) {
+    careersUrl = undefined;
+  }
+
   // Always guarantee a careersUrl — fall back to Google "site:careers" search
   // so every one of the 126K sponsors has a way for users to explore jobs.
   const fallbackCareersUrl =
