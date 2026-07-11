@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Users, CreditCard, Receipt, LogOut, ShieldCheck, Tag } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, Receipt, LogOut, ShieldCheck, Tag, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/plans", label: "Plans", icon: Tag },
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/admin/payments", label: "Payments", icon: Receipt },
+  { href: "/admin/tools", label: "Tools", icon: Wrench },
 ];
 
 export function AdminNav({ userName }: { userName: string }) {
