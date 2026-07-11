@@ -57,20 +57,20 @@ export function IndustryTopSponsors() {
       <div className="mt-14 space-y-16">
         {sections.map(({ key, label, href, eyebrow, sponsors }) => (
           <div key={key}>
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <p className="eyebrow mb-1">{eyebrow}</p>
-                <h3 className="font-display text-xl font-semibold tracking-tight">{label}</h3>
+                <h3 className="font-display text-lg font-semibold tracking-tight sm:text-xl">{label}</h3>
               </div>
               <Link
                 href={href}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5 shrink-0")}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5 shrink-0 mt-1")}
               >
                 View all <ArrowRight className="size-3.5" />
               </Link>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {sponsors.map((s) => (
                 <SponsorCard key={s.id} sponsor={s} isPro={false} />
               ))}

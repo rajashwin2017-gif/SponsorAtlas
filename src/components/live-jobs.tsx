@@ -215,42 +215,46 @@ export function LiveJobs({ sponsorId, companyName, isPro: isProOverride }: LiveJ
       {isPro && (
         <>
           {/* Search bar */}
-          <form onSubmit={handleSearch} className="mb-4 flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Job title or keyword…"
-                value={inputKw}
-                onChange={(e) => setInputKw(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
-              />
+          <form onSubmit={handleSearch} className="mb-4 space-y-2">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Job title or keyword…"
+                  value={inputKw}
+                  onChange={(e) => setInputKw(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                />
+              </div>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="City…"
+                  value={inputLoc}
+                  onChange={(e) => setInputLoc(e.target.value)}
+                  className="h-10 w-28 rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 sm:w-32"
+                />
+              </div>
             </div>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                placeholder="City…"
-                value={inputLoc}
-                onChange={(e) => setInputLoc(e.target.value)}
-                className="h-9 w-32 rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
-              />
-            </div>
-            <button
-              type="submit"
-              className="h-9 rounded-lg bg-red-600 px-4 text-xs font-semibold text-white hover:bg-red-700"
-            >
-              Search
-            </button>
-            {hasFilter && (
+            <div className="flex gap-2">
               <button
-                type="button"
-                onClick={clearSearch}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted"
+                type="submit"
+                className="h-10 flex-1 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 min-h-[44px]"
               >
-                <X className="size-4 text-muted-foreground" />
+                Search
               </button>
-            )}
+              {hasFilter && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="flex h-10 w-11 items-center justify-center rounded-lg border border-border hover:bg-muted min-h-[44px]"
+                >
+                  <X className="size-4 text-muted-foreground" />
+                </button>
+              )}
+            </div>
           </form>
 
           {/* Loading */}

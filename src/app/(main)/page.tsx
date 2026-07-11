@@ -49,8 +49,8 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right: hero photo */}
-            <div className="relative mx-auto aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl shadow-[0_30px_70px_-30px_rgba(17,17,17,0.35)] lg:max-w-none">
+            {/* Right: hero photo — hidden on mobile */}
+            <div className="relative mx-auto hidden aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl shadow-[0_30px_70px_-30px_rgba(17,17,17,0.35)] sm:block lg:max-w-none">
               <Image
                 src="/hero-photo.jpg"
                 alt="A professional using The Sponsor Finder to search for UK visa-sponsored jobs"

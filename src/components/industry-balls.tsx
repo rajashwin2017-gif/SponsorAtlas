@@ -45,19 +45,19 @@ export function IndustryBalls() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
-        className="mt-14 flex flex-wrap items-center justify-center gap-3"
+        className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:items-center md:justify-center"
       >
         {INDUSTRIES.map(({ label, keyword, icon: Icon, color, bg, border }) => (
-          <motion.li key={label} variants={item}>
+          <motion.li key={label} variants={item} className="flex">
             <Link
               href={`/jobs?industry=${encodeURIComponent(keyword)}`}
               aria-label={`Browse ${label}`}
-              className={`group flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-gradient-to-b ${bg} px-6 py-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${border}`}
+              className={`group flex w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-gradient-to-b ${bg} px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:px-6 md:py-5 ${border}`}
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm transition-transform duration-200 group-hover:scale-110">
-                <Icon className="size-6" style={{ color }} aria-hidden="true" />
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-sm transition-transform duration-200 group-hover:scale-110">
+                <Icon className="size-5" style={{ color }} aria-hidden="true" />
               </span>
-              <span className="text-xs font-semibold tracking-wide text-slate-700 uppercase">
+              <span className="text-center text-[11px] font-semibold tracking-wide text-slate-700 uppercase leading-tight">
                 {label}
               </span>
             </Link>

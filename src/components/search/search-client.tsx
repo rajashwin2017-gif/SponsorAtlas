@@ -571,7 +571,7 @@ export function SearchClient({
                 onClick={exportCsv}
                 disabled={results.length === 0}
                 title={isProPlus ? "Export results as CSV" : "Pro+ feature"}
-                className={cn(!isProPlus && "text-muted-foreground")}
+                className={cn("hidden sm:inline-flex", !isProPlus && "text-muted-foreground")}
               >
                 {isProPlus ? <Download className="size-4" /> : <Lock className="size-3.5" />}
                 Export CSV

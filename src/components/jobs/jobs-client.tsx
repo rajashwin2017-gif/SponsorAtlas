@@ -390,16 +390,16 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
             if (industryJobs.length === 0) return null;
             return (
               <div key={industry}>
-                <div className="mb-5 flex items-center justify-between">
+                <div className="mb-5 flex items-start justify-between gap-3">
                   <div>
                     <p className="eyebrow mb-0.5">Featured</p>
-                    <h3 className="font-display text-xl font-semibold tracking-tight">
+                    <h3 className="font-display text-lg font-semibold tracking-tight sm:text-xl">
                       {industry} Jobs
                     </h3>
                   </div>
                   <button
                     onClick={() => setIndustries([industry])}
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-foreground/20 hover:text-foreground"
+                    className="mt-1 inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-foreground/20 hover:text-foreground"
                   >
                     View all <ChevronRight className="size-3.5" />
                   </button>
