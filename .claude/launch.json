@@ -4,8 +4,9 @@
     {
       "name": "sponsoratlas",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "-p", "3200"],
-      "port": 3200
+      "runtimeArgs": ["run", "dev"],
+      "port": 3200,
+      "autoPort": true
     }
   ]
 }

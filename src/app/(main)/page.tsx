@@ -1,22 +1,24 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight, ShieldCheck, FileCheck2, Ban, Building2, CalendarPlus,
+  ArrowRight, ShieldCheck, Ban, CalendarPlus,
+  Building2, Users, Clock, Gift,
 } from "lucide-react";
 import { StatCounter } from "@/components/stat-counter";
-import { HeroBackground } from "@/components/hero-background";
+import { HeroSearch } from "@/components/hero-search";
 import { HowItWorks } from "@/components/how-it-works";
 import { PricingCards } from "@/components/pricing-cards";
 import { IndustryBalls } from "@/components/industry-balls";
+import { IndustryTopSponsors } from "@/components/industry-top-sponsors";
 import { PlatformDemo } from "@/components/platform-demo";
-import { WatchDemoButton } from "@/components/watch-demo-button";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const TRUST = [
-  { icon: Building2, label: "UK Registered" },
-  { icon: ShieldCheck, label: "Open Gov Data" },
-  { icon: FileCheck2, label: "Cancel Anytime" },
+const HERO_STATS = [
+  { icon: Building2, value: 126000, suffix: "+", label: "Sponsors Indexed" },
+  { icon: Users, value: 654, suffix: "", label: "New This Month" },
+  { icon: Clock, value: 24, suffix: "/7", label: "Daily Updates" },
+  { icon: Gift, value: 100, suffix: "%", label: "Free To Job Seekers" },
 ];
 
 export default function LandingPage() {
@@ -24,52 +26,55 @@ export default function LandingPage() {
     <>
       {/* ── Hero ── */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 grid-bg animate-grid-pan" aria-hidden="true" />
-        <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(356.5_95%_45.7%/0.12),transparent)]" aria-hidden="true" />
-        <HeroBackground />
+        <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(356.5_95%_45.7%/0.08),transparent)]" aria-hidden="true" />
 
-        <div className="container relative pb-20 pt-8 sm:pb-28 sm:pt-12">
-          <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="emerald" className="mx-auto mb-6 animate-fade-up px-4 py-1.5">
-              <span className="live-dot" aria-hidden="true" /> Real hiring signals, not just a sponsor list
-            </Badge>
-            <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
-              Find UK Employers That{" "}
-              <span className="gradient-text">Actually Sponsor</span>
-            </h1>
-            <p className="mx-auto mt-7 max-w-lg text-lg leading-relaxed text-muted-foreground">
-              126,000+ verified UK sponsors ranked by real CoS activity.
-              Stop applying blindly — target employers that hire.
-            </p>
+        <div className="container relative pb-16 pt-12 sm:pb-20">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            {/* Left: copy + search */}
+            <div>
+              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-red-600">
+                <span className="h-px w-6 bg-red-600" aria-hidden="true" /> The UK&apos;s Trusted Platform
+              </p>
+              <h1 className="mt-4 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+                Find UK Employers That{" "}
+                <span className="gradient-text">Actually Sponsor</span>
+              </h1>
+              <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
+                Discover verified UK employers that offer visa sponsorship. Search jobs, check
+                sponsorship details and take the next step in your career with confidence.
+              </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/search" className={cn(buttonVariants({ variant: "gradient", size: "lg" }))}>
-                Start Free Search <ArrowRight className="size-4" />
-              </Link>
-              <WatchDemoButton />
+              <div className="mt-8">
+                <HeroSearch />
+              </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-2">
-              {TRUST.map((t) => (
-                <span key={t.label} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <t.icon className="size-4 text-red-600" /> {t.label}
-                </span>
-              ))}
+            {/* Right: hero photo */}
+            <div className="relative mx-auto aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl shadow-[0_30px_70px_-30px_rgba(17,17,17,0.35)] lg:max-w-none">
+              <Image
+                src="/hero-photo.jpg"
+                alt="A professional using The Sponsor Finder to search for UK visa-sponsored jobs"
+                fill
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
             </div>
           </div>
 
-          {/* Stats bar */}
-          <div className="stagger mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
-            {[
-              { value: 126000, suffix: "+", label: "Sponsors indexed" },
-              { value: 654, suffix: "", label: "New this month" },
-              { value: 24, suffix: "/7", label: "Daily updates" },
-            ].map((s) => (
-              <div key={s.label} className="glass p-7 text-center transition-transform duration-200 hover:-translate-y-0.5">
-                <div className="font-display text-4xl text-foreground sm:text-5xl">
-                  <StatCounter value={s.value} suffix={s.suffix} />
+          {/* Stats bar — inline row */}
+          <div className="stagger mt-14 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-10 sm:grid-cols-4">
+            {HERO_STATS.map((s) => (
+              <div key={s.label} className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-red-600/10 text-red-600">
+                  <s.icon className="size-5" />
+                </span>
+                <div>
+                  <div className="font-display text-xl font-semibold text-foreground sm:text-2xl">
+                    <StatCounter value={s.value} suffix={s.suffix} />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
                 </div>
-                <p className="eyebrow mt-3">{s.label}</p>
               </div>
             ))}
           </div>
@@ -81,6 +86,9 @@ export default function LandingPage() {
 
       {/* ── Industry balls ── */}
       <IndustryBalls />
+
+      {/* ── Top sponsors by industry (free preview) ── */}
+      <IndustryTopSponsors />
 
       {/* ── Interactive platform demo ── */}
       <section id="demo" className="container scroll-mt-24 pb-24">

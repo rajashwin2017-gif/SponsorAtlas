@@ -10,7 +10,6 @@ import { getSponsors, getSponsorById, getSimilarSponsors } from "@/lib/sponsor-s
 import { SOC_CODES } from "@/lib/soc-data";
 import { LiveJobs } from "@/components/live-jobs";
 import { CosChartLazy } from "@/components/cos-chart-lazy";
-import { FitWidget } from "@/components/fit-widget";
 import { SponsorActions } from "@/components/sponsor-actions";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatGBP, timeAgo } from "@/lib/utils";
@@ -315,8 +314,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
 
         {/* ── Right column (sticky) ── */}
         <div className="space-y-6 lg:sticky lg:top-20 lg:self-start">
-          <FitWidget sponsorId={sponsor.id} industry={sponsor.industryCategory} />
-          <SponsorActions sponsorId={sponsor.id} name={sponsor.organisationName} />
+<SponsorActions sponsorId={sponsor.id} name={sponsor.organisationName} />
 
           <div className="surface-card p-5">
             <p className="eyebrow mb-3">Quick Facts</p>

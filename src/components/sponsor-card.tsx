@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {
-  Heart, Lock, MapPin, Zap, Briefcase, ShieldCheck, ShieldAlert,
+  Heart, Lock, MapPin, Briefcase, ShieldCheck, ShieldAlert,
   ArrowUpRight, TrendingUp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -201,13 +201,6 @@ export function SponsorCard({ sponsor, isPro = false, locked = false }: { sponso
             )}
           />
         </button>
-        <Link
-          href={`/sponsors/${sponsor.id}#fit`}
-          aria-label="Run Fit Check"
-          className="grid size-9 cursor-pointer place-items-center rounded-lg border border-border text-zinc-700 transition-colors hover:border-zinc-700/50 hover:bg-zinc-900/5"
-        >
-          <Zap className="size-4" />
-        </Link>
       </div>
 
       {/* Pro insights */}

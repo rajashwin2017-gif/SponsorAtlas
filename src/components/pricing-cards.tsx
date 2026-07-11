@@ -28,14 +28,55 @@ const FREE_PLAN = {
   monthlyPriceMinor: 0,
   yearlyPriceMinor: 0,
   features: [
-    "Sponsor licence holder directory",
+    "Preview 3 top sponsors per industry",
+    "Healthcare, Technology & Hospitality sectors",
+    "Top 3 live jobs per featured industry",
     "Basic company information",
     "Industry & location filters",
-    "Basic search functionality",
-    "Limited vacancy views",
     "Publicly available sponsor info",
   ],
 };
+
+const FALLBACK_PLANS: ApiPlan[] = [
+  {
+    planId: "pro",
+    name: "Pro",
+    tagline: null,
+    badge: "Most Popular",
+    highlighted: true,
+    monthlyPriceMinor: 1999,
+    yearlyPriceMinor: 9999,
+    features: [
+      "Everything in Free",
+      "30 unlocked sponsors per industry across all sectors",
+      "Full sponsor profiles & hiring signals",
+      "Unlimited search with advanced filters",
+      "Live job listings direct from each employer",
+      "Save favourite sponsors & jobs",
+      "Email job alerts & notifications",
+      "Employer activity updates & sponsorship insights",
+    ],
+  },
+  {
+    planId: "pro_plus",
+    name: "Pro Plus",
+    tagline: null,
+    badge: null,
+    highlighted: false,
+    monthlyPriceMinor: 2999,
+    yearlyPriceMinor: 14999,
+    features: [
+      "Everything in Pro",
+      "Unlimited access to all 126,000+ sponsors",
+      "CSV export of search results",
+      "Priority job alerts",
+      "AI-powered employer recommendations",
+      "Application tracking tools",
+      "Priority customer support",
+      "Early access to new features",
+    ],
+  },
+];
 
 function formatGBP(minor: number): string {
   return `£${(minor / 100).toFixed(2).replace(/\.00$/, "")}`;
@@ -73,7 +114,8 @@ export function PricingCards() {
   useEffect(() => {
     fetch("/api/plans")
       .then((r) => (r.ok ? r.json() : []))
-      .then(setPlans)
+      .then((data) => setPlans(data.length ? data : FALLBACK_PLANS))
+      .catch(() => setPlans(FALLBACK_PLANS))
       .finally(() => setLoading(false));
   }, []);
 
