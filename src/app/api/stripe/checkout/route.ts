@@ -59,11 +59,6 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/pricing?cancelled=1`,
       allow_promotion_codes: true,
       subscription_data: { metadata: { userId: user.id } },
-      // Present prices in the customer's local currency (e.g. INR for India).
-      // Requires Adaptive Pricing to be enabled in Stripe Dashboard →
-      // Settings → Adaptive pricing. Without it this field is ignored.
-      // @ts-expect-error currency_conversion is a valid Stripe API field not yet in the Node SDK typedefs
-      currency_conversion: { enabled: true },
     });
 
     return NextResponse.json({ url: checkoutSession.url });
