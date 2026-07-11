@@ -20,6 +20,8 @@ import { BlurGate } from "@/components/tier-gate";
 const FREE_VISIBLE_JOBS = 3;
 const FREE_TEASER_JOBS = 3;
 
+const FEATURED_INDUSTRIES = ["Hospitality", "Technology", "Healthcare"] as const;
+
 const SORT_OPTIONS = [
   { key: "recent" as const, label: "Most recent" },
   { key: "company" as const, label: "Company A–Z" },
@@ -367,6 +369,75 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
           <li className="flex items-center gap-1.5"><Zap className="size-3.5 text-red-600" /> Straight from employers&rsquo; systems</li>
         </ul>
       </header>
+
+      {/* ── Featured industry previews (free, no filters active) ── */}
+      {!isPro && activeFilterCount === 0 && !debouncedQ && (
+        <div className="mt-16 space-y-14">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow mb-3 text-red-600">Free preview</p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+              Top jobs by industry
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Hand-picked live roles from three high-demand sectors — no sign-up required.
+            </p>
+          </div>
+
+          {FEATURED_INDUSTRIES.map((industry) => {
+            const industryJobs = jobs
+              .filter((j) => j.sponsorIndustry === industry)
+              .slice(0, 3);
+            if (industryJobs.length === 0) return null;
+            return (
+              <div key={industry}>
+                <div className="mb-5 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="eyebrow mb-0.5">Featured</p>
+                    <h3 className="font-display text-lg font-semibold tracking-tight sm:text-xl">
+                      {industry} Jobs
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setIndustries([industry])}
+                    className="mt-1 inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-foreground/20 hover:text-foreground"
+                  >
+                    View all <ChevronRight className="size-3.5" />
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {industryJobs.map((job, i) => (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      saved={savedJobs.includes(job.id)}
+                      onSave={() => toggleSave(job.id)}
+                      style={{ animationDelay: `${i * 30}ms` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center">
+            <p className="font-semibold">Want to see all live roles?</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Upgrade to Pro to unlock every visa-sponsored job across all industries.
+            </p>
+            <Link href="/pricing">
+              <Button size="sm" className="mt-4 bg-red-600 text-white hover:bg-red-700">
+                Upgrade to Pro <ChevronRight className="ml-1 size-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="relative flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium text-muted-foreground">or search all jobs below</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+        </div>
+      )}
 
       {/* ── Body ── */}
       <div className="mt-14 grid gap-8 lg:grid-cols-[248px_1fr] lg:gap-10">

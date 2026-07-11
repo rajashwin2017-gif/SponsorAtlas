@@ -32,11 +32,11 @@ interface SubInfo {
 // so the admin can update them without a redeploy.
 const STATIC_FEATURES: Record<string, string[]> = {
   free: [
-    "Sponsor licence holder directory",
+    "Preview 3 top sponsors per industry",
+    "Healthcare, Technology & Hospitality sectors",
+    "Top 3 live jobs per featured industry",
     "Basic company information",
     "Industry & location filters",
-    "Basic search functionality",
-    "Limited vacancy views",
     "Publicly available sponsor info",
   ],
   pro: [
@@ -73,6 +73,29 @@ const FREE_PLAN = {
   yearlyPriceMinor: 0,
   features: STATIC_FEATURES.free,
 };
+
+const FALLBACK_PLANS: ApiPlan[] = [
+  {
+    planId: "pro",
+    name: "Pro",
+    tagline: null,
+    badge: "Most Popular",
+    highlighted: true,
+    monthlyPriceMinor: 1999,
+    yearlyPriceMinor: 9999,
+    features: STATIC_FEATURES.pro,
+  },
+  {
+    planId: "pro_plus",
+    name: "Pro Plus",
+    tagline: null,
+    badge: null,
+    highlighted: false,
+    monthlyPriceMinor: 2999,
+    yearlyPriceMinor: 14999,
+    features: STATIC_FEATURES.pro_plus,
+  },
+];
 
 function formatGBP(minor: number): string {
   return `£${(minor / 100).toFixed(2).replace(/\.00$/, "")}`;
@@ -116,9 +139,11 @@ export function PricingCards() {
   useEffect(() => {
     fetch("/api/plans")
       .then((r) => (r.ok ? r.json() : []))
-      .then((data: ApiPlan[]) =>
-        setPlans(data.map((p) => ({ ...p, features: STATIC_FEATURES[p.planId] ?? p.features })))
-      )
+      .then((data: ApiPlan[]) => {
+        const base = data.length ? data : FALLBACK_PLANS;
+        setPlans(base.map((p) => ({ ...p, features: STATIC_FEATURES[p.planId] ?? p.features })));
+      })
+      .catch(() => setPlans(FALLBACK_PLANS))
       .finally(() => setLoading(false));
 
     // Fetch subscription status so we can show upgrade vs switch CTA.

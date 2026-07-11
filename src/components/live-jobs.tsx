@@ -215,42 +215,46 @@ export function LiveJobs({ sponsorId, companyName, isPro: isProOverride }: LiveJ
       {isPro && (
         <>
           {/* Search bar */}
-          <form onSubmit={handleSearch} className="mb-4 flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Job title or keyword…"
-                value={inputKw}
-                onChange={(e) => setInputKw(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
-              />
+          <form onSubmit={handleSearch} className="mb-4 space-y-2">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Job title or keyword…"
+                  value={inputKw}
+                  onChange={(e) => setInputKw(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                />
+              </div>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="City…"
+                  value={inputLoc}
+                  onChange={(e) => setInputLoc(e.target.value)}
+                  className="h-10 w-28 rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 sm:w-32"
+                />
+              </div>
             </div>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                placeholder="City…"
-                value={inputLoc}
-                onChange={(e) => setInputLoc(e.target.value)}
-                className="h-9 w-32 rounded-lg border border-border bg-background pl-8 pr-3 text-sm outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
-              />
-            </div>
-            <button
-              type="submit"
-              className="h-9 rounded-lg bg-red-600 px-4 text-xs font-semibold text-white hover:bg-red-700"
-            >
-              Search
-            </button>
-            {hasFilter && (
+            <div className="flex gap-2">
               <button
-                type="button"
-                onClick={clearSearch}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-muted"
+                type="submit"
+                className="h-10 flex-1 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 min-h-[44px]"
               >
-                <X className="size-4 text-muted-foreground" />
+                Search
               </button>
-            )}
+              {hasFilter && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="flex h-10 w-11 items-center justify-center rounded-lg border border-border hover:bg-muted min-h-[44px]"
+                >
+                  <X className="size-4 text-muted-foreground" />
+                </button>
+              )}
+            </div>
           </form>
 
           {/* Loading */}
@@ -308,30 +312,29 @@ export function LiveJobs({ sponsorId, companyName, isPro: isProOverride }: LiveJ
                 </div>
               )}
 
-              {/* No jobs found (with or without careers URL) */}
+              {/* Employer's Live Job Portal — shown when no indexed listings are found */}
               {data.jobs.length === 0 && !hasFilter && (
-                <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center">
-                  <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-red-50">
-                    <Briefcase className="size-5 text-red-500" />
+                <div className="rounded-2xl border border-red-100 bg-gradient-to-b from-red-50/60 to-white p-6 text-center">
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-red-600/10">
+                    <ExternalLink className="size-5 text-red-600" />
                   </div>
-                  <p className="font-semibold text-sm text-foreground">No live listings right now</p>
-                  <p className="mt-1 text-xs text-muted-foreground max-w-xs mx-auto">
-                    We couldn't find active job postings for {data.companyName} at this time — they may post directly on their careers page.
+                  <p className="font-semibold text-sm text-foreground">
+                    Employer&apos;s Live Job Portal
+                  </p>
+                  <p className="mt-1.5 text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
+                    Explore {data.companyName}&apos;s official careers page to view the latest opportunities and apply directly.
                   </p>
                   {data.careersUrl && (
                     <a
                       href={data.careersUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-red-700"
                     >
-                      {data.source === "nhs" ? "Search NHS Jobs" : "Explore Careers Page"}
+                      {data.source === "nhs" ? "Search NHS Jobs" : "Visit Careers Page"}
                       <ExternalLink className="size-3" />
                     </a>
                   )}
-                  <p className="mt-3 text-[11px] text-muted-foreground">
-                    Or try searching for a job title above
-                  </p>
                 </div>
               )}
             </>

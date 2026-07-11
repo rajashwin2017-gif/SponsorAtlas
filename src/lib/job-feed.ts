@@ -241,12 +241,16 @@ async function filterToLiveLinks(jobs: LiveJob[]): Promise<LiveJob[]> {
 
 // ── Public aggregator ───────────────────────────────────────────────────────────
 
-let _cache: { at: number; jobs: LiveJob[] } | null = null;
-const CACHE_MS = 3600_000; // 1h, matches the per-feed fetch revalidate
+function sortByRecency(jobs: LiveJob[]): LiveJob[] {
+  return [...jobs].sort((a, b) => {
+    // Most-recent first; undefined dates sink to the bottom.
+    const at = a.postedAt ? new Date(a.postedAt).getTime() : 0;
+    const bt = b.postedAt ? new Date(b.postedAt).getTime() : 0;
+    return bt - at;
+  });
+}
 
-export async function getLiveJobs(): Promise<LiveJob[]> {
-  if (_cache && Date.now() - _cache.at < CACHE_MS) return _cache.jobs;
-
+async function aggregateRaw(): Promise<LiveJob[]> {
   const sources = getAtsSources();
   const results = await Promise.all(
     sources.map(async (src) => {
@@ -272,17 +276,36 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
         }));
     })
   );
+  return results.flat();
+}
 
-  const candidates = results.flat();
-  const verified = await filterToLiveLinks(candidates);
+let _cache: { at: number; jobs: LiveJob[] } | null = null;
+const CACHE_MS = 3600_000; // 1h, matches the per-feed fetch revalidate
 
-  const jobs = verified.sort((a, b) => {
-    // Most-recent first; undefined dates sink to the bottom.
-    const at = a.postedAt ? new Date(a.postedAt).getTime() : 0;
-    const bt = b.postedAt ? new Date(b.postedAt).getTime() : 0;
-    return bt - at;
-  });
+// Verifying ~300 apply links serially-enough-to-matter can take many seconds —
+// too slow to block a page navigation on. Kick verification off in the
+// background and serve it on the NEXT request once ready, rather than making
+// every cold-cache visitor (e.g. the hero search's first click after a
+// server restart) wait on it. The unverified list is still cross-checked
+// against the licensed register and UK-location filtered — verification only
+// catches the rarer case of a listing closing between the ATS feed and the
+// employer's own site.
+let _verifying = false;
 
-  _cache = { at: Date.now(), jobs };
-  return jobs;
+export async function getLiveJobs(): Promise<LiveJob[]> {
+  if (_cache && Date.now() - _cache.at < CACHE_MS) return _cache.jobs;
+
+  const candidates = await aggregateRaw();
+
+  if (!_verifying) {
+    _verifying = true;
+    filterToLiveLinks(candidates)
+      .then((verified) => {
+        _cache = { at: Date.now(), jobs: sortByRecency(verified) };
+      })
+      .catch(() => { /* keep serving the unverified cache on failure */ })
+      .finally(() => { _verifying = false; });
+  }
+
+  return sortByRecency(candidates);
 }

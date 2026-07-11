@@ -25,7 +25,7 @@ const PAGE_SIZE = 12;
 const AUTO_LOAD_PAGES = 5;
 
 // Free-tier preview: one fully-unlocked sponsor per industry, everything else locked.
-const FREE_PREVIEW_INDUSTRIES = ["Healthcare", "Technology", "Finance"] as const;
+const FREE_PREVIEW_INDUSTRIES = ["Healthcare", "Technology", "Hospitality"] as const;
 
 const HIRING_ACTIVITIES = ["Very High", "High", "Medium", "Low"] as const;
 const TIERS = ["Platinum", "Gold", "Silver", "Bronze", "Active"] as const;
@@ -188,13 +188,13 @@ export function SearchClient({
           activity: activities,
           aRated: aRatedOnly ? "1" : undefined,
           minCos: minCos > 0 ? minCos : undefined,
-          pageSize: 1,
+          pageSize: 3,
         });
         return fetch(`/api/sponsors?${qs}`).then((r) => r.json());
       })
     ).then((jsons) => {
       if (cancelled) return;
-      setPreviewSponsors(jsons.map((j) => j.data?.[0]).filter(Boolean));
+      setPreviewSponsors(jsons.flatMap((j) => j.data ?? []).filter(Boolean));
     });
 
     return () => { cancelled = true; };
@@ -571,7 +571,7 @@ export function SearchClient({
                 onClick={exportCsv}
                 disabled={results.length === 0}
                 title={isProPlus ? "Export results as CSV" : "Pro+ feature"}
-                className={cn(!isProPlus && "text-muted-foreground")}
+                className={cn("hidden sm:inline-flex", !isProPlus && "text-muted-foreground")}
               >
                 {isProPlus ? <Download className="size-4" /> : <Lock className="size-3.5" />}
                 Export CSV
