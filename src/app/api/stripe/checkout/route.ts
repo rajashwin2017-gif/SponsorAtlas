@@ -59,6 +59,10 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/pricing?cancelled=1`,
       allow_promotion_codes: true,
       subscription_data: { metadata: { userId: user.id } },
+      // Present prices in the customer's local currency (e.g. INR for India).
+      // Requires Adaptive Pricing to be enabled in Stripe Dashboard →
+      // Settings → Adaptive pricing. Without it this field is ignored.
+      currency_conversion: { enabled: true } as object,
     });
 
     return NextResponse.json({ url: checkoutSession.url });
