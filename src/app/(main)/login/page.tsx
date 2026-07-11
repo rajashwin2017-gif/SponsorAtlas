@@ -31,6 +31,8 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   const authError = params.get("error");
 
@@ -76,11 +78,24 @@ function LoginForm() {
       password,
     });
     setLoading(false);
-    if (result?.error) {
+    if (result?.error === "EmailNotVerified") {
+      setUnverifiedEmail(email);
+      setError("Please verify your email before signing in.");
+    } else if (result?.error) {
       setError("Invalid email or password.");
     } else {
       router.push(callbackUrl);
     }
+  }
+
+  async function handleResend() {
+    setResendState("sending");
+    await fetch("/api/auth/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: unverifiedEmail }),
+    });
+    setResendState("sent");
   }
 
   async function handleGoogle() {
@@ -138,9 +153,30 @@ function LoginForm() {
           )}
 
           {error && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              <AlertCircle className="mt-0.5 size-4 shrink-0" />
-              {error}
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+              {unverifiedEmail && (
+                <div className="mt-2.5 pl-6">
+                  {resendState === "sent" ? (
+                    <span className="flex items-center gap-1.5 text-emerald-700">
+                      <CheckCircle2 className="size-3.5" />
+                      Verification email sent — check your inbox.
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resendState === "sending"}
+                      className="font-medium underline underline-offset-2 hover:no-underline disabled:opacity-60"
+                    >
+                      {resendState === "sending" ? "Sending…" : "Resend verification email"}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

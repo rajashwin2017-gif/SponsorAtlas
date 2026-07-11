@@ -36,6 +36,11 @@ export const authOptions: NextAuthOptions = {
         const valid = await verifyPassword(credentials.password, user.password);
         if (!valid) return null;
 
+        // Check email verification here (not in the signIn callback) so that
+        // `redirect: false` on the client receives result.error instead of a
+        // server-side redirect to the error page.
+        if (!user.emailVerified) throw new Error("EmailNotVerified");
+
         return {
           id: user.id,
           email: user.email,
@@ -84,10 +89,6 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (user.status === "suspended") return false;
-
-      if (account?.provider === "credentials" && !user.emailVerified) {
-        throw new Error("EmailNotVerified");
-      }
 
       return true;
     },
