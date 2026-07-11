@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-function redirectTo(req: NextRequest, path: string) {
-  return NextResponse.redirect(new URL(path, req.url));
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+
+function redirectTo(path: string) {
+  return NextResponse.redirect(`${APP_URL}${path}`);
 }
 
 export async function GET(req: NextRequest) {
@@ -10,7 +12,7 @@ export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get("email")?.toLowerCase();
 
   if (!token || !email) {
-    return redirectTo(req, "/login?verify=invalid");
+    return redirectTo("/login?verify=invalid");
   }
 
   const record = await prisma.verificationToken.findUnique({
@@ -23,7 +25,7 @@ export async function GET(req: NextRequest) {
         where: { identifier_token: { identifier: email, token } },
       });
     }
-    return redirectTo(req, "/login?verify=expired");
+    return redirectTo("/login?verify=expired");
   }
 
   await prisma.$transaction([
@@ -36,5 +38,5 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  return redirectTo(req, "/login?verify=success");
+  return redirectTo("/login?verify=success");
 }
