@@ -3,13 +3,13 @@ import { Search, Building2, FileText, CheckCircle2 } from "lucide-react";
 const STEPS = [
   {
     icon: Search,
-    title: "Search Jobs",
-    desc: "Search thousands of jobs from UK employers who offer visa sponsorship.",
+    title: "Search Employers",
+    desc: "Search 126,000+ verified UK employers who hold an active visa sponsorship licence.",
   },
   {
     icon: Building2,
-    title: "Check Sponsors",
-    desc: "See which employers are licensed sponsors and view sponsorship details.",
+    title: "Check Hiring Signals",
+    desc: "Review each employer's real CoS activity, sponsorship tier, and live hiring signals.",
   },
   {
     icon: FileText,

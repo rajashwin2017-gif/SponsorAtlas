@@ -7764,3 +7764,14 @@ export function getAtsSources(): AtsSource[] {
   }
   return out;
 }
+
+/** All URL-type career page entries (used by the offline scraper script). */
+export function getUrlEntries(): Array<{ key: string; url: string }> {
+  const out: Array<{ key: string; url: string }> = [];
+  for (const [key, entry] of Object.entries(CAREERS_TABLE)) {
+    if (entry.type === "url" && entry.url) {
+      out.push({ key, url: entry.url });
+    }
+  }
+  return out;
+}
