@@ -35,6 +35,7 @@ const SOURCE_META: Record<JobFeedSource, { dot: string; ring: string }> = {
   Greenhouse: { dot: "bg-emerald-500", ring: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400" },
   Lever: { dot: "bg-violet-500", ring: "border-violet-500/30 text-violet-700 dark:text-violet-400" },
   Workable: { dot: "bg-sky-500", ring: "border-sky-500/30 text-sky-700 dark:text-sky-400" },
+  CareerPage: { dot: "bg-orange-500", ring: "border-orange-500/30 text-orange-700 dark:text-orange-400" },
 };
 
 // Deterministic monogram tint from the company name — stable across renders.

@@ -16,10 +16,12 @@
  * SERVER-ONLY: reads the sponsor dataset from disk. Never import client-side.
  */
 
+import fs from "fs";
+import path from "path";
 import { getAtsSources, normaliseCompanyName, type AtsSource } from "@/lib/careers-data";
 import { getSponsors, type RichSponsor } from "@/lib/sponsor-store";
 
-export type JobFeedSource = "Greenhouse" | "Lever" | "Workable";
+export type JobFeedSource = "Greenhouse" | "Lever" | "Workable" | "CareerPage";
 
 export interface LiveJob {
   id: string;
@@ -252,7 +254,7 @@ function sortByRecency(jobs: LiveJob[]): LiveJob[] {
 
 async function aggregateRaw(): Promise<LiveJob[]> {
   const sources = getAtsSources();
-  const results = await Promise.all(
+  const atsResults = await Promise.all(
     sources.map(async (src) => {
       const sponsor = resolveSponsor(src.key);
       if (!sponsor) return []; // not on the licensed register → drop
@@ -276,7 +278,61 @@ async function aggregateRaw(): Promise<LiveJob[]> {
         }));
     })
   );
-  return results.flat();
+  return [...atsResults.flat(), ...loadScrapedJobs()];
+}
+
+// ── Scraped career-page jobs (written by scripts/scrape-career-pages.ts) ──────
+
+interface ScrapedJobRecord {
+  id: string;
+  sponsorId: string;
+  sponsorName: string;
+  sponsorIndustry: string;
+  sponsorTown: string;
+  title: string;
+  location: string;
+  department?: string;
+  applyUrl: string;
+  scrapedAt: string;
+}
+
+let _scrapedCache: LiveJob[] | null = null;
+
+function loadScrapedJobs(): LiveJob[] {
+  if (_scrapedCache) return _scrapedCache;
+  const filePath = path.join(process.cwd(), "prisma", "data", "scraped-jobs.json");
+  if (!fs.existsSync(filePath)) return [];
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, "utf8")) as {
+      jobs: ScrapedJobRecord[];
+    };
+
+    // Runtime cross-check: every job must resolve to a sponsor in the live
+    // register. This is a belt-and-braces guard — the scraper already enforces
+    // this, but we re-verify here so a corrupt/stale file can never leak an
+    // unverified listing onto the board.
+    const verifiedIds = new Set(getSponsors().map((s) => s.id));
+
+    _scrapedCache = (raw.jobs ?? [])
+      .filter((j) => j.sponsorId && j.title && j.applyUrl && verifiedIds.has(j.sponsorId))
+      .map<LiveJob>((j) => ({
+        id: j.id,
+        sponsorId: j.sponsorId,
+        sponsorName: j.sponsorName,
+        sponsorIndustry: j.sponsorIndustry,
+        sponsorTown: j.sponsorTown,
+        title: j.title,
+        location: j.location,
+        department: j.department,
+        source: "CareerPage",
+        applyUrl: j.applyUrl,
+        postedAt: undefined,
+        postedDaysAgo: undefined,
+      }));
+    return _scrapedCache;
+  } catch {
+    return [];
+  }
 }
 
 let _cache: { at: number; jobs: LiveJob[] } | null = null;
