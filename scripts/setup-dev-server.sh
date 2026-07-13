@@ -10,11 +10,11 @@ set -euo pipefail
 # ── Config ────────────────────────────────────────────────────────────────────
 REPO_URL="https://github.com/rajashwin2017-gif/SponsorAtlas.git"
 DEV_BRANCH="lohit"
-DEV_DIR="/var/www/sponsoratlas-dev"
+DEV_DIR="/var/www/dev/SponsorAtlas"
 DEV_PORT=3001
 APP_NAME="sponsoratlas-dev"
 DEV_DOMAIN="dev.thesponsorfinder.com"   # change or leave blank to skip nginx
-PROD_DIR="/var/www/sponsoratlas"        # used to copy .env as a starting point
+PROD_DIR="/var/www/production/SponsorAtlas"  # used to copy .env as a starting point
 
 # ── Colours ───────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
