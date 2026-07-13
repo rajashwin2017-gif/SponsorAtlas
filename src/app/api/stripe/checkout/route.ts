@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       success_url: `${baseUrl}/dashboard?upgraded=1`,
       cancel_url: `${baseUrl}/pricing?cancelled=1`,
       allow_promotion_codes: true,
-      subscription_data: { metadata: { userId: user.id } },
+      subscription_data: { metadata: { userId: user.id, plan } },
     });
 
     return NextResponse.json({ url: checkoutSession.url });

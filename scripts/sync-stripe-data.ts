@@ -58,24 +58,37 @@ async function findOrLinkUser(customer: Stripe.Customer) {
   return null;
 }
 
-function planFromMetadataOrPrice(
+async function planFromMetadataOrPrice(
   sub: Stripe.Subscription,
   priceId: string
-): { plan: string; interval: "month" | "year" } {
-  // Try metadata set by our checkout (subscription_data.metadata.userId etc.)
-  const planMeta = sub.metadata?.plan;
+): Promise<{ plan: string; interval: "month" | "year" }> {
   const price = sub.items.data[0]?.price;
   const interval: "month" | "year" =
     price?.recurring?.interval === "year" ? "year" : "month";
 
+  // 1. Metadata set by our checkout (most reliable — added since July 2026)
+  const planMeta = sub.metadata?.plan;
   if (planMeta) return { plan: planMeta, interval };
 
-  // Fall back: infer from price nickname or product name
+  // 2. Look up the price ID in our plans table
+  if (priceId) {
+    const dbPlan = await prisma.plan.findFirst({
+      where: {
+        OR: [
+          { stripeMonthlyPriceId: priceId },
+          { stripeYearlyPriceId: priceId },
+        ],
+      },
+    });
+    if (dbPlan) return { plan: dbPlan.planId, interval };
+  }
+
+  // 3. Infer from price nickname
   const nick = (price?.nickname ?? "").toLowerCase();
   if (nick.includes("plus") || nick.includes("pro+")) return { plan: "pro_plus", interval };
   if (nick.includes("pro")) return { plan: "pro", interval };
 
-  // Last resort: keep "pro" as a safe default
+  // 4. Last resort
   return { plan: "pro", interval };
 }
 
@@ -91,7 +104,7 @@ async function syncSubscriptions(userId: string, customerId: string) {
     expand: ["data.items.data.price"],
   })) {
     const priceId = sub.items.data[0]?.price.id ?? "";
-    const { plan, interval } = planFromMetadataOrPrice(sub, priceId);
+    const { plan, interval } = await planFromMetadataOrPrice(sub, priceId);
     const periodEnd = (sub as any).current_period_end
       ? new Date((sub as any).current_period_end * 1000)
       : null;
