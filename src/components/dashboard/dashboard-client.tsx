@@ -56,7 +56,7 @@ export function DashboardClient() {
     })();
   }, []);
   const { saved } = useSaved();
-  const { tier, isPro, refetch: refetchTier } = useTier();
+  const { tier, isPro, loading: tierLoading, refetch: refetchTier } = useTier();
   const { profile } = useProfile();
   const [alerts, setAlerts] = useState([
     { id: 1, industry: "Tech", city: "London", frequency: "weekly", active: true },
@@ -104,8 +104,8 @@ export function DashboardClient() {
               </span>
               <div className="min-w-0">
                 <p className="truncate font-heading text-base font-semibold">{displayName}</p>
-                <Badge variant={isPro ? "emerald" : "outline"} className="mt-1">
-                  {TIER_LABEL[tier]}
+                <Badge variant={tierLoading ? "outline" : isPro ? "emerald" : "outline"} className="mt-1">
+                  {tierLoading ? "···" : TIER_LABEL[tier]}
                 </Badge>
               </div>
             </div>
