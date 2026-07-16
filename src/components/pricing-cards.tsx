@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Check, Sparkles, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
@@ -124,8 +123,7 @@ async function startCheckout(
 
 export function PricingCards() {
   const { toast } = useToast();
-  const { tier } = useTier();
-  const { update } = useSession();
+  const { tier, refetch: refetchTier } = useTier();
   const router = useRouter();
   const [plans, setPlans] = useState<ApiPlan[]>([]);
   const [subInfo, setSubInfo] = useState<SubInfo | null>(null);
@@ -174,7 +172,7 @@ export function PricingCards() {
       setLoadingPlan(null);
 
       if (res.ok) {
-        await update(); // refresh JWT so tier badge updates immediately
+        await refetchTier();
         toast(
           `Switched to ${data.plan ?? planId}. Your billing has been updated.`,
           "success"

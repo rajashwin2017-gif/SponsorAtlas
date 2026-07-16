@@ -81,13 +81,30 @@ export async function POST(req: NextRequest) {
     const updated = await stripe.subscriptions.update(activeSub.stripeSubscriptionId, {
       items: [{ id: currentItem.id, price: newPriceId }],
       proration_behavior: isUpgrade ? "always_invoice" : "create_prorations",
-      // If the proration payment fails, keep the subscription active rather
-      // than immediately canceling — Stripe will retry automatically.
       payment_behavior: "pending_if_incomplete",
     });
 
-    // Optimistically update the DB so the billing panel reflects the change
-    // immediately, before the webhook fires.
+    // For upgrades, verify the proration invoice was actually paid before
+    // granting access. If payment is still pending, reject and tell the user
+    // to update their payment method.
+    if (isUpgrade) {
+      const latestInvoiceId = (updated as any).latest_invoice;
+      if (typeof latestInvoiceId === "string") {
+        const invoice = await stripe.invoices.retrieve(latestInvoiceId);
+        if (invoice.status !== "paid") {
+          // Roll back the Stripe subscription item to the previous price.
+          await stripe.subscriptions.update(activeSub.stripeSubscriptionId, {
+            items: [{ id: updated.items.data[0]?.id, price: currentItem.price.id }],
+            proration_behavior: "none",
+          }).catch(() => {});
+          throw new ApiError(
+            "Payment for the upgrade could not be processed. Please update your payment method and try again.",
+            402
+          );
+        }
+      }
+    }
+
     await prisma.subscription.update({
       where: { stripeSubscriptionId: activeSub.stripeSubscriptionId },
       data: {
