@@ -16,9 +16,9 @@ import { useToast } from "@/components/ui/toast";
 import { useTier } from "@/hooks/use-tier";
 import { BlurGate } from "@/components/tier-gate";
 
-// Free users see this many real listings before hitting the paywall.
 const FREE_VISIBLE_JOBS = 3;
 const FREE_TEASER_JOBS = 3;
+const PRO_VISIBLE_JOBS = 30;
 
 const FEATURED_INDUSTRIES = ["Hospitality", "Technology", "Healthcare"] as const;
 
@@ -81,7 +81,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
   const router = useRouter();
   const params = useSearchParams();
   const { toast } = useToast();
-  const { isPro } = useTier();
+  const { isPro, isProPlus, loading: tierLoading } = useTier();
 
   // Facets derived from the real data — never a hard-coded list.
   const { industryList, cityList, typeList, sourceCount } = useMemo(() => {
@@ -532,7 +532,15 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                   </Button>
                 )}
               </div>
-            ) : isPro ? (
+            ) : tierLoading ? (
+              /* Tier not yet confirmed — show jobs without paywall to avoid flash */
+              <>
+                {results.slice(0, PRO_VISIBLE_JOBS).map((job, i) => (
+                  <JobCard key={job.id} job={job} saved={savedJobs.includes(job.id)} onSave={() => toggleSave(job.id)} style={{ animationDelay: `${Math.min(i, 7) * 30}ms` }} />
+                ))}
+              </>
+            ) : isProPlus ? (
+              /* Pro Plus — unlimited */
               <>
                 {results.slice(0, visible).map((job, i) => (
                   <JobCard
@@ -554,7 +562,28 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                   </div>
                 )}
               </>
+            ) : isPro ? (
+              /* Pro — first 30, then Pro Plus upgrade wall */
+              <>
+                {results.slice(0, PRO_VISIBLE_JOBS).map((job, i) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    saved={savedJobs.includes(job.id)}
+                    onSave={() => toggleSave(job.id)}
+                    style={{ animationDelay: `${Math.min(i, 7) * 30}ms` }}
+                  />
+                ))}
+                {results.length > PRO_VISIBLE_JOBS && (
+                  <JobsPaywall
+                    teaser={results.slice(PRO_VISIBLE_JOBS, PRO_VISIBLE_JOBS + FREE_TEASER_JOBS)}
+                    remaining={results.length - PRO_VISIBLE_JOBS}
+                    variant="pro"
+                  />
+                )}
+              </>
             ) : (
+              /* Free — first 3, then Pro upgrade wall */
               <>
                 {results.slice(0, FREE_VISIBLE_JOBS).map((job, i) => (
                   <JobCard
@@ -569,6 +598,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
                   <JobsPaywall
                     teaser={results.slice(FREE_VISIBLE_JOBS, FREE_VISIBLE_JOBS + FREE_TEASER_JOBS)}
                     remaining={results.length - FREE_VISIBLE_JOBS}
+                    variant="free"
                   />
                 )}
               </>
@@ -604,7 +634,12 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
   );
 }
 
-function JobsPaywall({ teaser, remaining }: { teaser: LiveJob[]; remaining: number }) {
+function JobsPaywall({ teaser, remaining, variant = "free" }: {
+  teaser: LiveJob[];
+  remaining: number;
+  variant?: "free" | "pro";
+}) {
+  const isPro = variant === "pro";
   return (
     <div className="relative overflow-hidden rounded-2xl">
       <div className="pointer-events-none select-none space-y-3 blur-[3px]" aria-hidden="true">
@@ -619,12 +654,14 @@ function JobsPaywall({ teaser, remaining }: { teaser: LiveJob[]; remaining: numb
         <div className="text-center">
           <p className="font-semibold">{remaining} more live roles</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Upgrade to Pro to see every visa-sponsored job on the board.
+            {isPro
+              ? "Upgrade to Pro Plus for unlimited access to all visa-sponsored jobs."
+              : "Upgrade to Pro to see every visa-sponsored job on the board."}
           </p>
         </div>
         <Link href="/pricing">
           <Button size="sm" className="mt-1 bg-red-600 text-white hover:bg-red-700">
-            Upgrade to Pro <ChevronRight className="ml-1 size-4" />
+            {isPro ? "Upgrade to Pro Plus" : "Upgrade to Pro"} <ChevronRight className="ml-1 size-4" />
           </Button>
         </Link>
       </div>

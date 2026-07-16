@@ -22,18 +22,27 @@ function normalize(raw: string | undefined | null): Tier {
 export function useTier() {
   const { data: session, status } = useSession();
   const jwtTier = normalize(session?.user?.subscriptionTier);
-  const [tier, setTier] = useState<Tier>(jwtTier);
+  // null = DB fetch still in flight (don't show paywalls yet to avoid flash)
+  const [tier, setTier] = useState<Tier | null>(null);
 
   const fetchTier = () =>
     fetch("/api/user/subscription")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (data?.tier) setTier(normalize(data.tier)); })
-      .catch(() => {});
+      .then((data) => { setTier(data?.tier ? normalize(data.tier) : jwtTier); })
+      .catch(() => { setTier(jwtTier); });
 
   useEffect(() => {
+    if (status === "unauthenticated") { setTier("free"); return; }
     if (status !== "authenticated") return;
     fetchTier();
   }, [status]);
 
-  return { tier, isPro: tier !== "free", isProPlus: tier === "pro_plus", refetch: fetchTier };
+  const resolved = tier ?? jwtTier;
+  return {
+    tier: resolved,
+    loading: tier === null && status === "authenticated",
+    isPro: resolved !== "free",
+    isProPlus: resolved === "pro_plus",
+    refetch: fetchTier,
+  };
 }

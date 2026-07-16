@@ -161,8 +161,26 @@ export function PricingCards() {
 
     setLoadingPlan(planId);
 
-    // Existing active subscriber → switch plan in-place to avoid double billing.
+    // Existing active subscriber upgrading to a higher plan → send through
+    // Stripe Checkout so the user sees and confirms the payment step.
+    // Downgrades (e.g. Pro+ → Pro) are handled silently via change-plan
+    // because they don't charge the user immediately.
     if (hasActiveSub && tier !== "free") {
+      const isUpgrade = planId === "pro_plus" && tier === "pro";
+
+      if (isUpgrade) {
+        // Redirect to Checkout for upgrades — user must confirm payment.
+        const result = await startCheckout(planId, yearly);
+        setLoadingPlan(null);
+        if (result.url) {
+          window.location.href = result.url;
+        } else {
+          toast(result.error ?? "Could not start checkout. Please try again.", "error");
+        }
+        return;
+      }
+
+      // Downgrade: switch in-place (no immediate charge, credit applied).
       const res = await fetch("/api/stripe/change-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,10 +191,7 @@ export function PricingCards() {
 
       if (res.ok) {
         await refetchTier();
-        toast(
-          `Switched to ${data.plan ?? planId}. Your billing has been updated.`,
-          "success"
-        );
+        toast(`Switched to ${data.plan ?? planId}. Your billing has been updated.`, "success");
         router.push("/dashboard");
       } else if (res.status === 401) {
         toast("Please sign in to change your plan.", "info");
