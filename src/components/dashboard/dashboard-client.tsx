@@ -36,20 +36,22 @@ export function DashboardClient() {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("overview");
   const { toast } = useToast();
+  const [upgrading, setUpgrading] = useState(searchParams.get("upgraded") === "1");
 
-  // After Stripe redirects here with ?upgraded=1, wait briefly for the
-  // webhook to land then force a JWT re-sync so the tier badge updates
-  // immediately without requiring a sign-out / sign-in cycle.
+  // After Stripe redirects here with ?upgraded=1, call the sync endpoint to
+  // pull the latest subscription from Stripe directly (webhooks don't reach
+  // localhost in dev), then force a JWT re-sync so the tier badge updates.
   useEffect(() => {
     if (searchParams.get("upgraded") !== "1") return;
-    const timer = setTimeout(async () => {
+    (async () => {
+      await fetch("/api/stripe/sync", { method: "POST" }).catch(() => {});
       const newSession = await update();
       router.replace("/dashboard");
       const tier = newSession?.user?.subscriptionTier;
       const planLabel = tier === "pro_plus" ? "Pro Plus" : tier === "pro" ? "Pro" : "your new plan";
+      setUpgrading(false);
       toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
-    }, 2500);
-    return () => clearTimeout(timer);
+    })();
   }, []);
   const { saved } = useSaved();
   const { tier, isPro } = useTier();
@@ -66,6 +68,27 @@ export function DashboardClient() {
     () => SPONSORS.filter((s) => saved.includes(s.id)),
     [saved]
   );
+
+  if (upgrading) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background">
+        <div className="relative flex items-center justify-center">
+          <span className="absolute size-20 animate-ping rounded-full bg-red-600/20" />
+          <span className="relative grid size-16 place-items-center rounded-full bg-gradient-to-br from-red-600 to-zinc-900">
+            <Sparkles className="size-7 text-white" />
+          </span>
+        </div>
+        <div className="text-center">
+          <p className="font-heading text-xl font-bold">Activating your plan…</p>
+          <p className="mt-1 text-sm text-muted-foreground">Hang tight, we're setting everything up for you.</p>
+        </div>
+        <div className="h-1.5 w-48 overflow-hidden rounded-full bg-muted">
+          <div className="h-full w-full animate-[slide_1.4s_ease-in-out_infinite] rounded-full bg-red-600" />
+        </div>
+        <style>{`@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}`}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-10">
