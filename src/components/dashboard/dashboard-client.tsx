@@ -31,30 +31,36 @@ const NAV: { id: Tab; label: string; icon: typeof Search }[] = [
 ];
 
 export function DashboardClient() {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("overview");
   const { toast } = useToast();
   const [upgrading, setUpgrading] = useState(searchParams.get("upgraded") === "1");
 
-  // After Stripe redirects here with ?upgraded=1, call the sync endpoint to
-  // pull the latest subscription from Stripe directly (webhooks don't reach
-  // localhost in dev), then force a JWT re-sync so the tier badge updates.
+  // ?upgraded=1 — Stripe just redirected back after payment. Show loader,
+  // call sync to write the new tier to DB, then hard-reload to /dashboard?welcome=1
+  // so the fresh JWT is picked up by all components from a clean page load.
   useEffect(() => {
     if (searchParams.get("upgraded") !== "1") return;
     (async () => {
-      await fetch("/api/stripe/sync", { method: "POST" }).catch(() => {});
-      const newSession = await update();
-      const tier = newSession?.user?.subscriptionTier;
-      const planLabel = tier === "pro_plus" ? "Pro Plus" : tier === "pro" ? "Pro" : "your new plan";
-      setUpgrading(false);
-      // Force Next.js to re-fetch server components so useTier / session
-      // data reflects the new tier without requiring a sign-out/sign-in.
-      router.replace("/dashboard");
-      router.refresh();
-      toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
+      const syncRes = await fetch("/api/stripe/sync", { method: "POST" })
+        .then((r) => r.json())
+        .catch(() => null);
+      const plan = syncRes?.plan ?? "pro";
+      const encoded = encodeURIComponent(plan);
+      window.location.replace(`/dashboard?welcome=1&plan=${encoded}`);
     })();
+  }, []);
+
+  // ?welcome=1 — arrived after the hard reload with a fresh session.
+  // Show the upgrade toast once, then clean the URL.
+  useEffect(() => {
+    if (searchParams.get("welcome") !== "1") return;
+    const plan = searchParams.get("plan") ?? "pro";
+    const planLabel = plan === "pro_plus" ? "Pro Plus" : plan === "pro" ? "Pro" : "your new plan";
+    router.replace("/dashboard");
+    toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
   }, []);
   const { saved } = useSaved();
   const { tier, isPro } = useTier();
