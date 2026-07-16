@@ -39,8 +39,8 @@ export function DashboardClient() {
   const [upgrading, setUpgrading] = useState(searchParams.get("upgraded") === "1");
 
   // ?upgraded=1 — Stripe just redirected back after payment. Show loader,
-  // call sync to write the new tier to DB, then hard-reload to /dashboard?welcome=1
-  // so the fresh JWT is picked up by all components from a clean page load.
+  // sync the subscription to DB, then hard-reload to a clean URL.
+  // useTier reads tier directly from the DB so the badge updates automatically.
   useEffect(() => {
     if (searchParams.get("upgraded") !== "1") return;
     (async () => {
@@ -48,19 +48,11 @@ export function DashboardClient() {
         .then((r) => r.json())
         .catch(() => null);
       const plan = syncRes?.plan ?? "pro";
-      const encoded = encodeURIComponent(plan);
-      window.location.replace(`/dashboard?welcome=1&plan=${encoded}`);
+      const planLabel = plan === "pro_plus" ? "Pro Plus" : plan === "pro" ? "Pro" : "your new plan";
+      setUpgrading(false);
+      router.replace("/dashboard");
+      toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
     })();
-  }, []);
-
-  // ?welcome=1 — arrived after the hard reload with a fresh session.
-  // Show the upgrade toast once, then clean the URL.
-  useEffect(() => {
-    if (searchParams.get("welcome") !== "1") return;
-    const plan = searchParams.get("plan") ?? "pro";
-    const planLabel = plan === "pro_plus" ? "Pro Plus" : plan === "pro" ? "Pro" : "your new plan";
-    router.replace("/dashboard");
-    toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
   }, []);
   const { saved } = useSaved();
   const { tier, isPro } = useTier();
