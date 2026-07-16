@@ -46,10 +46,13 @@ export function DashboardClient() {
     (async () => {
       await fetch("/api/stripe/sync", { method: "POST" }).catch(() => {});
       const newSession = await update();
-      router.replace("/dashboard");
       const tier = newSession?.user?.subscriptionTier;
       const planLabel = tier === "pro_plus" ? "Pro Plus" : tier === "pro" ? "Pro" : "your new plan";
       setUpgrading(false);
+      // Force Next.js to re-fetch server components so useTier / session
+      // data reflects the new tier without requiring a sign-out/sign-in.
+      router.replace("/dashboard");
+      router.refresh();
       toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
     })();
   }, []);
