@@ -18,12 +18,16 @@ const PRO_UNLOCKED_ROWS = 30;
 
 /** Table body rows for the rankings table — top 3 free, top 30 Pro, all Pro Plus. */
 export function RankingTableRows({ sponsors }: { sponsors: Sponsor[] }) {
-  const { isPro, isProPlus } = useTier();
+  const { isPro, isProPlus, loading } = useTier();
 
   return (
     <>
       {sponsors.map((s, i) => {
-        const locked = isProPlus ? false : isPro ? i >= PRO_UNLOCKED_ROWS : i >= FREE_UNLOCKED_ROWS;
+        // While tier is loading, lock beyond 30 to avoid flash of unlocked content
+        // if a stale JWT claims pro_plus when the actual DB tier is pro.
+        const locked = loading
+          ? i >= PRO_UNLOCKED_ROWS
+          : isProPlus ? false : isPro ? i >= PRO_UNLOCKED_ROWS : i >= FREE_UNLOCKED_ROWS;
 
         return (
           <tr key={s.id} className="group cursor-pointer transition-colors hover:bg-muted/30">

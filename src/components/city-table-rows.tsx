@@ -16,12 +16,14 @@ const PRO_UNLOCKED_ROWS = 30;
 
 /** Table body rows for the city page's top-sponsors table — top 3 free, top 30 Pro, all Pro Plus. */
 export function CityTableRows({ sponsors }: { sponsors: Sponsor[] }) {
-  const { isPro, isProPlus } = useTier();
+  const { isPro, isProPlus, loading } = useTier();
 
   return (
     <>
       {sponsors.map((s, i) => {
-        const locked = isProPlus ? false : isPro ? i >= PRO_UNLOCKED_ROWS : i >= FREE_UNLOCKED_ROWS;
+        const locked = loading
+          ? i >= PRO_UNLOCKED_ROWS
+          : isProPlus ? false : isPro ? i >= PRO_UNLOCKED_ROWS : i >= FREE_UNLOCKED_ROWS;
 
         return (
           <tr key={s.id} className="group transition-colors hover:bg-muted/30">
