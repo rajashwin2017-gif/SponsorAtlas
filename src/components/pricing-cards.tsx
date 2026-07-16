@@ -161,26 +161,12 @@ export function PricingCards() {
 
     setLoadingPlan(planId);
 
-    // Existing active subscriber upgrading to a higher plan → send through
-    // Stripe Checkout so the user sees and confirms the payment step.
-    // Downgrades (e.g. Pro+ → Pro) are handled silently via change-plan
-    // because they don't charge the user immediately.
+    // Existing active subscriber → always switch in-place via change-plan.
+    // Upgrades (Pro→Pro+) charge the prorated difference immediately to the
+    // card on file. Downgrades apply a credit to the next invoice.
+    // We never send existing subscribers through Checkout because that would
+    // create a second subscription and double-bill them.
     if (hasActiveSub && tier !== "free") {
-      const isUpgrade = planId === "pro_plus" && tier === "pro";
-
-      if (isUpgrade) {
-        // Redirect to Checkout for upgrades — user must confirm payment.
-        const result = await startCheckout(planId, yearly);
-        setLoadingPlan(null);
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          toast(result.error ?? "Could not start checkout. Please try again.", "error");
-        }
-        return;
-      }
-
-      // Downgrade: switch in-place (no immediate charge, credit applied).
       const res = await fetch("/api/stripe/change-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -283,13 +269,14 @@ export function PricingCards() {
           const isCurrentPlan = tier === plan.planId;
           const isBusy = loadingPlan === plan.planId;
 
-          // CTA label: "Current plan" | "Switch to X" (existing sub) | "Upgrade to X"
+          // CTA label: "Current plan" | "Upgrade to X" | "Switch to X" | "Upgrade to X"
           let ctaLabel = `Upgrade to ${plan.name}`;
           if (isCurrentPlan) {
             ctaLabel = "Current plan";
           } else if (hasActiveSub && tier !== "free" && plan.planId !== "free") {
-            const isUpgrade = plan.planId === "pro_plus" && tier === "pro";
-            ctaLabel = isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`;
+            const planMinor = plans.find((p) => p.planId === plan.planId)?.monthlyPriceMinor ?? 0;
+            const currentMinor = plans.find((p) => p.planId === tier)?.monthlyPriceMinor ?? 0;
+            ctaLabel = planMinor > currentMinor ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`;
           }
 
           return (
