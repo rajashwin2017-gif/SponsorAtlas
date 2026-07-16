@@ -11,17 +11,17 @@ const TIER_EMOJI: Record<SponsorTier, string> = {
   Platinum: "🏆", Gold: "🥇", Silver: "🥈", Bronze: "🥉", Active: "●", Inactive: "○",
 };
 
-// Free tier gets the top 3 rows fully open; everything else is fully locked.
 const FREE_UNLOCKED_ROWS = 3;
+const PRO_UNLOCKED_ROWS = 30;
 
-/** Table body rows for the city page's top-sponsors table — top 3 free, rest locked unless Pro. */
+/** Table body rows for the city page's top-sponsors table — top 3 free, top 30 Pro, all Pro Plus. */
 export function CityTableRows({ sponsors }: { sponsors: Sponsor[] }) {
-  const { isPro } = useTier();
+  const { isPro, isProPlus } = useTier();
 
   return (
     <>
       {sponsors.map((s, i) => {
-        const locked = !isPro && i >= FREE_UNLOCKED_ROWS;
+        const locked = isProPlus ? false : isPro ? i >= PRO_UNLOCKED_ROWS : i >= FREE_UNLOCKED_ROWS;
 
         return (
           <tr key={s.id} className="group transition-colors hover:bg-muted/30">

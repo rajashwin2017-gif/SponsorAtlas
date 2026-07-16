@@ -632,20 +632,34 @@ export function SearchClient({
             ) : (
               <>
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {displayResults.map((s, i) => (
-                    <div
-                      key={s.id}
-                      style={{ animationDelay: `${Math.min(i % PAGE_SIZE, 7) * 40}ms` }}
-                      className="motion-safe:animate-[fade-up_0.45s_ease-out_both]"
-                    >
-                      <SponsorCard
-                        sponsor={s}
-                        isPro={isPro || (freePreviewIds?.has(s.id) ?? false)}
-                        locked={!isPro && !(freePreviewIds?.has(s.id) ?? false)}
-                      />
-                    </div>
-                  ))}
+                  {displayResults.map((s, i) => {
+                    const freeUnlocked = freePreviewIds?.has(s.id) ?? false;
+                    const proLocked = isPro && !isProPlus && i >= 30;
+                    const freeLocked = !isPro && !freeUnlocked;
+                    return (
+                      <div
+                        key={s.id}
+                        style={{ animationDelay: `${Math.min(i % PAGE_SIZE, 7) * 40}ms` }}
+                        className="motion-safe:animate-[fade-up_0.45s_ease-out_both]"
+                      >
+                        <SponsorCard
+                          sponsor={s}
+                          isPro={!freeLocked && !proLocked}
+                          locked={freeLocked || proLocked}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
+                {isPro && !isProPlus && total > 30 && (
+                  <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/40 px-6 py-8 text-center">
+                    <p className="font-heading text-base font-semibold">You've seen your 30 Pro sponsors</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Upgrade to Pro Plus for unlimited access to all 126,000+ sponsors.</p>
+                    <a href="/pricing" className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                      Upgrade to Pro Plus →
+                    </a>
+                  </div>
+                )}
 
                 {/* Load more / spinner */}
                 {page < totalPages && (
