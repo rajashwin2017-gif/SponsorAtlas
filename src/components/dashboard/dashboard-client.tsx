@@ -49,13 +49,14 @@ export function DashboardClient() {
         .catch(() => null);
       const plan = syncRes?.plan ?? "pro";
       const planLabel = plan === "pro_plus" ? "Pro Plus" : plan === "pro" ? "Pro" : "your new plan";
+      await refetchTier();
       setUpgrading(false);
       router.replace("/dashboard");
       toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
     })();
   }, []);
   const { saved } = useSaved();
-  const { tier, isPro } = useTier();
+  const { tier, isPro, refetch: refetchTier } = useTier();
   const { profile } = useProfile();
   const [alerts, setAlerts] = useState([
     { id: 1, industry: "Tech", city: "London", frequency: "weekly", active: true },

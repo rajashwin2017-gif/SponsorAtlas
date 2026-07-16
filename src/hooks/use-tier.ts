@@ -17,19 +17,23 @@ function normalize(raw: string | undefined | null): Tier {
 
 // Reads subscription tier directly from the DB via /api/user/subscription so
 // it is always up-to-date regardless of JWT cache state. Falls back to the
-// JWT value while the fetch is in flight.
+// JWT value while the fetch is in flight. Call refetch() to re-read instantly
+// (e.g. right after a payment sync completes).
 export function useTier() {
   const { data: session, status } = useSession();
   const jwtTier = normalize(session?.user?.subscriptionTier);
   const [tier, setTier] = useState<Tier>(jwtTier);
 
-  useEffect(() => {
-    if (status !== "authenticated") return;
+  const fetchTier = () =>
     fetch("/api/user/subscription")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data?.tier) setTier(normalize(data.tier)); })
       .catch(() => {});
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    fetchTier();
   }, [status]);
 
-  return { tier, isPro: tier !== "free", isProPlus: tier === "pro_plus" };
+  return { tier, isPro: tier !== "free", isProPlus: tier === "pro_plus", refetch: fetchTier };
 }
