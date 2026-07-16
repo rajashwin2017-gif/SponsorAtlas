@@ -55,10 +55,13 @@ export function RankingTableRows({ sponsors }: { sponsors: Sponsor[] }) {
                   </span>
                   <Link
                     href="/pricing"
-                    aria-label="Upgrade to Pro to unlock this sponsor"
-                    className="absolute inset-0 flex items-center justify-center gap-1.5 rounded-lg bg-card/60 text-xs font-semibold text-red-600 backdrop-blur-[1px] transition-colors hover:bg-card/80"
+                    aria-label="Upgrade to unlock this sponsor"
+                    className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-card/60 text-xs font-semibold text-red-600 backdrop-blur-[1px] transition-colors hover:bg-card/80"
                   >
                     <Lock className="size-3.5" /> Upgrade to unlock
+                    <span className="rounded-full bg-emerald-500 px-1.5 py-0 text-[10px] font-semibold text-white">
+                      {isPro ? "Pro+" : "Pro"}
+                    </span>
                   </Link>
                 </div>
               </td>

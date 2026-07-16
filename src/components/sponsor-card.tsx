@@ -31,7 +31,7 @@ function formatCos(sponsor: Sponsor): string {
   return total!.toLocaleString();
 }
 
-export function SponsorCard({ sponsor, isPro = false, locked = false }: { sponsor: Sponsor; isPro?: boolean; locked?: boolean }) {
+export function SponsorCard({ sponsor, isPro = false, locked = false, lockVariant = "pro" }: { sponsor: Sponsor; isPro?: boolean; locked?: boolean; lockVariant?: "pro" | "pro_plus" }) {
   const { isSaved, toggle } = useSaved();
   const { toast } = useToast();
   const saved = isSaved(sponsor.id);
@@ -93,7 +93,7 @@ export function SponsorCard({ sponsor, isPro = false, locked = false }: { sponso
             <Lock className="size-4" />
           </span>
           <span className="text-xs font-semibold text-foreground">Upgrade to unlock this sponsor</span>
-          <Badge variant="emerald" className="px-1.5 py-0 text-[10px]">Pro</Badge>
+          <Badge variant="emerald" className="px-1.5 py-0 text-[10px]">{lockVariant === "pro_plus" ? "Pro+" : "Pro"}</Badge>
         </Link>
       </div>
     );

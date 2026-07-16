@@ -646,6 +646,7 @@ export function SearchClient({
                           sponsor={s}
                           isPro={!freeLocked && !proLocked}
                           locked={freeLocked || proLocked}
+                          lockVariant={proLocked ? "pro_plus" : "pro"}
                         />
                       </div>
                     );
