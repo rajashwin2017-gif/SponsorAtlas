@@ -11,10 +11,6 @@ const schema = z.object({
   yearly: z.boolean().default(false),
 });
 
-// Changes an existing active subscription's plan or billing interval in-place
-// via stripe.subscriptions.update(). This avoids creating a second subscription
-// (which would double-bill the customer). The webhook's
-// customer.subscription.updated event will fire afterward and sync the DB.
 export async function POST(req: NextRequest) {
   try {
     if (!stripe) {
@@ -38,16 +34,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find the user's current active subscription from the DB — more reliable
-    // than user.stripeSubscriptionId which can be stale for returning subscribers.
     const activeSub = await prisma.subscription.findFirst({
-      where: {
-        userId: sessionUser.id,
-        status: { in: ["active", "trialing"] },
-      },
+      where: { userId: sessionUser.id, status: { in: ["active", "trialing"] } },
       orderBy: { createdAt: "desc" },
     });
-
     if (!activeSub) {
       throw new ApiError(
         "No active subscription found. Please subscribe first via the pricing page.",
@@ -55,15 +45,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch the live Stripe subscription to get the current item ID.
     const stripeSub = await stripe.subscriptions.retrieve(activeSub.stripeSubscriptionId);
     const currentItem = stripeSub.items.data[0];
     if (!currentItem) {
       throw new ApiError("Could not retrieve current subscription details from Stripe.", 500);
     }
 
-    // Upgrades charge the prorated difference immediately.
-    // Downgrades apply a credit to the next invoice.
+    // Resolve both plans from DB. Fail explicitly if either is missing so
+    // isUpgrade never silently defaults to false and skips the payment check.
     const [newPlan, currentPlan] = await Promise.all([
       prisma.plan.findUnique({ where: { planId: plan } }),
       prisma.plan.findFirst({
@@ -76,18 +65,42 @@ export async function POST(req: NextRequest) {
       }),
     ]);
 
-    const isUpgrade = (newPlan?.monthlyPriceMinor ?? 0) > (currentPlan?.monthlyPriceMinor ?? 0);
+    if (!newPlan) {
+      throw new ApiError(`Plan "${plan}" not found. Please contact support.`, 400);
+    }
 
+    const isUpgrade =
+      (newPlan.monthlyPriceMinor ?? 0) > (currentPlan?.monthlyPriceMinor ?? 0);
+
+    // For upgrades, use error_if_incomplete so Stripe atomically rejects the
+    // subscription change if payment fails — no manual rollback needed or safe.
+    // For downgrades, pending_if_incomplete is fine (no immediate charge).
     const updated = await stripe.subscriptions.update(activeSub.stripeSubscriptionId, {
       items: [{ id: currentItem.id, price: newPriceId }],
       proration_behavior: isUpgrade ? "always_invoice" : "create_prorations",
-      // If the proration payment fails, keep the subscription active rather
-      // than immediately canceling — Stripe will retry automatically.
-      payment_behavior: "pending_if_incomplete",
+      payment_behavior: isUpgrade ? "error_if_incomplete" : "pending_if_incomplete",
     });
 
-    // Optimistically update the DB so the billing panel reflects the change
-    // immediately, before the webhook fires.
+    // For upgrades, double-check the proration invoice is actually paid.
+    // We expand latest_invoice on the freshly-fetched subscription (not the
+    // update response) to avoid the race where the update response still
+    // carries the previous invoice ID.
+    if (isUpgrade) {
+      const freshSub = await stripe.subscriptions.retrieve(updated.id, {
+        expand: ["latest_invoice"],
+      });
+      const invoice = freshSub.latest_invoice as import("stripe").Stripe.Invoice | null;
+
+      if (!invoice || invoice.status !== "paid") {
+        // payment_behavior: error_if_incomplete should have already thrown,
+        // but guard here as a second line of defence.
+        throw new ApiError(
+          "Payment for the upgrade could not be processed. Please update your payment method and try again.",
+          402
+        );
+      }
+    }
+
     await prisma.subscription.update({
       where: { stripeSubscriptionId: activeSub.stripeSubscriptionId },
       data: {
@@ -110,7 +123,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send plan-change confirmation email (fire-and-forget — don't block the response).
     sendPlanChangedEmail(user.email, {
       name: user.name,
       oldPlan,

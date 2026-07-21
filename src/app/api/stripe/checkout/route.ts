@@ -35,6 +35,18 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: sessionUser.id } });
 
+    // Block existing subscribers from creating a second subscription via
+    // Checkout — they must use /api/stripe/change-plan instead.
+    const activeSub = await prisma.subscription.findFirst({
+      where: { userId: user.id, status: { in: ["active", "trialing"] } },
+    });
+    if (activeSub) {
+      throw new ApiError(
+        "You already have an active subscription. Use the plan switcher to change your plan.",
+        400
+      );
+    }
+
     // Reuse an existing Stripe customer for this user instead of letting
     // Checkout create a new one each time, so billing history stays unified.
     let customerId = user.stripeCustomerId;
@@ -58,7 +70,7 @@ export async function POST(req: NextRequest) {
       success_url: `${baseUrl}/dashboard?upgraded=1`,
       cancel_url: `${baseUrl}/pricing?cancelled=1`,
       allow_promotion_codes: true,
-      subscription_data: { metadata: { userId: user.id } },
+      subscription_data: { metadata: { userId: user.id, plan } },
     });
 
     return NextResponse.json({ url: checkoutSession.url });

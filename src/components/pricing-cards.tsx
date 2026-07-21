@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Check, Sparkles, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
@@ -122,16 +121,22 @@ async function startCheckout(
   }
 }
 
+interface UpgradeConfirm {
+  planId: string;
+  amountDue: number;
+  currency: string;
+}
+
 export function PricingCards() {
   const { toast } = useToast();
-  const { tier } = useTier();
-  const { update } = useSession();
+  const { tier, refetch: refetchTier } = useTier();
   const router = useRouter();
   const [plans, setPlans] = useState<ApiPlan[]>([]);
   const [subInfo, setSubInfo] = useState<SubInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [yearly, setYearly] = useState(false);
+  const [upgradeConfirm, setUpgradeConfirm] = useState<UpgradeConfirm | null>(null);
 
   useEffect(() => {
     fetch("/api/plans")
@@ -155,6 +160,31 @@ export function PricingCards() {
     subInfo?.status === "trialing" ||
     subInfo?.status === "past_due";
 
+  // Step 2 — execute: called after user confirms the upgrade modal, or
+  // immediately for downgrades.
+  async function executePlanChange(planId: string) {
+    setLoadingPlan(planId);
+    const res = await fetch("/api/stripe/change-plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: planId, yearly }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setLoadingPlan(null);
+    setUpgradeConfirm(null);
+
+    if (res.ok) {
+      await refetchTier();
+      toast(`Switched to ${data.plan ?? planId}. Your billing has been updated.`, "success");
+      router.push("/dashboard");
+    } else if (res.status === 401) {
+      toast("Please sign in to change your plan.", "info");
+      router.push("/login?callbackUrl=/pricing");
+    } else {
+      toast(data.error ?? "Could not switch plan. Please try again.", "error");
+    }
+  }
+
   async function handleCta(planId: string) {
     if (planId === "free") {
       toast("You're on the Free plan. Start searching!", "success");
@@ -163,29 +193,32 @@ export function PricingCards() {
 
     setLoadingPlan(planId);
 
-    // Existing active subscriber → switch plan in-place to avoid double billing.
+    // Existing active subscriber → always switch in-place via change-plan.
+    // For upgrades, first fetch the proration preview so the user sees exactly
+    // what they'll be charged before we mutate anything in Stripe.
     if (hasActiveSub && tier !== "free") {
-      const res = await fetch("/api/stripe/change-plan", {
+      // Step 1 — preview: find out if this is an upgrade and how much is due.
+      const preview = await fetch("/api/stripe/change-plan/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId, yearly }),
-      });
-      const data = await res.json().catch(() => ({}));
+      }).then((r) => r.json()).catch(() => null);
+
       setLoadingPlan(null);
 
-      if (res.ok) {
-        await update(); // refresh JWT so tier badge updates immediately
-        toast(
-          `Switched to ${data.plan ?? planId}. Your billing has been updated.`,
-          "success"
-        );
-        router.push("/dashboard");
-      } else if (res.status === 401) {
-        toast("Please sign in to change your plan.", "info");
-        router.push("/login?callbackUrl=/pricing");
-      } else {
-        toast(data.error ?? "Could not switch plan. Please try again.", "error");
+      if (!preview) {
+        toast("Could not calculate upgrade cost. Please try again.", "error");
+        return;
       }
+
+      if (preview.isUpgrade && preview.amountDue > 0) {
+        // Show confirmation modal — do NOT charge yet.
+        setUpgradeConfirm({ planId, amountDue: preview.amountDue, currency: preview.currency });
+        return;
+      }
+
+      // Downgrade (or £0 proration) — execute immediately, no confirmation needed.
+      await executePlanChange(planId);
       return;
     }
 
@@ -270,13 +303,14 @@ export function PricingCards() {
           const isCurrentPlan = tier === plan.planId;
           const isBusy = loadingPlan === plan.planId;
 
-          // CTA label: "Current plan" | "Switch to X" (existing sub) | "Upgrade to X"
+          // CTA label: "Current plan" | "Upgrade to X" | "Switch to X" | "Upgrade to X"
           let ctaLabel = `Upgrade to ${plan.name}`;
           if (isCurrentPlan) {
             ctaLabel = "Current plan";
           } else if (hasActiveSub && tier !== "free" && plan.planId !== "free") {
-            const isUpgrade = plan.planId === "pro_plus" && tier === "pro";
-            ctaLabel = isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`;
+            const planMinor = plans.find((p) => p.planId === plan.planId)?.monthlyPriceMinor ?? 0;
+            const currentMinor = plans.find((p) => p.planId === tier)?.monthlyPriceMinor ?? 0;
+            ctaLabel = planMinor > currentMinor ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`;
           }
 
           return (
@@ -354,6 +388,43 @@ export function PricingCards() {
           );
         })}
       </div>
+
+      {/* Upgrade confirmation modal — shown before any Stripe mutation */}
+      {upgradeConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-xl">
+            <h2 className="font-heading text-lg font-bold">Confirm upgrade</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You'll be charged{" "}
+              <span className="font-semibold text-foreground">
+                {formatGBP(upgradeConfirm.amountDue)}
+              </span>{" "}
+              now — the prorated difference for the rest of your billing period.
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              This will be charged to your card on file.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setUpgradeConfirm(null)}
+                disabled={!!loadingPlan}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="gradient"
+                className="flex-1"
+                disabled={!!loadingPlan}
+                onClick={() => executePlanChange(upgradeConfirm.planId)}
+              >
+                {loadingPlan ? <><Loader2 className="size-4 animate-spin" /> Processing…</> : "Confirm & pay"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

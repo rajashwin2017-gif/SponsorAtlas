@@ -7,16 +7,16 @@ import { useSession } from "next-auth/react";
 import {
   Search, Heart, Zap, BellRing, Settings, Sparkles, ArrowRight, Bookmark,
   TrendingUp, Activity, Plus, Trash2, Gauge, Crown, Star, Lock, CheckCircle,
-  ChevronRight, Briefcase, Building2, BarChart3,
+  ChevronRight, Briefcase, BarChart3,
 } from "lucide-react";
 import { useSaved } from "@/hooks/use-saved";
-import { useTier, TIER_LABEL } from "@/hooks/use-tier";
+import { useTier, type Tier } from "@/hooks/use-tier";
 import { useProfile } from "@/hooks/use-profile";
 import { SPONSORS } from "@/lib/mock-data";
 import { SponsorCard } from "@/components/sponsor-card";
 import { BillingPanel } from "@/components/dashboard/billing-panel";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { INDUSTRY_LIST, CITY_LIST } from "@/lib/mock-data";
@@ -54,30 +54,37 @@ const TIER_CONFIG = {
 } as const;
 
 export function DashboardClient() {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("overview");
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (searchParams.get("upgraded") !== "1") return;
-    const timer = setTimeout(async () => {
-      const newSession = await update();
-      router.replace("/dashboard");
-      const tier = newSession?.user?.subscriptionTier;
-      const planLabel = tier === "pro_plus" ? "Pro+" : tier === "pro" ? "Pro" : "your new plan";
-      toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [upgrading, setUpgrading] = useState(searchParams.get("upgraded") === "1");
 
   const { saved } = useSaved();
-  const { tier, isPro, isProPlus } = useTier();
+  const { tier, isPro, isProPlus, loading: tierLoading, refetch: refetchTier } = useTier();
   const { profile } = useProfile();
   const [alerts, setAlerts] = useState([
     { id: 1, industry: "Tech", city: "London", frequency: "weekly", active: true },
   ]);
+
+  // ?upgraded=1 — Stripe just redirected back after payment. Show loader,
+  // sync the subscription to DB, then hard-reload to a clean URL.
+  // useTier reads tier directly from the DB so the badge updates automatically.
+  useEffect(() => {
+    if (searchParams.get("upgraded") !== "1") return;
+    (async () => {
+      const syncRes = await fetch("/api/stripe/sync", { method: "POST" })
+        .then((r) => r.json())
+        .catch(() => null);
+      const plan = syncRes?.plan ?? "pro";
+      const planLabel = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "your new plan";
+      await refetchTier();
+      setUpgrading(false);
+      router.replace("/dashboard");
+      toast(`Your account has been upgraded! Welcome to ${planLabel}.`, "success");
+    })();
+  }, []);
 
   const displayName = session?.user?.name ?? session?.user?.email?.split("@")[0] ?? "there";
   const checksUsed = profile?.monthlyChecksUsed ?? 0;
@@ -85,10 +92,36 @@ export function DashboardClient() {
   const tierConfig = TIER_CONFIG[tier];
   const TierIcon = tierConfig.icon;
 
+  // While the DB tier fetch is in flight, treat the account as the most
+  // restrictive tier so a stale JWT can't briefly unlock paid features.
+  const effectiveIsPro = tierLoading ? false : isPro;
+  const effectiveIsProPlus = tierLoading ? false : isProPlus;
+
   const savedSponsors = useMemo(
     () => SPONSORS.filter((s) => saved.includes(s.id)),
     [saved]
   );
+
+  if (upgrading) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background">
+        <div className="relative flex items-center justify-center">
+          <span className="absolute size-20 animate-ping rounded-full bg-red-600/20" />
+          <span className="relative grid size-16 place-items-center rounded-full bg-gradient-to-br from-red-600 to-zinc-900">
+            <Sparkles className="size-7 text-white" />
+          </span>
+        </div>
+        <div className="text-center">
+          <p className="font-heading text-xl font-bold">Activating your plan…</p>
+          <p className="mt-1 text-sm text-muted-foreground">Hang tight, we're setting everything up for you.</p>
+        </div>
+        <div className="h-1.5 w-48 overflow-hidden rounded-full bg-muted">
+          <div className="h-full w-full animate-[slide_1.4s_ease-in-out_infinite] rounded-full bg-red-600" />
+        </div>
+        <style>{`@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}`}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50/50">
@@ -108,10 +141,14 @@ export function DashboardClient() {
                   <p className="truncate font-semibold text-sm text-zinc-900">{displayName}</p>
                   <span className={cn(
                     "inline-flex items-center gap-1 mt-1 text-xs font-semibold px-2 py-0.5 rounded-full border",
-                    tierConfig.badgeCls
+                    tierLoading ? "bg-zinc-100 text-zinc-400 border-zinc-200" : tierConfig.badgeCls
                   )}>
-                    {TierIcon && <TierIcon className="size-3" />}
-                    {tierConfig.label} Plan
+                    {tierLoading ? "···" : (
+                      <>
+                        {TierIcon && <TierIcon className="size-3" />}
+                        {tierConfig.label} Plan
+                      </>
+                    )}
                   </span>
                 </div>
               </div>
@@ -143,11 +180,11 @@ export function DashboardClient() {
 
             {/* Tier status card */}
             <TierStatusCard
-              tier={tier}
+              tierLoading={tierLoading}
               checksUsed={checksUsed}
               checksLimit={checksLimit}
-              isPro={isPro}
-              isProPlus={isProPlus}
+              isPro={effectiveIsPro}
+              isProPlus={effectiveIsProPlus}
             />
           </aside>
 
@@ -157,8 +194,9 @@ export function DashboardClient() {
               <Overview
                 savedCount={savedSponsors.length}
                 alerts={alerts.length}
-                isPro={isPro}
-                isProPlus={isProPlus}
+                isPro={effectiveIsPro}
+                isProPlus={effectiveIsProPlus}
+                tierLoading={tierLoading}
                 tier={tier}
                 displayName={displayName}
                 checksUsed={checksUsed}
@@ -176,14 +214,14 @@ export function DashboardClient() {
                   />
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {savedSponsors.map((s) => <SponsorCard key={s.id} sponsor={s} isPro={isPro} />)}
+                    {savedSponsors.map((s) => <SponsorCard key={s.id} sponsor={s} isPro={effectiveIsPro} />)}
                   </div>
                 )}
               </Section>
             )}
             {tab === "fit" && (
               <Section title="Fit Checks" subtitle="AI Sponsorship Fit history">
-                {!isPro ? (
+                {!effectiveIsPro ? (
                   <LockedFeature
                     icon={<Zap className="size-6 text-red-600" />}
                     title="AI Fit Scoring"
@@ -202,7 +240,7 @@ export function DashboardClient() {
             )}
             {tab === "alerts" && (
               <Section title="Opportunity Alerts" subtitle="Get notified when matching sponsors hire">
-                {!isPro ? (
+                {!effectiveIsPro ? (
                   <LockedFeature
                     icon={<BellRing className="size-6 text-red-600" />}
                     title="Sponsor Alerts"
@@ -229,14 +267,24 @@ export function DashboardClient() {
 // ── Tier Status Sidebar Card ─────────────────────────────────────────────────
 
 function TierStatusCard({
-  tier, checksUsed, checksLimit, isPro, isProPlus,
+  tierLoading, checksUsed, checksLimit, isPro, isProPlus,
 }: {
-  tier: "free" | "pro" | "pro_plus";
+  tierLoading: boolean;
   checksUsed: number;
   checksLimit: number;
   isPro: boolean;
   isProPlus: boolean;
 }) {
+  if (tierLoading) {
+    return (
+      <div className="rounded-xl border border-zinc-200 bg-white p-4 space-y-3 animate-pulse">
+        <div className="h-3 w-24 rounded bg-zinc-100" />
+        <div className="h-2 w-full rounded-full bg-zinc-100" />
+        <div className="h-8 w-full rounded-lg bg-zinc-100" />
+      </div>
+    );
+  }
+
   if (isProPlus) {
     return (
       <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4">
@@ -315,10 +363,10 @@ function TierStatusCard({
 // ── Overview Tab ─────────────────────────────────────────────────────────────
 
 function Overview({
-  savedCount, alerts, isPro, isProPlus, tier, displayName, checksUsed, checksLimit,
+  savedCount, alerts, isPro, isProPlus, tierLoading, tier, displayName, checksUsed, checksLimit,
 }: {
-  savedCount: number; alerts: number; isPro: boolean; isProPlus: boolean;
-  tier: "free" | "pro" | "pro_plus"; displayName: string;
+  savedCount: number; alerts: number; isPro: boolean; isProPlus: boolean; tierLoading: boolean;
+  tier: Tier; displayName: string;
   checksUsed: number; checksLimit: number;
 }) {
   const tierConfig = TIER_CONFIG[tier];
@@ -329,7 +377,7 @@ function Overview({
       {/* Welcome banner */}
       <div className={cn(
         "rounded-xl border bg-gradient-to-r p-6 relative overflow-hidden",
-        tierConfig.bannerCls
+        tierLoading ? "from-zinc-50 to-zinc-100 border-zinc-200" : tierConfig.bannerCls
       )}>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_100%_0%,rgba(220,38,38,0.08),transparent)]" aria-hidden />
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -342,17 +390,21 @@ function Overview({
           </div>
           <div className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold shrink-0 self-start",
-            tierConfig.badgeCls
+            tierLoading ? "bg-zinc-100 text-zinc-400 border-zinc-200" : tierConfig.badgeCls
           )}>
-            {TierIcon && <TierIcon className="size-4" />}
-            {tierConfig.label} Plan
+            {tierLoading ? "···" : (
+              <>
+                {TierIcon && <TierIcon className="size-4" />}
+                {tierConfig.label} Plan
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tier comparison banner — only for non-Pro+ */}
       {!isProPlus && (
-        <TierComparisonBanner tier={tier} isPro={isPro} />
+        <TierComparisonBanner tier={tier} isPro={isPro} tierLoading={tierLoading} />
       )}
 
       {/* Stat tiles */}
@@ -361,7 +413,6 @@ function Overview({
           icon={<Heart className="size-4 text-red-600" />}
           label="Saved sponsors"
           value={savedCount}
-          href="/dashboard"
         />
         <StatTile
           icon={<Zap className="size-4 text-amber-600" />}
@@ -410,12 +461,12 @@ function Overview({
 
 // ── Tier Comparison Banner ────────────────────────────────────────────────────
 
-function TierComparisonBanner({ tier, isPro }: { tier: "free" | "pro" | "pro_plus"; isPro: boolean }) {
+function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro: boolean; tierLoading: boolean }) {
   const plans = [
     {
       name: "Free",
       price: "£0",
-      current: tier === "free",
+      current: !tierLoading && tier === "free",
       features: ["5 sponsor searches/mo", "Basic sponsor info", "Job board access"],
       locked: ["CoS data", "AI fit scoring", "Hiring signals", "Alerts"],
       cta: null,
@@ -426,7 +477,7 @@ function TierComparisonBanner({ tier, isPro }: { tier: "free" | "pro" | "pro_plu
     {
       name: "Pro",
       price: "£19",
-      current: tier === "pro",
+      current: !tierLoading && tier === "pro",
       features: ["Unlimited searches", "Full CoS data", "AI fit scoring", "Weekly alerts", "Hiring signals"],
       locked: ["Priority support", "API access"],
       cta: "/pricing",
@@ -437,7 +488,7 @@ function TierComparisonBanner({ tier, isPro }: { tier: "free" | "pro" | "pro_plu
     {
       name: "Pro+",
       price: "£39",
-      current: tier === "pro_plus",
+      current: !tierLoading && tier === "pro_plus",
       features: ["Everything in Pro", "Daily alerts", "Priority support", "API access", "Early features"],
       locked: [],
       cta: "/pricing",
@@ -598,9 +649,9 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
   );
 }
 
-function StatTile({ icon, label, value, href, locked, lockedTier }: {
+function StatTile({ icon, label, value, locked, lockedTier }: {
   icon: React.ReactNode; label: string; value: number;
-  href?: string; locked?: boolean; lockedTier?: string;
+  locked?: boolean; lockedTier?: string;
 }) {
   return (
     <div className={cn(

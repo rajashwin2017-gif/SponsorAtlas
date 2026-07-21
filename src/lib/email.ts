@@ -176,6 +176,8 @@ export async function sendSubscriptionEmail(
     interval: "month" | "year";
     amountMinor: number;
     currency: string;
+    invoiceUrl?: string | null;
+    invoicePdfUrl?: string | null;
   }
 ) {
   const planLabel = PLAN_LABEL[opts.plan] ?? opts.plan;
@@ -193,6 +195,25 @@ export async function sendSubscriptionEmail(
         </td><td style="padding:5px 0 5px 10px;font-size:14px;color:#3f3f46;">${f}</td></tr>`
     )
     .join("");
+
+  const invoiceSection = opts.invoiceUrl || opts.invoicePdfUrl
+    ? `<div style="background:#fafafa;border:1px solid #e4e4e7;border-radius:8px;padding:18px 24px;margin-bottom:28px;">
+        <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:0.8px;">Your invoice</p>
+        <table cellpadding="0" cellspacing="0" role="presentation" width="100%">
+          <tr>
+            <td style="font-size:14px;color:#3f3f46;vertical-align:middle;">
+              <strong>${currencySymbol}${amount}</strong> · ${planLabel} · billed ${intervalLabel}
+            </td>
+            <td style="text-align:right;vertical-align:middle;">
+              ${opts.invoiceUrl ? `<a href="${opts.invoiceUrl}" style="display:inline-block;margin-left:8px;font-size:13px;font-weight:600;color:#dc2626;text-decoration:none;border:1px solid #dc2626;border-radius:6px;padding:5px 12px;">View</a>` : ""}
+              ${opts.invoicePdfUrl ? `<a href="${opts.invoicePdfUrl}" style="display:inline-block;margin-left:8px;font-size:13px;font-weight:600;color:#dc2626;text-decoration:none;border:1px solid #dc2626;border-radius:6px;padding:5px 12px;">Download PDF</a>` : ""}
+            </td>
+          </tr>
+        </table>
+      </div>`
+    : "";
+
+  const exploreUrl = `${APP_URL}/dashboard?upgraded=1`;
 
   const html = emailBase(
     `You're now on ${BRAND} ${planLabel} — here's what you've unlocked`,
@@ -216,8 +237,10 @@ export async function sendSubscriptionEmail(
       </table>
     </div>
 
+    ${invoiceSection}
+
     <div style="text-align:center;margin-bottom:28px;">
-      ${btn("Go to my dashboard →", `${APP_URL}/dashboard`)}
+      ${btn("Explore now →", exploreUrl)}
     </div>
 
     ${divider()}

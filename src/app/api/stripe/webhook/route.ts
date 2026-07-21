@@ -207,12 +207,28 @@ export async function POST(req: NextRequest) {
                 : (session as any).amount_subtotal) ??
               0;
 
+            // Fetch the latest invoice so we can include View/PDF links in the email.
+            let invoiceUrl: string | null = null;
+            let invoicePdfUrl: string | null = null;
+            const latestInvoiceId = (subscription as any).latest_invoice;
+            if (typeof latestInvoiceId === "string") {
+              try {
+                const invoice = await stripe.invoices.retrieve(latestInvoiceId);
+                invoiceUrl = invoice.hosted_invoice_url ?? null;
+                invoicePdfUrl = invoice.invoice_pdf ?? null;
+              } catch {
+                // Non-fatal — email sends without invoice links
+              }
+            }
+
             await sendSubscriptionEmail(user.email, {
               name: user.name,
               plan,
               interval,
               amountMinor,
               currency: subscription.currency ?? "gbp",
+              invoiceUrl,
+              invoicePdfUrl,
             }).catch((err) =>
               console.error("Failed to send subscription email:", err)
             );
