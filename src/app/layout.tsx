@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { CustomCursor } from "@/components/custom-cursor";
 import { AuthSessionProvider } from "@/components/session-provider";
 import { DevTierUnlock } from "@/components/dev-tier-unlock";
+import { ChunkErrorRecovery } from "@/components/chunk-error-recovery";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${mono.variable} ${ebGaramond.variable} font-sans`}>
         {/* Dev-only: auto-unlock Pro+ for local testing. Never runs in production. */}
         {process.env.NODE_ENV !== "production" && <DevTierUnlock />}
+        <ChunkErrorRecovery />
         <AuthSessionProvider>
           <ToastProvider>
             <CustomCursor />
