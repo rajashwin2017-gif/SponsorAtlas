@@ -369,6 +369,11 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
           <li className="flex items-center gap-1.5"><RefreshCw className="size-3.5 text-red-600" /> Re-checked hourly</li>
           <li className="flex items-center gap-1.5"><Zap className="size-3.5 text-red-600" /> Straight from employers&rsquo; systems</li>
         </ul>
+
+        {/* Sponsorship disclaimer */}
+        <p className="mx-auto mt-5 max-w-2xl rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-center text-xs leading-relaxed text-muted-foreground">
+          <span className="font-medium text-foreground">Heads up:</span> These roles are posted by companies that hold a UK Skilled Worker sponsor licence — but that doesn&rsquo;t guarantee every individual job will offer visa sponsorship. Always confirm sponsorship availability directly with the employer before applying.
+        </p>
       </header>
 
       {/* ── Featured industry previews (free, no filters active) ── */}

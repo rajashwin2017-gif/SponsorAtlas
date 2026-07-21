@@ -42,10 +42,17 @@ export interface LiveJob {
 // Keep only roles physically in the UK (or explicitly UK-remote). This is a
 // UK visa-sponsorship board, so non-UK offices of these employers are excluded.
 const UK_LOCATION =
-  /(united kingdom|\bu\.?k\.?\b|\bg\.?b\.?\b|\bengland\b|scotland|wales|northern ireland|london|manchester|edinburgh|glasgow|birmingham|leeds|bristol|cambridge|oxford|reading|sheffield|liverpool|nottingham|cardiff|belfast|aberdeen|airdrie|macclesfield|leigh on sea)/i;
+  /(united kingdom|\bu\.?k\.?\b|\bg\.?b\.?\b|\bengland\b|\bscotland\b|\bwales\b|northern ireland|\blondon\b|\bmanchester\b|\bedinburgh\b|\bglasgow\b|\bbirmingham\b|\bleeds\b|\bbristol\b|\bcambridge\b|\boxford\b|\breading\b|\bsheffield\b|\bliverpool\b|\bnottingham\b|\bcardiff\b|\bbelfast\b|\baberdeen\b|\bairdrie\b|\bmacclesfield\b|leigh on sea)/i;
+
+// Non-UK country / US-state patterns that conclusively rule out a UK location.
+// Checked BEFORE the UK regex so e.g. "Cambridge, MA, United States" is rejected
+// even though "Cambridge" appears in the UK allow-list.
+const NON_UK_LOCATION =
+  /\b(united states|usa|\bu\.s\.a\.?\b|canada|australia|new zealand|india|germany|france|netherlands|singapore|hong kong|dubai|uae|ireland(?!\s*(,|$))|republic of ireland|new york|california|texas|illinois|massachusetts|washington|florida|georgia|virginia|ohio|michigan|pennsylvania|new jersey|colorado|arizona|minnesota|oregon|wisconsin|connecticut|maryland|missouri|north carolina|south carolina|indiana|tennessee|kentucky|nevada|utah|iowa|arkansas|mississippi|kansas|new mexico|nebraska|west virginia|idaho|new hampshire|maine|rhode island|montana|delaware|north dakota|south dakota|alaska|vermont|wyoming|hawaii|\bny\b|\bca\b|\btx\b|\bma\b|\bwa\b|\bfl\b|\bga\b|\bva\b|\boh\b|\bmi\b|\bpa\b|\bnj\b|\bco\b|\baz\b|\bmn\b|\bor\b|\bwi\b|\bct\b|\bmd\b|\bmo\b|\bnc\b|\bsc\b|\bin\b|\btn\b|\bky\b|\bnv\b|\but\b|\bia\b|\bar\b|\bks\b|\bnm\b|\bne\b|\bwv\b|\bid\b|\bnh\b|\bme\b|\bri\b|\bmt\b|\bde\b|\bnd\b|\bsd\b|\bak\b|\bvt\b|\bwy\b|\bhi\b)\b/i;
 
 function isUkLocation(loc: string): boolean {
   if (!loc) return false;
+  if (NON_UK_LOCATION.test(loc)) return false;
   return UK_LOCATION.test(loc);
 }
 
