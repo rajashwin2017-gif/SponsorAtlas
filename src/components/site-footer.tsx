@@ -53,9 +53,9 @@ export function SiteFooter() {
                 United Kingdom
               </p>
               <p>
-                <a href="mailto:hello@thesponsorfinder.app" className="flex items-center gap-2.5 font-medium text-white transition-colors hover:text-red-400">
+                <a href="mailto:support@thesponsorfinder.com" className="flex items-center gap-2.5 font-medium text-white transition-colors hover:text-red-400">
                   <Mail className="size-4 shrink-0 text-red-500" aria-hidden="true" />
-                  hello@thesponsorfinder.app
+                  support@thesponsorfinder.com
                 </a>
               </p>
             </address>
