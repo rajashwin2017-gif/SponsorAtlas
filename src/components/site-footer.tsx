@@ -9,7 +9,7 @@ const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/search", label: "Sponsor Search" },
   { href: "/jobs", label: "Job Board" },
-  { href: "/soc-codes", label: "SOC Codes" },
+  { href: "/soc-codes", label: "Job Codes" },
   { href: "/pricing", label: "Pricing" },
 ];
 
