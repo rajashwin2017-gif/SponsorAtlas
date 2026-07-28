@@ -20,12 +20,11 @@ import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { INDUSTRY_LIST, CITY_LIST } from "@/lib/mock-data";
 
-type Tab = "overview" | "saved" | "fit" | "alerts" | "settings";
+type Tab = "overview" | "saved" | "alerts" | "settings";
 
 const NAV: { id: Tab; label: string; icon: typeof Search }[] = [
   { id: "overview", label: "Overview", icon: Gauge },
   { id: "saved", label: "Saved Sponsors", icon: Heart },
-  { id: "fit", label: "Fit Checks", icon: Zap },
   { id: "alerts", label: "Alerts", icon: BellRing },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -211,25 +210,6 @@ export function DashboardClient() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     {savedSponsors.map((s) => <SponsorCard key={s.id} sponsor={s} isPro={effectiveIsPro} />)}
                   </div>
-                )}
-              </Section>
-            )}
-            {tab === "fit" && (
-              <Section title="Fit Checks" subtitle="AI Sponsorship Fit history">
-                {!effectiveIsPro ? (
-                  <LockedFeature
-                    icon={<Zap className="size-6 text-red-600" />}
-                    title="AI Fit Scoring"
-                    body="Get an instant score showing how well your profile matches any sponsor's hiring history."
-                    requiredTier="Pro"
-                  />
-                ) : (
-                  <EmptyState
-                    icon={<Zap className="size-7" />}
-                    title="No fit checks run yet"
-                    body="Open any sponsor and run an AI Sponsorship Fit to score your profile."
-                    cta={{ href: "/search", label: "Find a sponsor" }}
-                  />
                 )}
               </Section>
             )}
