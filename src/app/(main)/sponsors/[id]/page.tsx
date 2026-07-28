@@ -73,7 +73,7 @@ function MetricCard({ label, value, icon, hint, valueColor }: { label: string; v
   );
 }
 
-function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 py-2.5">
       <dt className="flex items-center gap-1.5 text-sm text-muted-foreground">{icon} {label}</dt>
@@ -327,8 +327,8 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
               )}
               <Fact
                 icon={<CalendarClock className="size-3.5" />}
-                label="On register since"
-                value={new Date(sponsor.addedDate).toLocaleDateString("en-GB", { year: "numeric", month: "short" })}
+                label="On register"
+                value={<ShieldCheck className="size-4 text-green-500" />}
               />
               <Fact
                 icon={<Target className="size-3.5" />}

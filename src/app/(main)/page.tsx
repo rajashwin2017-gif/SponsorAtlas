@@ -33,7 +33,7 @@ export default function LandingPage() {
             {/* Left: copy + search */}
             <div>
               <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-red-600">
-                <span className="h-px w-6 bg-red-600" aria-hidden="true" /> The UK&apos;s Trusted Platform
+                The UK&apos;s Trusted Platform
               </p>
               <h1 className="mt-4 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
                 Find UK Employers That{" "}

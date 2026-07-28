@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import type { Sponsor } from "@/lib/types";
 
 // Backed by the SavedSponsor table via /api/user/saved-sponsors. Returns
 // null from toggle() when the caller isn't signed in, so consumers can
@@ -9,18 +10,25 @@ import { useSession } from "next-auth/react";
 export function useSaved() {
   const { status } = useSession();
   const [saved, setSaved] = useState<string[]>([]);
+  const [savedSponsors, setSavedSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status !== "authenticated") {
       setSaved([]);
+      setSavedSponsors([]);
       setLoading(false);
       return;
     }
     setLoading(true);
-    fetch("/api/user/saved-sponsors")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((ids: string[]) => setSaved(ids))
+    Promise.all([
+      fetch("/api/user/saved-sponsors").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/user/saved-sponsors?full=1").then((r) => (r.ok ? r.json() : [])),
+    ])
+      .then(([ids, sponsors]: [string[], Sponsor[]]) => {
+        setSaved(ids);
+        setSavedSponsors(sponsors);
+      })
       .finally(() => setLoading(false));
   }, [status]);
 
@@ -34,7 +42,16 @@ export function useSaved() {
       });
       if (!res.ok) return currentlySaved;
 
-      setSaved((prev) => (currentlySaved ? prev.filter((x) => x !== id) : [...prev, id]));
+      if (currentlySaved) {
+        setSaved((prev) => prev.filter((x) => x !== id));
+        setSavedSponsors((prev) => prev.filter((s) => s.id !== id));
+      } else {
+        setSaved((prev) => [...prev, id]);
+        // Fetch the full sponsor object for the newly saved sponsor
+        fetch(`/api/user/saved-sponsors?full=1`)
+          .then((r) => (r.ok ? r.json() : []))
+          .then((sponsors: Sponsor[]) => setSavedSponsors(sponsors));
+      }
       return !currentlySaved;
     },
     [saved, status]
@@ -42,5 +59,5 @@ export function useSaved() {
 
   const isSaved = useCallback((id: string) => saved.includes(id), [saved]);
 
-  return { saved, toggle, isSaved, loading };
+  return { saved, savedSponsors, toggle, isSaved, loading };
 }

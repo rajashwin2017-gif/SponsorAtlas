@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -12,7 +12,6 @@ import {
 import { useSaved } from "@/hooks/use-saved";
 import { useTier, type Tier } from "@/hooks/use-tier";
 import { useProfile } from "@/hooks/use-profile";
-import { SPONSORS } from "@/lib/mock-data";
 import { SponsorCard } from "@/components/sponsor-card";
 import { BillingPanel } from "@/components/dashboard/billing-panel";
 import { buttonVariants } from "@/components/ui/button";
@@ -61,7 +60,7 @@ export function DashboardClient() {
   const { toast } = useToast();
   const [upgrading, setUpgrading] = useState(searchParams.get("upgraded") === "1");
 
-  const { saved } = useSaved();
+  const { saved, savedSponsors } = useSaved();
   const { tier, isPro, isProPlus, loading: tierLoading, refetch: refetchTier } = useTier();
   const { profile } = useProfile();
   const [alerts, setAlerts] = useState([
@@ -78,7 +77,7 @@ export function DashboardClient() {
         .then((r) => r.json())
         .catch(() => null);
       const plan = syncRes?.plan ?? "pro";
-      const planLabel = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "your new plan";
+      const planLabel = plan === "pro_plus" ? "Pro Plus+" : plan === "pro" ? "Pro" : "your new plan";
       await refetchTier();
       setUpgrading(false);
       router.replace("/dashboard");
@@ -97,10 +96,6 @@ export function DashboardClient() {
   const effectiveIsPro = tierLoading ? false : isPro;
   const effectiveIsProPlus = tierLoading ? false : isProPlus;
 
-  const savedSponsors = useMemo(
-    () => SPONSORS.filter((s) => saved.includes(s.id)),
-    [saved]
-  );
 
   if (upgrading) {
     return (
@@ -467,7 +462,7 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
       name: "Free",
       price: "£0",
       current: !tierLoading && tier === "free",
-      features: ["Preview 3 top sponsors per industry", "Healthcare, Tech & Hospitality sectors", "Top 3 live jobs per industry", "Basic company information"],
+      features: ["Preview 3 top sponsors per industry", "Healthcare, Technology & Hospitality sectors", "Top 3 live jobs per featured industry", "Basic company information", "Industry & location filters", "Publicly available sponsor info"],
       locked: [],
       cta: null,
       cls: "border-zinc-200 bg-zinc-50",
@@ -475,19 +470,19 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
     },
     {
       name: "Pro",
-      price: "£19.99",
+      price: "£17.99",
       current: !tierLoading && tier === "pro",
-      features: ["30 sponsors per industry, all sectors", "Full profiles & hiring signals", "Unlimited search & filters", "Live job listings", "Save sponsors & jobs", "Email alerts"],
+      features: ["30 unlocked sponsors per industry across all sectors", "Full sponsor profiles & hiring signals", "Unlimited search with advanced filters", "Live job listings direct from each employer", "Save favourite sponsors & jobs", "Email job alerts & notifications", "Employer activity updates & sponsorship insights"],
       locked: [],
       cta: "/pricing",
       cls: "border-red-200 bg-white ring-2 ring-red-100",
       headerCls: "bg-red-600 text-white",
     },
     {
-      name: "Pro+",
-      price: "£29.99",
+      name: "Pro Plus+",
+      price: "£19.99",
       current: !tierLoading && tier === "pro_plus",
-      features: ["All 126,000+ sponsors unlocked", "CSV export", "Priority job alerts", "AI recommendations", "Priority support", "Early access"],
+      features: ["Unlimited access to all 126,000+ sponsors", "CSV export of search results", "Priority job alerts", "AI-powered employer recommendations", "Application tracking tools", "Priority customer support", "Early access to new features"],
       locked: [],
       cta: "/pricing",
       cls: "border-amber-200 bg-white",
@@ -528,9 +523,9 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
               {plan.cta && !plan.current && (
                 <Link href={plan.cta} className={cn(
                   "mt-2 flex items-center justify-center gap-1 w-full rounded-md py-1.5 text-xs font-bold transition-colors",
-                  plan.name === "Pro+" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90" : "bg-red-600 text-white hover:bg-red-700"
+                  plan.name === "Pro Plus+" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90" : "bg-red-600 text-white hover:bg-red-700"
                 )}>
-                  {plan.name === "Pro+" ? <Crown className="size-3" /> : <Star className="size-3" />}
+                  {plan.name === "Pro Plus+" ? <Crown className="size-3" /> : <Star className="size-3" />}
                   Upgrade
                 </Link>
               )}

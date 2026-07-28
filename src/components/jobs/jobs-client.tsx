@@ -348,18 +348,12 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
         )}
 
         {/* Trust strip */}
-        <dl className="mx-auto mt-9 grid max-w-xl grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card/60 py-4 text-center backdrop-blur-sm">
-          <div className="px-2">
-            <dt className="font-display text-2xl text-foreground tabular sm:text-3xl">{jobs.length.toLocaleString()}</dt>
-            <dd className="eyebrow mt-1 normal-case tracking-normal">Live UK roles</dd>
+        <dl className="mx-auto mt-9 grid max-w-md grid-cols-2 divide-x divide-border rounded-2xl border border-border bg-card/60 py-4 text-center backdrop-blur-sm">
+          <div className="px-6">
+            <dd className="eyebrow normal-case tracking-normal text-foreground font-semibold">Live UK roles</dd>
           </div>
-          <div className="px-2">
-            <dt className="font-display text-2xl text-foreground tabular sm:text-3xl">{sponsorCount}</dt>
-            <dd className="eyebrow mt-1 normal-case tracking-normal">Verified sponsors</dd>
-          </div>
-          <div className="px-2">
-            <dt className="font-display text-2xl text-foreground tabular sm:text-3xl">{sourceCount}</dt>
-            <dd className="eyebrow mt-1 normal-case tracking-normal">ATS sources</dd>
+          <div className="px-6">
+            <dd className="eyebrow normal-case tracking-normal text-foreground font-semibold">Verified sponsors</dd>
           </div>
         </dl>
 
@@ -707,7 +701,7 @@ function JobCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="emerald" className="gap-1">
-              <CheckCircle2 className="size-3" /> Visa Sponsored
+              <CheckCircle2 className="size-3" /> Verified Sponsor
             </Badge>
             <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               {job.sponsorIndustry}
