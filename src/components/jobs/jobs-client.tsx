@@ -195,21 +195,24 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
         <fieldset>
           <legend className="eyebrow mb-2.5">Industry</legend>
           <div className="flex flex-wrap gap-1.5">
-            {industryList.map((ind) => (
-              <button
-                key={ind}
-                onClick={() => toggleIn(industries, setIndustries, ind)}
-                aria-pressed={industries.includes(ind)}
-                className={cn(
-                  "cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors duration-200",
-                  industries.includes(ind)
-                    ? "border-red-600/40 bg-red-600/10 text-red-600"
-                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                )}
-              >
-                {ind}
-              </button>
-            ))}
+            {industryList.map((ind) => {
+              const active = industries.length === 1 && industries[0] === ind;
+              return (
+                <button
+                  key={ind}
+                  onClick={() => setIndustries(active ? [] : [ind])}
+                  aria-pressed={active}
+                  className={cn(
+                    "cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors duration-200",
+                    active
+                      ? "border-red-600/40 bg-red-600/10 text-red-600"
+                      : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                  )}
+                >
+                  {ind}
+                </button>
+              );
+            })}
           </div>
         </fieldset>
       )}
