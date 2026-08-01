@@ -20,7 +20,7 @@ const FIT_BARS = [
   { label: "CoS hiring activity", pct: 88 },
 ];
 
-const SCENES = ["Search", "Results", "Fit check"] as const;
+const SCENES = ["Search", "Employer", "Sponsorship Fit"] as const;
 const SCENE_MS = 3600;
 
 function usePrefersReducedMotion() {

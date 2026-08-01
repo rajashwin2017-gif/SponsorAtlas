@@ -14,7 +14,7 @@ const CATEGORIES = [
 const TABS = [
   { key: "employers" as const, label: "Employers", icon: Building2, href: "/search" },
   { key: "jobs" as const, label: "Search Jobs", icon: Search, href: "/jobs" },
-  { key: "guide" as const, label: "Visa Guide", icon: BookOpen, href: "/soc-codes" },
+  { key: "guide" as const, label: "Job Codes", icon: BookOpen, href: "/soc-codes" },
 ];
 
 export function HeroSearch() {

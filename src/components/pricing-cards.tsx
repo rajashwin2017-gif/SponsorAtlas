@@ -53,7 +53,6 @@ const STATIC_FEATURES: Record<string, string[]> = {
     "Unlimited access to all 126,000+ sponsors",
     "CSV export of search results",
     "Priority job alerts",
-    "AI-powered employer recommendations",
     "Application tracking tools",
     "Priority customer support",
     "Early access to new features",
@@ -75,8 +74,8 @@ const FALLBACK_PLANS: ApiPlan[] = [
     planId: "pro",
     name: "Pro",
     tagline: null,
-    badge: "Most Popular",
-    highlighted: true,
+    badge: null,
+    highlighted: false,
     monthlyPriceMinor: 1799,
     yearlyPriceMinor: 8999,
     features: STATIC_FEATURES.pro,
@@ -85,8 +84,8 @@ const FALLBACK_PLANS: ApiPlan[] = [
     planId: "pro_plus",
     name: "Pro Plus+",
     tagline: null,
-    badge: null,
-    highlighted: false,
+    badge: "Most Popular",
+    highlighted: true,
     monthlyPriceMinor: 1999,
     yearlyPriceMinor: 9999,
     features: STATIC_FEATURES.pro_plus,
@@ -313,77 +312,97 @@ export function PricingCards() {
             ctaLabel = planMinor > currentMinor ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`;
           }
 
+          const isProPlus = plan.planId === "pro_plus";
+          const isPro = plan.planId === "pro";
+
           return (
             <div
               key={plan.planId}
               className={cn(
-                "relative flex flex-col rounded-2xl border p-6 transition-all duration-200",
-                plan.highlighted
-                  ? "border-red-600/50 bg-card glow-accent lg:-translate-y-2"
-                  : "border-border bg-card hover:border-border/80"
+                "relative flex flex-col rounded-2xl border overflow-hidden transition-all duration-200",
+                isPro ? "border-red-500/60" :
+                isProPlus ? "border-orange-400/60 lg:-translate-y-2" :
+                "border-border bg-card hover:border-border/80"
               )}
             >
-              {plan.badge && (
-                <Badge
-                  variant="emerald"
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 shadow-lg"
+              {/* Coloured header for Pro and Pro Plus+ */}
+              {(isPro || isProPlus) && (
+                <div
+                  className={cn(
+                    "flex items-center justify-between px-6 py-4",
+                    isPro ? "bg-red-600" : "bg-gradient-to-r from-orange-400 to-amber-500"
+                  )}
                 >
-                  <Sparkles className="size-3.5" /> {plan.badge}
-                </Badge>
+                  <h3 className="font-heading text-lg font-bold text-white">{plan.name}</h3>
+                  {isCurrentPlan && (
+                    <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                      Current
+                    </span>
+                  )}
+                  {plan.badge && !isCurrentPlan && (
+                    <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                      {plan.badge}
+                    </span>
+                  )}
+                </div>
               )}
 
-              <h3 className="font-heading text-lg font-bold">{plan.name}</h3>
+              <div className={cn("flex flex-col flex-1 p-6", (isPro || isProPlus) ? "bg-card" : "")}>
+                {plan.planId === "free" && (
+                  <h3 className="font-heading text-lg font-bold">{plan.name}</h3>
+                )}
 
-              <div className="mt-5">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-heading text-4xl font-bold tabular">{displayPrice}</span>
-                  <span className="text-sm text-muted-foreground">{priceSuffix}</span>
+                <div className={cn(plan.planId === "free" ? "mt-5" : "mt-4")}>
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-heading text-4xl font-bold tabular">{displayPrice}</span>
+                    <span className="text-sm text-muted-foreground">{priceSuffix}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{altLabel}</p>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{altLabel}</p>
-              </div>
 
-              {plan.planId === "free" ? (
-                isCurrentPlan ? (
+                {plan.planId === "free" ? (
+                  isCurrentPlan ? (
+                    <Button variant="outline" className="mt-6 w-full" disabled>
+                      Current plan
+                    </Button>
+                  ) : (
+                    <Link
+                      href="/register"
+                      className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+                    >
+                      Start free
+                    </Link>
+                  )
+                ) : isCurrentPlan ? (
                   <Button variant="outline" className="mt-6 w-full" disabled>
                     Current plan
                   </Button>
                 ) : (
-                  <Link
-                    href="/register"
-                    className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+                  <button
+                    className={cn(
+                      "mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2",
+                      isPro ? "bg-red-600" : "bg-gradient-to-r from-orange-400 to-amber-500"
+                    )}
+                    disabled={isBusy}
+                    onClick={() => handleCta(plan.planId)}
                   >
-                    Start free
-                  </Link>
-                )
-              ) : isCurrentPlan ? (
-                <Button variant="outline" className="mt-6 w-full" disabled>
-                  Current plan
-                </Button>
-              ) : (
-                <Button
-                  variant={plan.highlighted ? "gradient" : "outline"}
-                  className="mt-6 w-full"
-                  disabled={isBusy}
-                  onClick={() => handleCta(plan.planId)}
-                >
-                  {isBusy ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" /> Processing…
-                    </>
-                  ) : (
-                    ctaLabel
-                  )}
-                </Button>
-              )}
+                    {isBusy ? (
+                      <><Loader2 className="size-4 animate-spin" /> Processing…</>
+                    ) : (
+                      ctaLabel
+                    )}
+                  </button>
+                )}
 
-              <ul className="mt-6 space-y-3">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm">
-                    <Check className="mt-0.5 size-4 shrink-0 text-red-600" />
-                    <span className="text-muted-foreground">{f}</span>
-                  </li>
-                ))}
-              </ul>
+                <ul className="mt-6 space-y-3">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm">
+                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+                      <span className="text-muted-foreground">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           );
         })}

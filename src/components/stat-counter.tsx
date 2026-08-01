@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { formatNumber } from "@/lib/utils";
 
 interface StatCounterProps {
-  value: number;
+  value: number | string;
   suffix?: string;
   prefix?: string;
   durationMs?: number;
@@ -17,6 +17,7 @@ export function StatCounter({ value, suffix = "", prefix = "", durationMs = 1600
   const started = useRef(false);
 
   useEffect(() => {
+    if (typeof value !== "number") return;
     const el = ref.current;
     if (!el) return;
 
@@ -45,6 +46,14 @@ export function StatCounter({ value, suffix = "", prefix = "", durationMs = 1600
     observer.observe(el);
     return () => observer.disconnect();
   }, [value, durationMs]);
+
+  if (typeof value === "string") {
+    return (
+      <span ref={ref} className="tabular">
+        {prefix}{value}{suffix}
+      </span>
+    );
+  }
 
   return (
     <span ref={ref} className="tabular">

@@ -301,8 +301,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
         </p>
         <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-5xl">Job Board</h1>
         <p className="mx-auto mt-4 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Real openings, pulled live from licensed UK visa sponsors&rsquo; own career systems — no
-          aggregators, no stale posts.
+          Real openings, data pulled live from licensed UK visa sponsors&rsquo; including own career pages.
         </p>
 
         {/* Search — the primary action */}
@@ -327,11 +326,11 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <span className="text-xs font-medium text-muted-foreground">Popular:</span>
             {quickIndustries.map((ind) => {
-              const active = industries.includes(ind);
+              const active = industries.length === 1 && industries[0] === ind;
               return (
                 <button
                   key={ind}
-                  onClick={() => toggleIn(industries, setIndustries, ind)}
+                  onClick={() => setIndustries(active ? [] : [ind])}
                   aria-pressed={active}
                   className={cn(
                     "cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors duration-200",
@@ -364,10 +363,7 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
           <li className="flex items-center gap-1.5"><Zap className="size-3.5 text-red-600" /> Straight from employers&rsquo; systems</li>
         </ul>
 
-        {/* Sponsorship disclaimer */}
-        <p className="mx-auto mt-5 max-w-2xl rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-center text-xs leading-relaxed text-muted-foreground">
-          <span className="font-medium text-foreground">Heads up:</span> These roles are posted by companies that hold a UK Skilled Worker sponsor licence — but that doesn&rsquo;t guarantee every individual job will offer visa sponsorship. Always confirm sponsorship availability directly with the employer before applying.
-        </p>
+
       </header>
 
       {/* ── Featured industry previews (free, no filters active) ── */}

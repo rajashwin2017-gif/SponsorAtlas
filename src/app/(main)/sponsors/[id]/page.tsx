@@ -193,7 +193,7 @@ export default function SponsorDetailPage({ params }: { params: { id: string } }
 
           {/* CoS breakdown */}
           <div className="surface-card p-5">
-            <p className="eyebrow mb-1">Home Office FOI Data</p>
+            <p className="eyebrow mb-1">Home Office Data</p>
             <h2 className="font-display text-lg font-semibold">2025 CoS Breakdown</h2>
             <p className="mb-5 mt-1 text-sm text-muted-foreground">
               Certificates of Sponsorship issued Jan–Dec 2025

@@ -12,7 +12,7 @@ const NAV = [
   { href: "/search", label: "Search" },
   { href: "/sponsors/rankings", label: "Rankings" },
   { href: "/jobs", label: "Job Board" },
-  { href: "/soc-codes", label: "Job Codes" },
+  { href: "/soc-codes", label: "SOC Codes" },
   { href: "/pricing", label: "Pricing" },
 ];
 
@@ -31,11 +31,17 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50">
       <div className="container flex items-center justify-between gap-3 py-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight">
-          <Image src="/logo-mark.png" alt="The Sponsor Finder" width={32} height={30} className="size-8 w-auto" priority />
-          <span>
-The Sponsor<span className="gradient-text"> Finder</span>
-          </span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image src="/logo-mark.png" alt="The Sponsor Finder" width={40} height={40} className="h-10 w-auto" priority />
+          <div className="flex flex-col leading-none">
+            <span className="font-heading text-sm font-black tracking-widest text-zinc-900 uppercase">
+              The <span className="text-red-600">Sponsor</span> Finder
+            </span>
+            <div className="my-[3px] h-[2px] w-full bg-red-600" />
+            <span className="text-[9px] font-semibold tracking-[0.18em] text-zinc-600 uppercase">
+              Find UK Sponsorship Jobs
+            </span>
+          </div>
         </Link>
 
         {/* Desktop: floating pill nav + detached CTA pill */}

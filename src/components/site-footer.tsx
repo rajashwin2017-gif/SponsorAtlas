@@ -118,6 +118,13 @@ export function SiteFooter() {
           </div>
         </div>
 
+        {/* Job board sponsorship disclaimer */}
+        <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3">
+          <p className="text-xs leading-relaxed text-zinc-400">
+            <span className="font-semibold text-amber-400">Please note:</span> These roles are posted by companies that hold a UK Skilled Worker sponsor licence — but that doesn&rsquo;t guarantee every individual job will offer visa sponsorship. Always confirm sponsorship availability directly with the employer before applying.
+          </p>
+        </div>
+
         {/* Divider + bottom bar */}
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} The Sponsor Finder. All rights reserved.</p>

@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
 
 const HERO_STATS = [
   { icon: Building2, value: 126000, suffix: "+", label: "Sponsors Indexed" },
-  { icon: Users, value: 654, suffix: "", label: "New This Month" },
+  { icon: Users, value: "600+", suffix: "", label: "New This Month" },
   { icon: Clock, value: 24, suffix: "/7", label: "Daily Updates" },
-  { icon: Gift, value: 100, suffix: "%", label: "Free To Job Seekers" },
+  { icon: Gift, value: 100, suffix: "%", label: "Free To Join" },
 ];
 
 export default function LandingPage() {

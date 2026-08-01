@@ -462,7 +462,7 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
       name: "Pro Plus+",
       price: "£19.99",
       current: !tierLoading && tier === "pro_plus",
-      features: ["Unlimited access to all 126,000+ sponsors", "CSV export of search results", "Priority job alerts", "AI-powered employer recommendations", "Application tracking tools", "Priority customer support", "Early access to new features"],
+      features: ["Unlimited access to all 126,000+ sponsors", "CSV export of search results", "Priority job alerts", "Application tracking tools", "Priority customer support", "Early access to new features"],
       locked: [],
       cta: "/pricing",
       cls: "border-amber-200 bg-white",
