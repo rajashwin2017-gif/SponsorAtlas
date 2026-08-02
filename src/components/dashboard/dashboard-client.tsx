@@ -379,7 +379,7 @@ function Overview({
 
       {/* Tier comparison banner — only for non-Pro+ */}
       {!isProPlus && (
-        <TierComparisonBanner tier={tier} isPro={isPro} tierLoading={tierLoading} />
+        <TierComparisonBanner tier={tier} isPro={isPro} isProPlus={isProPlus} tierLoading={tierLoading} />
       )}
 
       {/* Stat tiles */}
@@ -436,7 +436,7 @@ function Overview({
 
 // ── Tier Comparison Banner ────────────────────────────────────────────────────
 
-function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro: boolean; tierLoading: boolean }) {
+function TierComparisonBanner({ tier, isPro, isProPlus, tierLoading }: { tier: Tier; isPro: boolean; isProPlus: boolean; tierLoading: boolean }) {
   const plans = [
     {
       name: "Free",
@@ -455,7 +455,7 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
       features: ["30 unlocked sponsors per industry across all sectors", "Full sponsor profiles & hiring signals", "Unlimited search with advanced filters", "Live job listings direct from each employer", "Save favourite sponsors & jobs", "Email job alerts & notifications", "Employer activity updates & sponsorship insights"],
       locked: [],
       cta: "/pricing",
-      cls: "border-red-200 bg-white ring-2 ring-red-100",
+      cls: "border-red-200 bg-white",
       headerCls: "bg-red-600 text-white",
     },
     {
@@ -465,7 +465,7 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
       features: ["Unlimited access to all 126,000+ sponsors", "CSV export of search results", "Priority job alerts", "Application tracking tools", "Priority customer support", "Early access to new features"],
       locked: [],
       cta: "/pricing",
-      cls: "border-amber-200 bg-white",
+      cls: "border-amber-300 bg-white ring-2 ring-amber-100",
       headerCls: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
     },
   ];
@@ -481,7 +481,7 @@ function TierComparisonBanner({ tier, isPro, tierLoading }: { tier: Tier; isPro:
           <div key={plan.name} className={cn("rounded-lg border overflow-hidden", plan.cls)}>
             <div className={cn("px-3 py-2 flex items-center justify-between", plan.headerCls)}>
               <span className="text-xs font-bold">{plan.name}</span>
-              {plan.name === "Pro" && !isPro && (
+              {plan.name === "Pro Plus+" && !isProPlus && (
                 <span className="text-[10px] font-bold bg-white/20 rounded px-1.5 py-0.5">POPULAR</span>
               )}
               {plan.current && (

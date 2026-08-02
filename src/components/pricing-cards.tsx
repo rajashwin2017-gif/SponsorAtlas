@@ -320,8 +320,8 @@ export function PricingCards() {
               key={plan.planId}
               className={cn(
                 "relative flex flex-col rounded-2xl border overflow-hidden transition-all duration-200",
-                isPro ? "border-red-500/60" :
-                isProPlus ? "border-orange-400/60 lg:-translate-y-2" :
+                isProPlus ? "border-amber-400/80 ring-2 ring-amber-400/25 lg:-translate-y-2" :
+                isPro ? "border-red-500/40" :
                 "border-border bg-card hover:border-border/80"
               )}
             >
