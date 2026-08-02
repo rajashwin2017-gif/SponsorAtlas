@@ -158,6 +158,12 @@ export function JobsClient({ jobs }: { jobs: LiveJob[] }) {
         break;
       // "recent" keeps the server's most-recent-first ordering
     }
+    // "Other"-industry jobs always sink to the bottom regardless of sort option
+    out = out.sort((a, b) => {
+      const aO = a.sponsorIndustry === "Other" ? 1 : 0;
+      const bO = b.sponsorIndustry === "Other" ? 1 : 0;
+      return aO - bO;
+    });
     return out;
   }, [jobs, debouncedQ, industries, effectiveCities, jobTypes, sort]);
 
