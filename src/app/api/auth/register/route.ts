@@ -33,28 +33,36 @@ export async function POST(req: NextRequest) {
   const { name, password } = parsed.data;
   const email = parsed.data.email.toLowerCase();
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+  try {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: { name, email, password: passwordHash },
+    });
+
+    const token = randomBytes(32).toString("hex");
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires: new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS),
+      },
+    });
+
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+    await sendVerificationEmail(email, verifyUrl, name);
+
+    return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
+  } catch (err) {
+    console.error("Register error:", err);
+    return NextResponse.json(
+      { error: "Could not create account. Please try again." },
+      { status: 500 }
+    );
   }
-
-  const passwordHash = await hashPassword(password);
-
-  const user = await prisma.user.create({
-    data: { name, email, password: passwordHash },
-  });
-
-  const token = randomBytes(32).toString("hex");
-  await prisma.verificationToken.create({
-    data: {
-      identifier: email,
-      token,
-      expires: new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS),
-    },
-  });
-
-  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
-  await sendVerificationEmail(email, verifyUrl, name);
-
-  return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
 }
