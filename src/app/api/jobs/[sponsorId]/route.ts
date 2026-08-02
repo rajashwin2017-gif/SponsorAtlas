@@ -135,17 +135,22 @@ function parseSalary(text: string): { min?: number; max?: number; text: string }
   };
 }
 
-async function fetchNHSJobs(orgName: string, keyword = "", location = ""): Promise<JobListing[]> {
-  // NHS Jobs doesn't support reliable org-name filtering via URL params —
-  // search by keyword + city of the trust to return relevant local listings.
-  const params = new URLSearchParams({
-    keyword: keyword || "",
-    page: "1",
-  });
-  // Use supplied location or fall back to empty (national)
-  if (location) params.set("location", location);
-
-  const url = `https://www.jobs.nhs.uk/candidate/search/results?${params}`;
+async function fetchNHSJobs(orgName: string, keyword = "", location = "", baseUrl?: string): Promise<JobListing[]> {
+  // When we have a careers-data entry URL it already contains the correct
+  // employer= filter for this specific trust — use it as the base so we only
+  // see that trust's jobs (not other employers who also post on NHS Jobs).
+  let url: string;
+  if (baseUrl) {
+    const u = new URL(baseUrl);
+    if (keyword) u.searchParams.set("keyword", keyword);
+    url = u.toString();
+  } else {
+    // Fallback for trusts not in the careers table: search by keyword + location.
+    // This may include results from other employers on the NHS Jobs platform.
+    const params = new URLSearchParams({ keyword: keyword || "", page: "1" });
+    if (location) params.set("location", location);
+    url = `https://www.jobs.nhs.uk/candidate/search/results?${params}`;
+  }
   let html: string;
   try {
     const res = await fetch(url, {
@@ -328,7 +333,7 @@ export async function GET(
     primaryCareersUrl = `https://apply.workable.com/${entry.token}/`;
   } else if (isNHS) {
     const city = location || sponsor.town || "";
-    primaryJobs = await fetchNHSJobs(sponsor.organisationName, keyword, city);
+    primaryJobs = await fetchNHSJobs(sponsor.organisationName, keyword, city, entry?.url);
     primarySource = "nhs";
     primaryCareersUrl =
       entry?.url ??
