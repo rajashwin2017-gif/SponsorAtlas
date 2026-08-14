@@ -424,7 +424,31 @@ async function scrapeUrl(rawUrl: string): Promise<JobSnippet[]> {
 // ── UK location heuristic ─────────────────────────────────────────────────────
 
 const UK_LOC = /(united kingdom|\bu\.?k\.?\b|\bg\.?b\.?\b|\bengland\b|scotland|wales|northern ireland|london|manchester|edinburgh|glasgow|birmingham|leeds|bristol|cambridge|oxford|reading|sheffield|liverpool|nottingham|cardiff|belfast|remote|hybrid)/i;
-const NON_UK_LOC = /\b(san francisco|new york|singapore|paris|milan|berlin|amsterdam|dubai|toronto|sydney|melbourne|chicago|los angeles|boston|seattle|austin|denver|atlanta|madrid|barcelona|munich|zurich|stockholm|oslo|copenhagen|helsinki|warsaw|prague|budapest|johannesburg|nairobi|bangalore|mumbai|delhi|shanghai|beijing|tokyo|seoul|hong kong|taipei|manila|jakarta|kuala lumpur|maryland|california|texas|florida|illinois|ontario|new south wales|americas|apac|emea)\b/i;
+
+// Explicit non-UK locations — checked BEFORE accepting a job.
+// Ireland entries use a negative lookbehind so "Northern Ireland" is not rejected.
+const NON_UK_LOC = new RegExp(
+  "(?<!northern )\\bireland\\b" +        // Ireland (but not Northern Ireland)
+  "|\\b(republic of ireland|eire)\\b" +
+  // Irish cities commonly appearing in job postings
+  "|\\b(dublin|cork|galway|limerick|waterford|kilkenny|drogheda|dundalk|athlone|tralee|ennis|sligo|wexford|leinster|munster|connacht|ulster(?!\\s*avenue|\\s*road|\\s*street))\\b" +
+  // North America
+  "|\\b(united states|usa|u\\.s\\.a\\.?|canada|mexico)\\b" +
+  "|\\b(san francisco|new york|los angeles|chicago|boston|seattle|austin|denver|atlanta|miami|toronto|vancouver|montreal|ottawa|calgary|quebec)\\b" +
+  "|\\b(california|texas|florida|illinois|massachusetts|washington state|new jersey|georgia|ohio|pennsylvania|michigan|arizona|minnesota|colorado|oregon|maryland|virginia|indiana|tennessee|nevada|utah)\\b" +
+  // Europe (non-UK)
+  "|\\b(germany|france|netherlands|spain|italy|sweden|norway|denmark|finland|poland|portugal|belgium|austria|switzerland|luxembourg|czech republic|hungary|romania|bulgaria|croatia|slovakia|slovenia|greece|cyprus)\\b" +
+  "|\\b(paris|berlin|amsterdam|madrid|barcelona|milan|rome|munich|zurich|stockholm|oslo|copenhagen|helsinki|warsaw|prague|budapest|brussels|vienna|lisbon|athens|frankfurt|hamburg|lyon|marseille)\\b" +
+  // Middle East & Africa
+  "|\\b(dubai|uae|united arab emirates|saudi arabia|qatar|kuwait|bahrain|oman|israel|south africa|nigeria|kenya|ghana|egypt|morocco|nairobi|johannesburg|cape town|cairo|tel aviv|riyadh|abu dhabi)\\b" +
+  // Asia-Pacific
+  "|\\b(india|china|japan|south korea|singapore|australia|new zealand|malaysia|indonesia|philippines|thailand|vietnam|hong kong|taiwan|pakistan|bangladesh|sri lanka)\\b" +
+  "|\\b(bangalore|bengaluru|mumbai|delhi|hyderabad|chennai|pune|kolkata|ahmedabad|shanghai|beijing|guangzhou|shenzhen|tokyo|osaka|seoul|singapore city|sydney|melbourne|brisbane|auckland|kuala lumpur|jakarta|manila|bangkok|ho chi minh|taipei)\\b" +
+  // Catch-all region tags
+  "|\\b(americas|apac|emea|latam|mena|asia pacific|north america|south america|europe(?!an)|middle east|africa)\\b",
+  "i"
+);
+
 const BAD_TITLE = /^job title:|more details$|&#x?[0-9a-f]+;|click here|apply now|view job|read more/i;
 const HTML_ENTITY = /&[a-z]+;|&#x?[0-9a-f]+;/gi;
 
